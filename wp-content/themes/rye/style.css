@@ -1,0 +1,12 @@
+/*
+Theme Name: Rye
+Theme URI: https://github.com/petesaia/WP-Rye
+Description: The developer's WordPress starter theme.
+Author: Pete Saia
+Version: 1
+Tags: html5, rye, clean, basic, semantic, starter
+*/
+
+@import url('assets/css/application.css');
+@import url('assets/js/fancybox/source/jquery.fancybox.css');
+@import url('assets/css/custom.css'); 
