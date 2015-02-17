@@ -13,7 +13,6 @@ $op = get_random ($operators);
 
 ?>
 
-
 	<label for="txt-math">* <?php _e('Solve this simple math problem (prevents spam submissions)', 'rye'); ?><span class="error-math-incorrect"><br />Incorrect solution</span></label>
 	<div>
 		<div class="form-label margin-bottom"><?php echo $op [0]; ?> <span class="value1"><?php echo $add1; ?></span> <span class="op1"><?php echo $op [1]; ?></span> <span class="value2"><?php echo $add2; ?></span> = </div>
