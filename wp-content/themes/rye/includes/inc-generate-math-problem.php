@@ -9,7 +9,7 @@ $operators = array (
 $add1 = get_random ($numbers);
 $add2 = get_random ($numbers);
 $op = get_random ($operators);
-//$solution = eval('return '.$add1.$op.$add2.';');
+//$solution = eval('return '.$add1.$op.$add2.';'); 
 
 ?>
 
