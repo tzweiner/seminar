@@ -154,9 +154,9 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 			
 			<p><a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to Seminar Admin Area</a></p>
 			<p>All registrants to date. This does not include information about each person's selection of classes.</p>
-			<p class="export-link"><a href="#" onclick="javascript: alert('will generate');">Export to CSV</a></p>
+			<p class="export-link"><a href="#" class="generate-all-registrants">Export to CSV</a></p>
 			<h3>Color coding</h3>
-			<p><span style="color: #fff; background: #cc0000;">Red: Cancelled</span> | <span style="color: #fff; background: blue;">Blue: Not confirmed</span></p> 
+			<p><span style="color: #fff; background: #cc0000;">Red: Cancelled</span> | <span style="color: #fff; background: blue;">Blue: Not confirmed/Email not sent</span></p> 
 			
 			<div style="overflow:scroll; width: 960px; max-height: 500px; ">
 			<table>
@@ -473,6 +473,64 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 			return '';
 			
 		}
+		
+		public function admin_javascript() {
+			?>
+		    <script type="text/javascript">
+		      jQuery(function ($) {
+		        $('body').on('click', '.generate-all-registrants', function ( e ) {
+		          e.preventDefault();
+
+		          generateCVSAllRegistrants ();
+		          
+		          return false;
+		        });
+		      });
+
+				function generateCVSAllRegistrants() {
+					window.open(ajaxurl + '?' + jQuery.param({ action: 'all_registrants_csv' }));
+				}
+		    </script>
+		    <?php
+		}
+		
+		public function admin_ajax_all_registrants_csv () {
+			
+			//helper vars
+			$first = true; // on first iteration of results, create the first row of column names
+			$count = 0; // keep count of current row
+			$last_index = 0; // last index of 'good' columns, used to filter out columns that come after custom questions.
+			
+			$csv = '';
+			$rows = $this->getAllRegistrants();
+			
+			// first add the headers
+			foreach ( $rows[0] as $index=>$value ) {
+				$csv .= strtoupper ($index) . "\t";
+			}
+			
+			// now do the actual values
+			foreach ( $rows as $row ) {
+				
+				foreach ( $row as $index=>$value ) {
+					$csv .= $this->cleanData ($value) . "\t";
+				}
+				
+			} 
+			// Stream file
+			header("Cache-Control: must-revalidate");
+			header("Pragma: must-revalidate");
+			header('Content-Type: text/csv');
+			header('Content-Disposition: attachment;filename="all-registrants-' . date('Y-m-d') . '.csv');
+		 	echo $csv;			
+			die();
+		}
+		
+		private function cleanData(&$str) {
+			$str = preg_replace("/\t/", "\\t", $str);
+		    $str = preg_replace("/\r?\n/", "\\n", $str);
+		    if(strstr($str, '"')) $str = '"' . str_replace('"', '""', $str) . '"';
+		}
 	}
 
 } // end of if( !class_exists('Registration_Database_Update') )
@@ -485,6 +543,8 @@ if( class_exists('Seminar_Registration_Admin') ) {
 
 	// add a admin menu option
 	add_action('admin_menu', array(&$seminar_segistration_admin, 'admin_menu'));
+	add_action('wp_ajax_all_registrants_csv', array(&$seminar_segistration_admin, 'admin_ajax_all_registrants_csv'));
+	add_action('admin_footer', array(&$seminar_segistration_admin, 'admin_javascript'));
 }
 
 ?>
