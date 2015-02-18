@@ -109,7 +109,9 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 					background: orange;
 					text-align: center;
 				}
-				
+				#wpbody-content {
+					width: 90%;
+				}
 			</style>
 			<?php 
 			
@@ -153,12 +155,12 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 			if (!empty ($rows)): ?>
 			
 			<p><a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to Seminar Admin Area</a></p>
-			<p>All registrants to date. This does not include information about each person's selection of classes.</p>
+			<p>All registrants to date. This does not include information about each person's selection of classes. "Export to CSV" will give you a CSV file of all confirmed registrants (ignoring cancelled and unconfirmed registrations). </p>
 			<p class="export-link"><a href="#" class="generate-all-registrants">Export to CSV</a></p>
 			<h3>Color coding</h3>
 			<p><span style="color: #fff; background: #cc0000;">Red: Cancelled</span> | <span style="color: #fff; background: blue;">Blue: Not confirmed/Email not sent</span></p> 
 			
-			<div style="overflow:scroll; width: 960px; max-height: 500px; ">
+			<div style="overflow:scroll; width: 100%; max-height: 500px; ">
 			<table>
 				<tbody>
 					<tr>
@@ -452,6 +454,22 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 			return $results;
 		}
 		
+		private function getAllRegistrantsClean () {
+			global $wpdb;
+			$table = 'wp_Seminar_registrations';
+				
+			$sql = "SELECT *
+			FROM $table
+			WHERE reg_year = " . intval ($this->reg_year) . "
+			AND cancel = 0
+			AND confirmed = 1
+			ORDER BY id ASC";
+		
+			$results = $wpdb->get_results ($sql);
+						
+					return $results;
+		}
+		
 		/*
 		 * $type = what post type are we look at
 		 * Updates $array by reference with posts IDs
@@ -502,25 +520,42 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 			$last_index = 0; // last index of 'good' columns, used to filter out columns that come after custom questions.
 			
 			$csv = '';
-			$rows = $this->getAllRegistrants();
+			$rows = $this->getAllRegistrantsClean();
+			$lines = array ();
 			
 			// first add the headers
 			foreach ( $rows[0] as $index=>$value ) {
-				$csv .= strtoupper ($index) . "\t";
+				if ($index == 'id') {
+					$lines[0][0] = "'" . strtoupper ($index); 
+					continue;
+				}
+				$key = strtoupper ($index);
+				$lines[0][] .= $key;
+				$last_index++;
 			}
 			
 			// now do the actual values
-			foreach ( $rows as $row ) {
-				
+			foreach ( $rows as $row_index=>$row ) {
+				$input_count = 0;
 				foreach ( $row as $index=>$value ) {
-					$csv .= $this->cleanData ($value) . "\t";
+					if( $input_count <= $last_index ){						
+						
+						$lines[ ($row_index + 1) ][] = $this->cleanData ($value);
+						
+					}
+					$input_count++;
 				}
 				
 			} 
+			
+			$csv = '';
+			foreach ( $lines as $line ) {
+				$csv .= $this->str_putcsv($line);
+			}
+
 			// Stream file
-			header("Cache-Control: must-revalidate");
-			header("Pragma: must-revalidate");
 			header('Content-Type: text/csv');
+			//header("Content-Type: application/vnd.ms-excel");
 			header('Content-Disposition: attachment;filename="all-registrants-' . date('Y-m-d') . '.csv');
 		 	echo $csv;			
 			die();
@@ -530,6 +565,22 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 			$str = preg_replace("/\t/", "\\t", $str);
 		    $str = preg_replace("/\r?\n/", "\\n", $str);
 		    if(strstr($str, '"')) $str = '"' . str_replace('"', '""', $str) . '"';
+		}
+		
+		// this makes the rows of input all tab separated and nicely formatted for csv/excel
+		private function str_putcsv( $input, $delimiter = ',', $enclosure = '"' ) {
+			// Open a memory "file" for read/write...
+			$fp = fopen('php://temp', 'r+');
+			// ... write the $input array to the "file" using fputcsv()...
+			fputcsv($fp, $input, $delimiter, $enclosure);
+			// ... rewind the "file" so we can read what we just wrote...
+			rewind($fp);
+			// ... read the entire line into a variable...
+			$data = fgets($fp);
+			// ... close the "file"...
+			fclose($fp);
+			// ... and return the $data to the caller, leaving the trailing newline from fgets().
+			return $data;
 		}
 	}
 
