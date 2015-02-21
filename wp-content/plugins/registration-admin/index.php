@@ -141,12 +141,19 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 			
 			<?php 
 			elseif (isset ($_POST ['get-dvd'])): ?>
-			<p>Will get info.</p>
+			<?php $results = $this->getDVDCounts (); ?>
+			<h3>DVD Orders</h3>
+			<p>PAL: <?php echo $results ['pal']; ?><br />
+			NTSC: <?php echo $results ['ntsc']; ?></p>
+			
 			<p><a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to Seminar Admin Area</a></p>
 				
 			<?php 
 			elseif (isset ($_POST ['get-transport'])): ?>
-			<p>Will get info.</p>
+			<h3>Koprivshtitsa Transportation Requested</h3>
+			<?php $results = $this->getTransportationRequests(); ?>
+			<p>Round Trip: <?php echo $results ['round_trip']; ?><br />
+			One-way: <?php echo $results ['one_way']; ?></p>
 			<p><a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to Seminar Admin Area</a></p>
 						
 			<?php 
@@ -438,6 +445,65 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 			}
 			
 			return false;
+		}
+		
+		private function getTransportationRequests () {
+			global $wpdb;
+			$table = 'wp_Seminar_registrations';
+				
+			$sql = "SELECT count(transport) one_way
+					FROM $table
+					WHERE transport = 1
+					AND cancel <> 1
+					AND confirmed = 1";
+				
+			$results = $wpdb->get_results ($sql);
+				
+			$one_way_count = 0;
+			if (!empty ($results)) $one_way_count = $results[0]->one_way;
+				
+			$sql = "SELECT count(transport) round_trip
+					FROM $table
+					WHERE transport = 2
+					AND cancel <> 1
+					AND confirmed = 1";
+			
+			$results = $wpdb->get_results ($sql);
+			
+			$round_trip_count = 0;
+			if (!empty ($results)) $round_trip_count = $results[0]->round_trip;
+				
+			return array ('round_trip'=>$round_trip_count, 'one_way'=>$one_way_count);
+
+		}
+		
+		private function getDVDCounts () {
+			global $wpdb;
+			$table = 'wp_Seminar_registrations';
+			
+			$sql = "SELECT count(dvd_format) PAL
+					FROM $table
+					WHERE dvd_format = 'pal'
+					AND cancel <> 1
+					AND confirmed = 1";
+			
+			$results = $wpdb->get_results ($sql);
+			
+			$pal_count = 0;
+			if (!empty ($results)) $pal_count = $results[0]->PAL;
+			
+			$sql = "SELECT count(dvd_format) NTSC
+					FROM $table
+					WHERE dvd_format = 'ntsc'
+					AND cancel <> 1
+					AND confirmed = 1";
+				
+			$results = $wpdb->get_results ($sql);
+				
+			$ntsc_count = 0;
+			if (!empty ($results)) $ntsc_count = $results[0]->NTSC;
+			
+			return array ('pal'=>$pal_count, 'ntsc'=>$ntsc_count);
 		}
 
 		private function getAllRegistrants () {
