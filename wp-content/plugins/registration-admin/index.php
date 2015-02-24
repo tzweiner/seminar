@@ -152,8 +152,8 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 			elseif (isset ($_POST ['get-transport'])): ?>
 			<h3>Koprivshtitsa Transportation Requested</h3>
 			<?php $results = $this->getTransportationRequests(); ?>
-			<p>Round Trip: <?php echo $results ['round_trip']; ?><br />
-			One-way: <?php echo $results ['one_way']; ?></p>
+			<p>Round Trip: <?php echo $results['round_trip']; ?><br />
+			One-way: <?php echo $results['one_way']; ?></p>
 			<p><a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to Seminar Admin Area</a></p>
 						
 			<?php 
@@ -420,7 +420,8 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 			
 			$sql = "SELECT id
 					FROM $this->table
-					WHERE cancel = 0
+					WHERE reg_year = " . intval ($this->reg_year) . "
+					AND cancel = 0
 					AND confirmed = 1";
 			
 			$results = $wpdb->get_results ($sql);
@@ -453,7 +454,8 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 				
 			$sql = "SELECT count(transport) one_way
 					FROM $table
-					WHERE transport = 1
+					WHERE reg_year = " . intval ($this->reg_year) . "
+					AND transport = 1
 					AND cancel <> 1
 					AND confirmed = 1";
 				
@@ -464,7 +466,8 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 				
 			$sql = "SELECT count(transport) round_trip
 					FROM $table
-					WHERE transport = 2
+					WHERE reg_year = " . intval ($this->reg_year) . "
+					AND transport = 2
 					AND cancel <> 1
 					AND confirmed = 1";
 			
@@ -483,7 +486,8 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 			
 			$sql = "SELECT count(dvd_format) PAL
 					FROM $table
-					WHERE dvd_format = 'pal'
+					WHERE reg_year = " . intval ($this->reg_year) . "
+					AND dvd_format = 'pal'
 					AND cancel <> 1
 					AND confirmed = 1";
 			
@@ -494,7 +498,8 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 			
 			$sql = "SELECT count(dvd_format) NTSC
 					FROM $table
-					WHERE dvd_format = 'ntsc'
+					WHERE reg_year = " . intval ($this->reg_year) . "
+					AND dvd_format = 'ntsc'
 					AND cancel <> 1
 					AND confirmed = 1";
 				
@@ -534,6 +539,23 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 			$results = $wpdb->get_results ($sql);
 						
 					return $results;
+		}
+		
+		private function getOnsite () {
+			global $wpdb;
+			$table = 'wp_Seminar_registrations';
+			
+			$sql = "SELECT *
+					FROM $table
+					WHERE reg_year = " . intval ($this->reg_year) . "
+					AND payment = 'on-site' 
+					AND confirmed = 1
+					AND cancel 0 
+					ORDER BY id ASC";
+
+			$results = $wpdb->get_results ($sql);
+	
+			return $results;
 		}
 		
 		/*
@@ -578,6 +600,54 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 		    <?php
 		}
 		
+		public function admin_ajax_onsite_csv () {
+			//helper vars
+			$first = true; // on first iteration of results, create the first row of column names
+			$count = 0; // keep count of current row
+			$last_index = 0; // last index of 'good' columns, used to filter out columns that come after custom questions.
+				
+			$csv = '';
+			$rows = $this->getOnsite();
+			$lines = array ();
+				
+			// first add the headers
+			foreach ( $rows[0] as $index=>$value ) {
+				if ($index == 'id') {
+					$lines[0][0] = "'" . strtoupper ($index);
+					continue;
+				}
+				$key = strtoupper ($index);
+				$lines[0][] .= $key;
+				$last_index++;
+			}
+				
+			// now do the actual values
+			foreach ( $rows as $row_index=>$row ) {
+				$input_count = 0;
+				foreach ( $row as $index=>$value ) {
+					if( $input_count <= $last_index ){
+			
+						$lines[ ($row_index + 1) ][] = $this->cleanData ($value);
+			
+					}
+					$input_count++;
+				}
+			
+			}
+				
+			$csv = '';
+			foreach ( $lines as $line ) {
+				$csv .= $this->str_putcsv($line);
+			}
+			
+			// Stream file
+			header('Content-Type: text/csv');
+			//header("Content-Type: application/vnd.ms-excel");
+			header('Content-Disposition: attachment;filename="all-registrants-' . date('Y-m-d') . '.csv');
+			echo $csv;
+			die();
+		}
+		
 		public function admin_ajax_all_registrants_csv () {
 			
 			//helper vars
@@ -620,6 +690,8 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 			}
 
 			// Stream file
+			header("Cache-Control: must-revalidate");
+			header("Pragma: must-revalidate");
 			header('Content-Type: text/csv');
 			//header("Content-Type: application/vnd.ms-excel");
 			header('Content-Disposition: attachment;filename="all-registrants-' . date('Y-m-d') . '.csv');
@@ -631,6 +703,7 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 			$str = preg_replace("/\t/", "\\t", $str);
 		    $str = preg_replace("/\r?\n/", "\\n", $str);
 		    if(strstr($str, '"')) $str = '"' . str_replace('"', '""', $str) . '"';
+		    return $str;
 		}
 		
 		// this makes the rows of input all tab separated and nicely formatted for csv/excel
@@ -661,6 +734,7 @@ if( class_exists('Seminar_Registration_Admin') ) {
 	// add a admin menu option
 	add_action('admin_menu', array(&$seminar_segistration_admin, 'admin_menu'));
 	add_action('wp_ajax_all_registrants_csv', array(&$seminar_segistration_admin, 'admin_ajax_all_registrants_csv'));
+	//add_action('wp_ajax_onsite_csv', array(&$seminar_segistration_admin, 'admin_ajax_onsite_csv'));
 	add_action('admin_footer', array(&$seminar_segistration_admin, 'admin_javascript'));
 }
 
