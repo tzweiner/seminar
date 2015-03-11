@@ -73,7 +73,7 @@
       	<div class="right-column column">
       		<h3><a href="http://www.eefc.org/" target="_blank">Supporting Partner of the<br />East European Folklife Center</a></h3>
       		<ul>		      	
-				<li><a href="http://www.eefc.org/" target="_blank"><img src="/wp-content/uploads/2014/09/eefc_logo1.jpg" alt="EEFC logo" /></a></li>
+				<li><a href="http://www.eefc.org/" target="_blank"><img src="<?php echo get_bloginfo('template_directory'); ?>/assets/images/eefc_logo.png" alt="EEFC logo" /></a></li>
 			</ul>
 		      
 		      

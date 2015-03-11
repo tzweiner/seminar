@@ -222,8 +222,32 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 				<p><a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to Seminar Admin Area</a></p>
 			
 			<?php 
-			elseif (isset ($_POST ['get-num-per-class'])): ?>
-			<p>Will get info.</p>
+			elseif (isset ($_POST ['get-num-per-class'])): 
+			$rows = $this->getNumberPerClass (); 
+			if (!empty ($rows)):?>
+			<p><a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to Seminar Admin Area</a></p>
+			<p>Number of registrants per class.</p>
+			<p class="export-link"><a href="#" class="generate-number-per-class">Export to spreadsheet</a></p>
+			<div style="overflow:scroll; width: 100%; max-height: 500px; ">
+			<table>
+				<tbody>
+					<tr>
+						<th>CLASS</th>						
+						<th>COUNT</th>						
+					</tr>
+					<?php foreach ($rows as $row): ?>
+					<tr>
+						<td><?php echo $row->class_name; ?></td>						
+						<td><?php echo $row->class_count; ?></td>			
+					</tr>
+					<?php endforeach; ?>
+				</tbody>				
+			</table>
+			</div>
+			
+			<?php else: ?>
+			<p>Not available</p>
+			<?php endif; ?>
 			<p><a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to Seminar Admin Area</a></p>
 			
 			<?php 
@@ -880,6 +904,30 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 				
 		}
 		
+		private function getNumberPerClass () {
+			global $wpdb;
+			$table = 'wp_Seminar_registrations';
+			$table_classes = 'wp_Seminar_classes';
+			$wp_posts = 'wp_posts';
+			
+			$sql = "SELECT T3.post_title class_name, COUNT(T1.class_id) class_count
+					FROM $table_classes T1
+					LEFT JOIN $wp_posts T3
+					ON T3.ID = T1.class_id
+					LEFT JOIN $table T2
+					ON (T1.reg_id = T2.reg_id AND T1.reg_slot = T2.reg_slot)
+					WHERE T3.post_type= 'classes'
+					AND T3.post_status = 'publish'
+					AND T2.cancel = 0
+					AND T2.confirmed = 1
+					AND T2.reg_year = " . intval ($this->reg_year) . "
+					GROUP BY T1.class_id";
+
+			$results = $wpdb->get_results ($sql);
+
+			return $results;
+		}
+		
 		/*
 		 * $type = what post type are we look at
 		 * Updates $array by reference with posts IDs
@@ -937,6 +985,14 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 			          
 			          return false;
 			        });
+
+		        $('body').on('click', '.generate-number-per-class', function ( e ) {
+			          e.preventDefault();
+
+			          generateNumberPerClass ();
+			          
+			          return false;
+			        });
 		        
 		      });
 
@@ -952,8 +1008,59 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 				function generateLevelsPerClass () {
 					window.open(ajaxurl + '?' + jQuery.param({ action: 'levels_per_class_csv' }));
 				}
+				function generateNumberPerClass () {
+					window.open(ajaxurl + '?' + jQuery.param({ action: 'number_per_class_csv' }));
+				}
 		    </script>
 		    <?php
+		}
+		
+		public function admin_ajax_number_per_class_csv () {
+			//helper vars
+			$first = true; // on first iteration of results, create the first row of column names
+			$count = 0; // keep count of current row
+			$last_index = 0; // last index of 'good' columns, used to filter out columns that come after custom questions.
+			
+			$csv = '';
+			$rows = $this->getNumberPerClass();
+			$lines = array ();
+			
+			// first add the headers
+			foreach ( $rows[0] as $index=>$value ) {
+				if ($index == 'class_name') {
+					$lines[0][0] = "'" . strtoupper ($index);
+					continue;
+				}
+				$key = strtoupper ($index);
+				$lines[0][] .= $key;
+				$last_index++;
+			}
+			
+			// now do the actual values
+			foreach ( $rows as $row_index=>$row ) {
+				$input_count = 0;
+				foreach ( $row as $index=>$value ) {
+					if( $input_count <= $last_index ){
+							
+						$lines[ ($row_index + 1) ][] = $this->cleanData ($value);
+							
+					}
+					$input_count++;
+				}
+					
+			}
+			
+			$csv = '';
+			foreach ( $lines as $line ) {
+				$csv .= $this->str_putcsv($line);
+			}
+				
+			// Stream file
+			header('Content-Type: text/csv');
+			//header("Content-Type: application/vnd.ms-excel");
+			header('Content-Disposition: attachment;filename="number-per-class-' . date('Y-m-d') . '.csv');
+			echo $csv;
+			die();
 		}
 		
 		public function admin_ajax_levels_per_class_csv () {
@@ -1181,17 +1288,18 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 
 if( class_exists('Seminar_Registration_Admin') ) {
 
-	$seminar_segistration_admin = new Seminar_Registration_Admin();
+	$seminar_registration_admin = new Seminar_Registration_Admin();
 
-	register_activation_hook(__FILE__, array(&$seminar_segistration_admin, 'install'));
+	register_activation_hook(__FILE__, array(&$seminar_registration_admin, 'install'));
 
 	// add a admin menu option
-	add_action('admin_menu', array(&$seminar_segistration_admin, 'admin_menu'));
-	add_action('wp_ajax_all_registrants_csv', array(&$seminar_segistration_admin, 'admin_ajax_all_registrants_csv'));
-	add_action('wp_ajax_onsite_csv', array(&$seminar_segistration_admin, 'admin_ajax_onsite_csv'));
-	add_action('wp_ajax_rentals_per_class_csv', array(&$seminar_segistration_admin, 'admin_ajax_rentals_per_class_csv'));
-	add_action('wp_ajax_levels_per_class_csv', array(&$seminar_segistration_admin, 'admin_ajax_levels_per_class_csv'));
-	add_action('admin_footer', array(&$seminar_segistration_admin, 'admin_javascript'));
+	add_action('admin_menu', array(&$seminar_registration_admin, 'admin_menu'));
+	add_action('wp_ajax_all_registrants_csv', array(&$seminar_registration_admin, 'admin_ajax_all_registrants_csv'));
+	add_action('wp_ajax_onsite_csv', array(&$seminar_registration_admin, 'admin_ajax_onsite_csv'));
+	add_action('wp_ajax_rentals_per_class_csv', array(&$seminar_registration_admin, 'admin_ajax_rentals_per_class_csv'));
+	add_action('wp_ajax_levels_per_class_csv', array(&$seminar_registration_admin, 'admin_ajax_levels_per_class_csv'));
+	add_action('wp_ajax_number_per_class_csv', array(&$seminar_registration_admin, 'admin_ajax_number_per_class_csv'));
+	add_action('admin_footer', array(&$seminar_registration_admin, 'admin_javascript'));
 }
 
 ?>
