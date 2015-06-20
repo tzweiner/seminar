@@ -709,7 +709,7 @@ function get_balance_individual ($num_days, $age, $eefc, $payment, $dvd, $transp
 	
 	$price = intval (get_regular_price ());
 	
-	$today = strtotime($todays_date);
+	$today = strtotime($date);
 
 	if ($payment == "on-site") {
 		if ($age == "child") {
@@ -742,14 +742,14 @@ function get_balance_individual ($num_days, $age, $eefc, $payment, $dvd, $transp
 			if ($num_days == 6) $balance = round ($price * 5.5);
 			else $balance = round ($price) * $num_days;
 		}
-			
+
 		if ($reg_deadline < $today) {
-			$late_fee = number_format($balance*late_fee_percent_func ()/100, 2);
-			$balance = number_format($balance + $late_fee, 2);
+			$late_fee = number_format($balance*get_late_registration_fee_percentage ()/100, 2);
+			$balance = round($balance + $late_fee);
 		}
+		
 		if ($eefc) {
-			$eefc_discount = number_format($balance - ($balance * (100 - get_eefc_discount())/100 ), 2);
-			$balance = number_format($balance - $eefc_discount, 2);
+			$balance =  round($balance * (100 - get_eefc_discount())/100);
 		}
 	}
 	
