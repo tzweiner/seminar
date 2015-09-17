@@ -68,27 +68,37 @@ $(document).ready(function() {
 	
 	
 	$('#previous_years_button').click ( function (e) {
-		e.preventDefault();
-		if ($(this).attr ('href') == '#') alert ('Please select year');
+		
+		if ($(this).attr ('href') == '#') {
+			e.preventDefault();
+			alert ('Please select year');
+		}
 		else {
-			/* Previous Year PDF fancybox trigger */
-			$(".fancypdf").fancybox({
-				type: 'iframe',		
-				iframe : {
-			        preload: false
-			    },
-			    helpers: {
-		        	overlay: {
-			          locked: false
-			        }
-			    },
-			    beforeShow: function(){
-			        $("body").css({'overflow-y':'hidden'});
-			    },
-			    afterClose: function(){
-			        $("body").css({'overflow-y':'visible'});
-			    }
-			});
+			if (strpos ($(this).attr ('href'), '?year') === false) {
+				e.preventDefault();
+				
+				/* Previous Year PDF fancybox trigger */
+				$(".fancypdf").fancybox({
+					type: 'iframe',		
+					iframe : {
+				        preload: false
+				    },
+				    helpers: {
+			        	overlay: {
+				          locked: false
+				        }
+				    },
+				    beforeShow: function(){
+				        $("body").css({'overflow-y':'hidden'});
+				    },
+				    afterClose: function(){
+				        $("body").css({'overflow-y':'visible'});
+				    }
+				});
+			}
+			else {
+				window.location ('http://folkseminarplovdiv.net' + $(this).attr ('href'));
+			}
 		}
 	});
 	

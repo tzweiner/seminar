@@ -200,7 +200,7 @@ $rye_config = array(
         		'hierarchical'       => true,
         		'menu_position'      => 0,
         		'supports'           => array('title','editor','thumbnail','page-attributes'),
-        		'taxonomies'         => array('category')
+        		'taxonomies'         => array('category', 'post_tag')
         ),
         'dance-teachers' => array(
         		'labels'             => array('name' => 'Dance Teachers', 'add_new_item' => 'Add New Dance Teacher', 'edit_item' => 'Edit Dance Teacher', 'new_item' => 'New Dance Teacher', 'view_item' => 'View Dance Teacher', 'search_item' => 'Search Dance Teachers', 'not_found' => 'No Dance Teachers found'),
@@ -214,7 +214,8 @@ $rye_config = array(
         		'has_archive'        => true,
         		'hierarchical'       => false,
         		'menu_position'      => 0,
-        		'supports'           => array('title','editor','thumbnail')
+        		'supports'           => array('title','editor','thumbnail'),
+        		'taxonomies'         => array('post_tag')
         )
         /*
         'some_type' => array(

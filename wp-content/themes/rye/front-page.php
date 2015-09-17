@@ -1,7 +1,7 @@
 <?php get_header(); ?>
 <?php if (have_posts()): 
 	while (have_posts()): the_post(); ?>
-	<div class="c12 row banner">
+	<div class="c12 row banner"><!-- /wp-content/uploads/2015/09/seminar_banner_2016.jpg -->
 		<div class="seminar-banner"><img src="/wp-content/uploads/2015/02/seminar_banner_2015.jpg" alt="banner" /></div>
 	</div>
 	<div class="c12 row">

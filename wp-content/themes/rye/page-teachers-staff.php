@@ -302,12 +302,18 @@
 	</div> 
 	
 	<h3 class="margin">Teaching Staff Archive</h3>
-	<?php 
-	$previous_years = get_field ('previous_years_archive'); ?>
 	
 	<div class="previous-years-wrapper">
 		<select name="previous_years" class="previous_years">
-			<option value="">- Select Year -</option> <?php 
+			<option value="">- Select Year -</option> 
+			<?php $previous_years_updated = get_field('previous_years_archive_after_2014_repeater');
+			foreach ($previous_years_updated[0] as $year): ?>
+			<option value="/teachers-staff?filter=<?php echo $year; ?>"><?php echo $year; ?></option>
+			<?php 
+			endforeach;
+			
+			$previous_years = get_field ('previous_years_archive');
+	
 			foreach ($previous_years as $year):
 			?>
 			<option value="<?php echo $year ['pdf_of_teaching_staff']; ?>"><?php echo $year ['teaching_staff_archive_year']; ?></option>
