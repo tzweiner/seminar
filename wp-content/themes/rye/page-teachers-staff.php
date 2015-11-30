@@ -2,7 +2,22 @@
 <?php if ( have_posts() ) : ?>
 
 	<?php while (have_posts()) : the_post(); ?>
-	<h2><span><?php the_title(); ?></span></h2>
+	
+	<?php 
+	// get year from URL parameters
+	// if none, then use the seminar year
+	$lookupYear = get_seminar_year();
+	$urlYear = $_GET['filter'];
+	if (isset($urlYear) && $urlYear > 2014) {
+		$lookupYear = $urlYear;
+	}
+	else if (isset($urlYear) && $urlYear <= 2014) {
+		$lookupYear = -1; // cause 0 results
+	}
+	?>
+	
+	
+	<h2><span><?php the_title(); ?><?php if (isset ($urlYear) && $urlYear > 2014) echo ' Archive ' . $lookupYear; ?></span></h2>
 	<div class="c12 row">
 		<?php the_content(); ?>
 		
@@ -25,7 +40,16 @@
 		
 		if ($my_query->have_posts()): ?>
 		<h3 class="margin">Instrumental, Vocal & Language Teaching Staff</h3>
+		
+		<?php if ($lookupYear <= 2014): ?>
+		<p>Please use the drop-down menu to view teachers from this year.</p>
+		
 		<?php 
+		elseif ($lookupYear > get_seminar_year()):
+		?>
+		<p>No teacher determined yet.</p>
+		<?php 
+		else:
 			while ($my_query->have_posts()): $my_query->the_post();
 			$class_name = get_the_title();
 			if ($class_name == 'Dance') continue;
@@ -35,6 +59,7 @@
 			'posts_per_page'	=> -1,
 			'orderby' => 'menu_order',
 			'order' => 'ASC',
+			'tag' => $lookupYear,
 			'meta_query' => array (
 				array (
 					'key' => 'specialty',
@@ -87,8 +112,7 @@
 				</div>
 			</div>
 				<?php 
-				endwhile;
-						
+				endwhile;		
 			endif;
 			
 			wp_reset_postdata();
@@ -99,6 +123,8 @@
 				
 		<?php 
 			endwhile;
+			endif; 
+		
 		else: ?>
 		<p>No information found.</p>
 		
@@ -117,7 +143,8 @@
 			'posts_per_page'	=> -1,
 			'meta_key'		=> 'from_date',
 			'orderby' => 'meta_value_num',
-			'order' => 'ASC'
+			'order' => 'ASC',
+			'tag' => $lookupYear,
 						
 			);
 			
@@ -168,10 +195,19 @@
 			}
 			else {
 				?>
-				<p>No dance groups listed at this time.</p> <?php 
+				<?php if ($lookupYear <= 2014): ?>
+				<p>Please use the drop-down menu for dance teachers' archive of this year.</p>
+				<?php else: ?>
+				<p>No dance groups determined yet.</p> <?php 
+				endif; 
 			}
 			wp_reset_postdata();
 			wp_reset_query();
+		?>
+		
+		
+		<?php 
+		if (!isset($urlYear) || $urlYear == '' || $urlYear == get_seminar_year()):
 		?>
 		
 		<h3 class="margin">Program Coordinators</h3>
@@ -298,6 +334,8 @@
 			</div>
 			<?php 
 		}
+		
+		endif; 
 		?>
 	</div> 
 	

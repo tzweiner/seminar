@@ -74,7 +74,7 @@ $(document).ready(function() {
 			alert ('Please select year');
 		}
 		else {
-			if (strpos ($(this).attr ('href'), '?year') === false) {
+			if (strpos ($(this).attr ('href'), '?filter') === false) {
 				e.preventDefault();
 				
 				/* Previous Year PDF fancybox trigger */

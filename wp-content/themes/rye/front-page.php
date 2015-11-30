@@ -2,14 +2,15 @@
 <?php if (have_posts()): 
 	while (have_posts()): the_post(); ?>
 	<div class="c12 row banner"><!-- /wp-content/uploads/2015/09/seminar_banner_2016.jpg -->
-		<div class="seminar-banner"><img src="/wp-content/uploads/2015/02/seminar_banner_2015.jpg" alt="banner" /></div>
+		
+		<div class="seminar-banner"><img src="<?php the_field('seminar_banner'); ?>" alt="banner" /></div>
 	</div>
 	<div class="c12 row">
-        <p class="welcome-text">Thank you for your interest in the <?php echo get_year_order (); ?> annual Bulgarian Folk Music & Dance Seminar, taking place in the lovely, historic town of Plovdiv, Bulgaria.</p>
+        <p class="welcome-text"><?php the_content(); ?></p>
       </div>
      
       <!-- <h2>Testimonials</h2> -->
-      <?php the_content(); ?>
+      
            
       <?php echo get_red_note(); ?>
  <?php 
