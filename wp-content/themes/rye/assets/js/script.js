@@ -359,10 +359,12 @@ $(document).ready(function() {
 	$('input[name="radio-dvd"]').on ('change', function () {
 		if ($(this).val() == 'yes') {
 			$('.dvd-format-wrapper').addClass ('show-me');
+			$('.dvd-format-info-wrapper').addClass ('show-me');
 			$('.dvd-format-wrapper').find ('input:first-child').addClass ('required');
 		}
 		else {
-			$('.dvd-format-wrapper').removeClass ('show-me');			
+			$('.dvd-format-wrapper').removeClass ('show-me');
+			$('.dvd-format-info-wrapper').removeClass ('show-me');
 			$('.dvd-format-wrapper').find ('input:first-child').removeClass ('required');
 		}
 	});

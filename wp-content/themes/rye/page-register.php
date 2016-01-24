@@ -7,7 +7,7 @@
 
    $reg_closed_date = date ('Y-m-d', strtotime (get_field ('seminar_end_date', 'option')) - 2880);	// 2 days before
    $ok_to_register = $today <= $reg_closed_date;
-
+   
    if (!$ok_to_register):     // registration is closed ?>
 <?php get_header(); ?>
 <?php if ( have_posts() ) : ?>
@@ -427,6 +427,9 @@ endif; ?>
                         <input name="radio-dvd-format" value="ntsc" type="radio" class="<?php if (isset ($_POST['radio-dvd']) && $_POST['radio-dvd'] == 'yes') echo 'required'; ?>"<?php if (isset ($_POST['radio-dvd-format']) && $_POST['radio-dvd-format'] == 'ntsc') echo ' checked="checked"'; ?> /> NTSC format<br />
                         <input name="radio-dvd-format" value="pal" type="radio"<?php if (isset ($_POST['radio-dvd-format']) && $_POST['radio-dvd-format'] == 'pal') echo ' checked="checked"'; ?> /> PAL format
                      </div>
+                     <div class="dvd-format-info-wrapper<?php if (isset ($_POST['radio-dvd']) && $_POST['radio-dvd'] == 'yes') echo ' show-me'; ?>">
+                     	<p><a href="/wp-content/uploads/2016/01/PAL_NTSC_country_list.pdf" target="_blank">Pal/NTSC Country List</a>, courtsey of <a href="http://shop.sandbag.uk.com/OneGiantLeap/PALNTSCInfo.html" target="_blank">shop.sandbag.uk.com</a></p>
+                     </div>
                      <input name="radio-dvd" value="no" type="radio"<?php if (isset ($_POST['radio-dvd']) && $_POST['radio-dvd'] == 'no') echo ' checked="checked"'; ?> /> No
                   </div>
                </div>
@@ -664,6 +667,9 @@ endif; ?>
                      <div class="dvd-format-wrapper<?php if (isset ($_POST['radio-dvd']) && $_POST['radio-dvd'] == 'yes') echo ' show-me'; ?>">
                         <input name="radio-dvd-format" value="ntsc" type="radio" class="<?php if (isset ($_POST['radio-dvd']) && $_POST['radio-dvd'] == 'yes') echo 'required'; ?>"<?php if (isset ($_POST['radio-dvd-format']) && $_POST['radio-dvd-format'] == 'ntsc') echo ' checked="checked"'; ?> /> NTSC format<br />
                         <input name="radio-dvd-format" value="pal" type="radio"<?php if (isset ($_POST['radio-dvd-format']) && $_POST['radio-dvd-format'] == 'pal') echo ' checked="checked"'; ?> /> PAL format
+                     </div>
+                     <div class="dvd-format-info-wrapper<?php if (isset ($_POST['radio-dvd']) && $_POST['radio-dvd'] == 'yes') echo ' show-me'; ?>">
+                     	<p><a href="/wp-content/uploads/2016/01/PAL_NTSC_country_list.pdf" target="_blank">Pal/NTSC Country List</a>, courtsey of <a href="http://shop.sandbag.uk.com/OneGiantLeap/PALNTSCInfo.html" target="_blank">shop.sandbag.uk.com</a></p>
                      </div>
                      <input name="radio-dvd" value="no" type="radio"<?php if (isset ($_POST['radio-dvd']) && $_POST['radio-dvd'] == 'no') echo ' checked="checked"'; ?> /> No
                   </div>

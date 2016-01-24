@@ -951,7 +951,7 @@ function sendRegisterEmail (&$registration) {
 	
 	wp_mail(
 		$email,
-		'Folk Seminar Plovdiv ' . get_seminar_year () . ' Registration #' . $primary->id,
+		'Folk Seminar Plovdiv | Registration #' . $primary->id,
 		$message,
 		$headers
 	);
