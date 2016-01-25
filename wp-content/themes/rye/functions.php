@@ -866,6 +866,9 @@ function sendRegisterEmail (&$registration) {
 			$message .= "Country: $row->country" . "\r\n";
 			$message .= "Phone: $row->phone" . "\r\n";
 			$message .= "Email: $row->email" . "\r\n";
+			if ($row->emergency) {
+				$message .= "Emergency Info: $row->emergency" . "\r\n";
+			}
 		}
 		
 		// classes this person has selected:

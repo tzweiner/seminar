@@ -369,6 +369,18 @@ $(document).ready(function() {
 		}
 	});
 	
+	var counter = $('.charCount');
+	$('textarea[name="txt-speshnost"]').on('keyup', function () {
+		var textEntered = $(this).val();
+		counter.html(500 - textEntered.length);
+		if (500 - textEntered.length <= 50 && !counter.hasClass ('red')) {
+			counter.addClass ('red');
+		}
+		else if (500 - textEntered.length > 50 && counter.hasClass ('red')) {
+			counter.removeClass ('red');
+		}
+	});
+	
 	/*$('#select-broi-dni').on ( 'change', function () {
 		alert ($(this).val());
 	});*/

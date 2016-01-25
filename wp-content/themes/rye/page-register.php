@@ -8,6 +8,8 @@
    $reg_closed_date = date ('Y-m-d', strtotime (get_field ('seminar_end_date', 'option')) - 2880);	// 2 days before
    $ok_to_register = $today <= $reg_closed_date;
    
+   $ok_to_register = $_GET["dev"] == 'dev'; 
+   
    if (!$ok_to_register):     // registration is closed ?>
 <?php get_header(); ?>
 <?php if ( have_posts() ) : ?>
@@ -85,6 +87,15 @@ endif; ?>
          else {
             $email = NULL;
             $is_primary = 0;
+         }
+         
+         if (isset ($_POST ['txt-speshnost']) && trim ($_POST ['txt-speshnost']) != '') {
+         	$emergency = trim (mysql_real_escape_string($_POST ['txt-speshnost']));
+         	$is_primary = 1;
+         }
+         else {
+         	$emergency = NULL;
+         	$is_primary = 0;
          }
 
 
@@ -168,6 +179,7 @@ endif; ?>
                country = '$country',
                phone = '$phone',
                email = '$email',
+               emergency = '$emergency',
                num_days = $num_days,
                age = '$age',
                is_eefc = $eefc,
@@ -551,6 +563,14 @@ endif; ?>
               <div class="input-row">
                   <label for="txt-poshta2">* Confirm Email:<span class="error-password-mismatch"><br />Password mismatch</span></label>
                   <input name="txt-poshta2" id="txt-poshta2" type="email" class="required" />
+               </div>
+               
+               <div class="input-row">
+                  <label for="txt-speshnost">Emergency Contact</label>
+                  <div class="emergency-wrapper">
+	                  <div class="txt-right">Characters remaining: <span class="charCount bold">500</span></div>
+	                  <textarea name="txt-speshnost" id="txt-speshnost" rows="3" maxlength="500"></textarea>
+                  </div>
                </div>
 
                <div class="input-row">

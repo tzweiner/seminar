@@ -140,6 +140,7 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 									<th>COUNTRY</th>
 									<th>PHONE</th>
 									<th>EMAIL</th>
+									<th>EMERGENCY</th>
 									<th>NUMBER OF DAYS</th>
 									<th>AGE GROUP</th>
 									<th>EEFC MEMBER</th>
@@ -165,6 +166,7 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 									<td><?php echo $row->country ; ?></td>
 									<td><?php echo $row->phone ; ?></td>
 									<td><?php echo $row->email ; ?></td>
+									<td><?php echo $row->emergency ; ?></td>
 									<td><?php echo $row->num_days ; ?></td>
 									<td><?php echo $row->age ; ?></td>
 									<?php if ($row->is_eefc): ?>
@@ -353,6 +355,7 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 						<th>COUNTRY</th>
 						<th>PHONE</th>
 						<th>EMAIL</th>
+						<th>EMERGENCY</th>
 						<th>NUMBER OF DAYS</th>
 						<th>AGE GROUP</th>
 						<th>EEFC MEMBER</th>
@@ -378,6 +381,7 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 						<td><?php echo $row->country ; ?></td>
 						<td><?php echo $row->phone ; ?></td>
 						<td><?php echo $row->email ; ?></td>
+						<td><?php echo $row->emergency ; ?></td>
 						<td><?php echo $row->num_days ; ?></td>
 						<td><?php echo $row->age ; ?></td>
 						<?php if ($row->is_eefc): ?>
@@ -456,6 +460,7 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 						<th>COUNTRY</th>
 						<th>PHONE</th>
 						<th>EMAIL</th>
+						<th>EMERGENCY</th>
 						<th>NUMBER OF DAYS</th>
 						<th>AGE GROUP</th>
 						<th>EEFC MEMBER</th>
@@ -481,6 +486,7 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 						<td><?php echo $row->country ; ?></td>
 						<td><?php echo $row->phone ; ?></td>
 						<td><?php echo $row->email ; ?></td>
+						<td><?php echo $row->emergency ; ?></td>
 						<td><?php echo $row->num_days ; ?></td>
 						<td><?php echo $row->age ; ?></td>
 						<?php if ($row->is_eefc): ?>
