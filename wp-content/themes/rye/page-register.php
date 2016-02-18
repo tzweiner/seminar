@@ -106,6 +106,10 @@ endif; ?>
          $eefc = ($_POST ['radio-eefc'] == 'no') ? 0 : 1;
 
          $dvd = ($_POST ['radio-dvd'] == 'no') ? 0 : 1;
+         
+         $gala = ($_POST ['radio-gala'] == 'No') ? 0 : 1;
+         
+         $gala_option = $_POST ['radio-gala-option'];
 
 
          if (isset ($_POST['radio-dvd-format']) && $_POST['radio-dvd-format']) {
@@ -181,6 +185,8 @@ endif; ?>
                email = '$email',
                emergency = '$emergency',
                num_days = $num_days,
+               gala = $gala,
+               meal_option = '$gala_option',
                age = '$age',
                is_eefc = $eefc,
                payment = '$payment',
@@ -188,7 +194,7 @@ endif; ?>
                dvd = $dvd,
                dvd_format = '$dvd_format',
                cancel = 0,
-               balance = ". get_balance_individual ($num_days, $age, $eefc, $payment, $dvd, $transport);
+               balance = ". get_balance_individual ($num_days, $gala, $age, $eefc, $payment, $dvd, $transport);
 
 
          $wpdb->query(
@@ -345,6 +351,20 @@ endif; ?>
                      <option value="6"<?php if (isset ($_POST['select-broi-dni']) && $_POST['select-broi-dni'] == 6) echo ' selected="selected"'; ?>>Entire Seminar</option>
                   </select>
                </div>
+               
+               <div class="input-row">
+                  <label for="radio-gala">* Will you attend the gala dinner:</label>
+                  <div>
+                     <input name="radio-gala" value="Yes" type="radio" class="required"<?php if (isset ($_POST['radio-gala'])) echo ' checked="checked"'; ?> /> Yes<br />
+                     <div class="gala-option indent">
+                     	<input name="radio-gala-option" value="Vegetarian" type="radio" class="required"<?php if (isset ($_POST['radio-gala-option'])) echo ' checked="checked"'; ?> /> Vegetarian<br />
+                     	<input name="radio-gala-option" value="Non-vegetarian" type="radio" class=""<?php if (isset ($_POST['radio-gala-option'])) echo ' checked="checked"'; ?> /> Non-vegetarian<br />
+                     </div>
+                     <input name="radio-gala" value="No" type="radio"<?php if (isset ($_POST['radio-gala']) && $_POST['radio-gala'] == 'No') echo ' checked="checked"'; ?> /> No
+                     <p class="gala-vkluchena waive green">Gala dinner fee of <?php echo get_gala_dinner_fee(); ?> EURO will be waived because you are attendng for the entire duration of the seminar.</p>
+                     <p class="gala-vkluchena add red">Gala dinner fee of <?php echo get_gala_dinner_fee(); ?> EURO will be added to your total.</p>                    
+                  </div>
+               </div>
 
                <div class="input-row">
                   <label for="radio-age">* Please choose your type of registration based on your age group:</label>
@@ -356,7 +376,7 @@ endif; ?>
                </div>
 
                <div class="input-row">
-                  <label for="radio-eefc">* Member of the East European Folklife Center (EEFC) for the <?php echo get_seminar_year(); ?> calendar year? (See <a href="/faqs">FAQs</a>):</label>
+                  <label for="radio-eefc">* Are you (or is your family) a member of the East European Folklife Center (EEFC) for the <?php echo get_seminar_year(); ?> calendar year? (See <a href="/faqs">FAQs</a>):</label>
                   <div>
                      <input name="radio-eefc" value="yes" type="radio" class="required"<?php if (isset ($_POST['radio-eefc']) && $_POST['radio-eefc'] == 'yes') echo ' checked="checked"'; ?> /> Yes<br />
                      <input name="radio-eefc" value="no" type="radio"<?php if (isset ($_POST['radio-eefc']) && $_POST['radio-eefc'] == 'no') echo ' checked="checked"'; ?> /> No
@@ -584,6 +604,20 @@ endif; ?>
                      <option value="5"<?php if (isset ($_POST['select-broi-dni']) && $_POST['select-broi-dni'] == 5) echo ' selected="selected"'; ?>>5 days</option>
                      <option value="6"<?php if (isset ($_POST['select-broi-dni']) && $_POST['select-broi-dni'] == 6) echo ' selected="selected"'; ?>>Entire Seminar</option>
                   </select>
+               </div>
+               
+               <div class="input-row">
+                  <label for="radio-gala">* Will you attend the gala dinner:</label>
+                  <div>
+                     <input name="radio-gala" value="Yes" type="radio" class="required"<?php if (isset ($_POST['radio-gala'])) echo ' checked="checked"'; ?> /> Yes<br />
+                     <div class="gala-option indent">
+                     	<input name="radio-gala-option" value="Vegetarian" type="radio" class="required"<?php if (isset ($_POST['radio-gala-option'])) echo ' checked="checked"'; ?> /> Vegetarian<br />
+                     	<input name="radio-gala-option" value="Non-vegetarian" type="radio" class=""<?php if (isset ($_POST['radio-gala-option'])) echo ' checked="checked"'; ?> /> Non-vegetarian<br />
+                     </div>
+                     <input name="radio-gala" value="No" type="radio"<?php if (isset ($_POST['radio-gala']) && $_POST['radio-gala'] == 'No') echo ' checked="checked"'; ?> /> No
+                     <p class="gala-vkluchena waive green">Gala dinner fee of <?php echo get_gala_dinner_fee(); ?> EURO will be waived because you are attendng for the entire duration of the seminar.</p>
+                     <p class="gala-vkluchena add red">Gala dinner fee of <?php echo get_gala_dinner_fee(); ?> EURO will be added to your total.</p>                    
+                  </div>
                </div>
 
                <div class="input-row">

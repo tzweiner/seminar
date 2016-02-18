@@ -27,6 +27,7 @@
 <link rel="stylesheet" type="text/css" media="all" href="<?php bloginfo('stylesheet_url'); ?>" />
 <link rel="stylesheet" type="text/css" media="screen" href="<?= get_bloginfo('template_directory').'/assets/css/jquery.fancybox.css' ?>" />
 <link rel="stylesheet" type="text/css" media="screen" href="<?= get_bloginfo('template_directory').'/assets/css/style.css' ?>" />
+<link rel="stylesheet" type="text/css" media="print" href="<?= get_bloginfo('template_directory').'/assets/css/print.css' ?>" />
 <link rel="pingback" href="<?php bloginfo('pingback_url'); ?>" />
 
 <link rel="shortcut icon" href="/wp-content/themes/rye/favicon.ico" type="image/x-icon">

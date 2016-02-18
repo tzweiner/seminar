@@ -456,7 +456,12 @@ add_shortcode( 'sound_bites', 'sound_bites_func' );
 
 
 
-
+// gala dinner fee
+// [gala_dinner_fee]
+function gala_dinner_fee_func ( $atts ){
+	return get_gala_dinner_fee();
+}
+add_shortcode( 'gala_dinner_fee', 'gala_dinner_fee_func' );
 
 
 /////////////////////////////////
@@ -642,6 +647,13 @@ function get_dancegroup_date ($event_id, $show_times = false) {
 	}
 }
 
+// fee for gala dinner
+// if this is not populated, gala dinner will not be charged for
+// gala dinner is free for registrants who will attend for the duration
+function get_gala_dinner_fee () {
+	return get_field ('gala_price', 'option');
+}
+
 /**
  * Trim Text
  *
@@ -701,7 +713,7 @@ function getClassesRows ($reg_id) {
 	return $results;
 }
 
-function get_balance_individual ($num_days, $age, $eefc, $payment, $dvd, $transport) {
+function get_balance_individual ($num_days, $gala, $age, $eefc, $payment, $dvd, $transport) {
 
 	$date = date("Y-m-d");
 	$reg_deadline = strtotime (get_late_registration_deadline ());
@@ -764,6 +776,9 @@ function get_balance_individual ($num_days, $age, $eefc, $payment, $dvd, $transp
 		$balance += $transport * get_field ('koprivshtitsa_transportation_fee', $register_page_obj->ID);
 	}
 	
+	if ($gala) {
+		$balance += get_gala_dinner_fee(); 
+	}
 
 	return $balance;
 	

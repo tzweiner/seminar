@@ -142,6 +142,8 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 									<th>EMAIL</th>
 									<th>EMERGENCY</th>
 									<th>NUMBER OF DAYS</th>
+									<th>GALA</th>
+									<th>MEAL OPTION</th>
 									<th>AGE GROUP</th>
 									<th>EEFC MEMBER</th>
 									<th>PAYMENT OPTION</th>
@@ -168,6 +170,8 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 									<td><?php echo $row->email ; ?></td>
 									<td><?php echo $row->emergency ; ?></td>
 									<td><?php echo $row->num_days ; ?></td>
+									<td><?php echo $row->gala ; ?></td>
+									<td><?php echo $row->meal_option ; ?></td>
 									<td><?php echo $row->age ; ?></td>
 									<?php if ($row->is_eefc): ?>
 									<td><?php echo 'Yes'; ?></td>
@@ -357,6 +361,8 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 						<th>EMAIL</th>
 						<th>EMERGENCY</th>
 						<th>NUMBER OF DAYS</th>
+						<th>GALA</th>
+						<th>MEAL OPTION</th>
 						<th>AGE GROUP</th>
 						<th>EEFC MEMBER</th>
 						<th>PAYMENT OPTION</th>
@@ -383,6 +389,8 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 						<td><?php echo $row->email ; ?></td>
 						<td><?php echo $row->emergency ; ?></td>
 						<td><?php echo $row->num_days ; ?></td>
+						<td><?php echo $row->gala ; ?></td>
+						<td><?php echo $row->meal_option ; ?></td>
 						<td><?php echo $row->age ; ?></td>
 						<?php if ($row->is_eefc): ?>
 						<td><?php echo 'Yes'; ?></td>
@@ -462,6 +470,8 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 						<th>EMAIL</th>
 						<th>EMERGENCY</th>
 						<th>NUMBER OF DAYS</th>
+						<th>GALA</th>
+						<th>MEAL OPTION</th>
 						<th>AGE GROUP</th>
 						<th>EEFC MEMBER</th>
 						<th>PAYMENT OPTION</th>
@@ -488,6 +498,8 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 						<td><?php echo $row->email ; ?></td>
 						<td><?php echo $row->emergency ; ?></td>
 						<td><?php echo $row->num_days ; ?></td>
+						<td><?php echo $row->gala ; ?></td>
+						<td><?php echo $row->meal_option ; ?></td>
 						<td><?php echo $row->age ; ?></td>
 						<?php if ($row->is_eefc): ?>
 						<td><?php echo 'Yes'; ?></td>

@@ -203,6 +203,10 @@ fieldset {
 	color: @red!important;
 }
 
+.green {
+	color: @dark-green!important;
+}
+
 .c12 {
 	&.register {
 		@media @mobile {
@@ -1114,6 +1118,21 @@ fieldset {
 					}
 					&.show-me {
 						display: block;
+					}
+				}
+				.gala-vkluchena {
+					display: none;
+					&.selected {
+						display: block;
+					}
+				}
+				.gala-option {
+					display: none;
+					&.show-me {
+						display: block;
+					}
+					&.indent {
+						margin-left: 30px;
 					}
 				}
 				div {

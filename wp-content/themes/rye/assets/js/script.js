@@ -369,6 +369,44 @@ $(document).ready(function() {
 		}
 	});
 	
+	$('input[name="radio-gala"]').on ('click', function () {
+		var days = $('#select-broi-dni').val();
+		$('.gala-vkluchena').removeClass ('selected');
+		if ($('input[name="radio-gala"]:checked').val() == 'Yes') {
+			$('.gala-option').addClass ('show-me');
+			if (days == 6) {
+				$('.gala-vkluchena.waive').addClass ('selected');
+			}
+			else if (days){
+				$('.gala-vkluchena.add').addClass ('selected');
+			}
+		}
+		else {
+			$('.gala-option').removeClass ('show-me');
+			$('input[name="radio-gala-option"]').prop('checked', false);
+		}
+	});
+	
+	$('#select-broi-dni').on ( 'change', function () {
+		var selection = $(this).val();
+		var gala = $('input[name="radio-gala"]:checked').val();
+		$('.gala-vkluchena').removeClass ('selected');
+		if (!selection) {
+			$('input[name="radio-gala"]').prop('checked', false);
+			$('input[name="radio-gala-option"]').prop('checked', false);
+			$('.gala-option').removeClass ('show-me');
+			return;
+		}
+		if (gala == 'Yes') {
+			if (selection == 6) {
+				$('.gala-vkluchena.waive').addClass ('selected');
+			}
+			else if (selection) {
+				$('.gala-vkluchena.add').addClass ('selected');
+			}
+		}
+	});
+	
 	var counter = $('.charCount');
 	$('textarea[name="txt-speshnost"]').on('keyup', function () {
 		var textEntered = $(this).val();
@@ -426,11 +464,13 @@ function clearForm (form_id) {
 	});
 	
 	$form.find ('input[type="radio"]').each ( function () {
-		$(this).attr ('checked', false);		
+		$(this).attr ('checked', false);	
+		$(this).prop ('checked', false);
 	});
 	
 	$form.find ('input[type="checkbox"]').each ( function () {
-		$(this).attr ('checked', false);		
+		$(this).attr ('checked', false);
+		$(this).prop ('checked', false);
 	});
 	
 	$form.find ('.error').removeClass('error');
@@ -438,6 +478,8 @@ function clearForm (form_id) {
 	$form.find ('.checked').removeClass('checked');
 	$('.error-password-mismatch').hide();
 	$('.error-math-incorrect').hide();
+	$form.find ('.gala-vkluchena').removeClass ('selected');
+	$form.find ('.gala-option').removeClass ('show-me');
 }
 
 function validateForm (form_id) {

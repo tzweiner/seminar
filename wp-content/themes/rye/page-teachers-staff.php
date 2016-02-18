@@ -19,6 +19,8 @@
 	
 	<h2><span><?php the_title(); ?><?php if (isset ($urlYear) && $urlYear > 2014) echo ' Archive ' . $lookupYear; ?></span></h2>
 	<div class="c12 row">
+		<?php echo get_red_note(); ?>	
+	
 		<?php the_content(); ?>
 		
 		<?php 
