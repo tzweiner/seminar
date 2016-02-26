@@ -403,7 +403,7 @@ endif; ?>
                if ($my_query->have_posts()): ?>
                   <div class="classes-wrapper">
                      <p class="center bigger"><strong>CLASSES<br />
-                     Please make your selections and indicate for each whether you are bringing or renting an instrument and your level of proficiency.</strong></p>
+                     Please make your selections and indicate your level of proficiency and whether you're renting or bringing an instrument, if applicable. See FAQs.</strong></p>
                      <?php while ($my_query->have_posts()): $my_query->the_post();
                      $class_id = get_the_ID(); ?>
                      <div class="class-row" id="class-row-<?php echo $class_id; ?>">
@@ -411,22 +411,7 @@ endif; ?>
                            <input id="class-<?php echo $class_id; ?>" type='checkbox' multiple='multiple' name='ckb_class[]' value="<?php echo $class_id; ?>" />
                            <label for="class-<?php echo $class_id; ?>"><?php the_title(); ?></label>
                         </div>
-                        <div class="class-bring-rent one-third">
-                        <?php $rent_bring = get_field ('rent_bring');
-                        if ($rent_bring):
-                        foreach ($rent_bring as $rb_option):
-                           if ($rb_option == 'rent') $option = 'Rent';
-                           else $option = 'Bring instrument'; ?>
-                           <div class="radioboxes">
-                              <input type="radio" name="radio-rent-bring-<?php echo $class_id; ?>" id="radio-<?php echo $rb_option; ?>-<?php echo $class_id; ?>" value="<?php echo $rb_option; ?>"<?php if (isset($_POST ['radio-rent-bring-' . $class_id]) && $_POST ['radio-rent-bring-' . $class_id] == $rb_option) echo " checked"; ?> disabled />
-                              <label for="radio-<?php echo $rb_option; ?>-<?php echo $class_id; ?>"><?php echo $option; ?></label>
-                           </div>
-                        <?php endforeach;
-                        else: ?>
-                        <p class="mobile-hide">N/A</p> <?php
-                        endif; ?>
-                        </div>
-                       <div class="class-level one-third">
+                        <div class="class-level one-third">
                         <?php $level = get_field ('class_levels');
                         if ($level):
                         foreach ($level as $level_option):
@@ -441,6 +426,36 @@ endif; ?>
                         <p class="mobile-hide">N/A</p> <?php
                         endif; ?>
                         </div>
+                        <div class="class-bring-rent one-third">
+                        <?php $rent_bring = get_field ('rent_bring');
+                        if ($rent_bring):
+                        foreach ($rent_bring as $rb_option):
+                          if ($rb_option == 'rent') {
+							$available = get_available_count_for_rent ($class_id, $reg_id);
+							if ($available <= 0) continue;
+							$option = 'Rent';
+						  }
+                          else $option = 'Bring instrument'; ?>
+                           <div class="radioboxes">
+                              <input type="radio" name="radio-rent-bring-<?php echo $class_id; ?>" id="radio-<?php echo $rb_option; ?>-<?php echo $class_id; ?>" value="<?php echo $rb_option; ?>"<?php if (isset($_POST ['radio-rent-bring-' . $class_id]) && $_POST ['radio-rent-bring-' . $class_id] == $rb_option) echo " checked"; ?> disabled />
+                              <label for="radio-<?php echo $rb_option; ?>-<?php echo $class_id; ?>"><?php echo $option; ?></label>
+                              <?php if ($rb_option == 'rent'): ?> 
+                              	<ul style="padding-bottom: 7px;">
+                              		<li><?php echo $available; ?> available</li>
+                              		<li class="red">Rental fee of <?php echo get_instrument_rental_fee($class_id); ?> EURO per day will apply</li>
+                              	</ul>
+                              <?php endif; ?>
+                           </div>
+                        <?php endforeach;
+	                        if (in_array('rent', $rent_bring) && $available <= 0): ?>
+								<div class="indent">None available for rental</div>
+							<?php 
+							endif; 
+                        else: ?>
+                        <p class="mobile-hide">N/A</p> <?php
+                        endif; ?>
+                        </div>
+                       
                      </div>
                      <?php endwhile; ?>
                   </div>
@@ -515,15 +530,23 @@ endif; ?>
       <?php the_content(); ?>
 
       <p class="flt-l">* Indicates a required field.</p>
+      
+      <?php $pdf = get_field ('paper_registration_pdf', 'option');
+            $word = get_field ('paper_registration_word_doc', 'option'); 
+           	if ($pdf || $word): ?>
       <div class="paper-registration-wrapper">
          <div class="paper-registration-links">
-         <?php $pdf = get_field ('paper_registration_pdf', 'option');
-               $word = get_field ('paper_registration_word_doc', 'option'); ?>
+         
+         	<?php if ($pdf): ?>
             <a href="<?php echo $pdf ['url']; ?>">Download form in PDF</a>
             <div class="spacer-border"></div>
+            <?php endif; ?>
+          	<?php if ($word): ?>
             <a href="<?php echo $word ['url']; ?>">Download in Word</a>
+            <?php endif; ?>
          </div>
       </div>
+      <?php endif; ?>
 
       <div class="feedback">Please correct errors on form.</div>
 
@@ -586,7 +609,8 @@ endif; ?>
                </div>
                
                <div class="input-row">
-                  <label for="txt-speshnost">Emergency Contact</label>
+                  <label for="txt-speshnost">Emergency Contact<br />
+                  <span class="smaller">(Name, address, telephone number, email address of a person in your home country)</span></label>
                   <div class="emergency-wrapper">
 	                  <div class="txt-right">Characters remaining: <span class="charCount bold">500</span></div>
 	                  <textarea name="txt-speshnost" id="txt-speshnost" rows="3" maxlength="500"></textarea>
@@ -666,28 +690,13 @@ endif; ?>
                if ($my_query->have_posts()): ?>
                   <div class="classes-wrapper">
                      <p class="center bigger"><strong>CLASSES<br />
-                     Please make your selections and indicate for each whether you are bringing or renting an instrument and your level of proficiency.</strong></p>
+                     Please make your selections and indicate your level of proficiency and whether you're renting or bringing an instrument, if applicable. See FAQs.</strong></p>
                      <?php while ($my_query->have_posts()): $my_query->the_post();
                      $class_id = get_the_ID(); ?>
                      <div class="class-row" id="class-row-<?php echo $class_id; ?>">
                         <div class="class-title one-third">
                            <input id="class-<?php echo $class_id; ?>" type='checkbox' multiple='multiple' name='ckb_class[]' value="<?php echo $class_id; ?>" <?php //if (in_array ($class_id, $_POST['ckb_class'])) echo " checked"; ?> />
                            <label for="class-<?php echo $class_id; ?>"><?php the_title(); ?></label>
-                        </div>
-                        <div class="class-bring-rent one-third">
-                        <?php $rent_bring = get_field ('rent_bring');
-                        if ($rent_bring):
-                        foreach ($rent_bring as $rb_option):
-                          if ($rb_option == 'rent') $option = 'Rent';
-                           else $option = 'Bring instrument'; ?>
-                           <div class="radioboxes">
-                              <input type="radio" name="radio-rent-bring-<?php echo $class_id; ?>" id="radio-<?php echo $rb_option; ?>-<?php echo $class_id; ?>" value="<?php echo $rb_option; ?>"<?php if (isset($_POST ['radio-rent-bring-' . $class_id]) && $_POST ['radio-rent-bring-' . $class_id] == $rb_option) echo " checked"; ?> disabled />
-                              <label for="radio-<?php echo $rb_option; ?>-<?php echo $class_id; ?>"><?php echo $option; ?></label>
-                           </div>
-                        <?php endforeach;
-                        else: ?>
-                        <p class="mobile-hide">N/A</p> <?php
-                        endif; ?>
                         </div>
                         <div class="class-level one-third">
                         <?php $level = get_field ('class_levels');
@@ -704,6 +713,36 @@ endif; ?>
                         <p class="mobile-hide">N/A</p> <?php
                         endif; ?>
                         </div>
+                        <div class="class-bring-rent one-third">
+                        <?php $rent_bring = get_field ('rent_bring');
+                        if ($rent_bring):
+                        foreach ($rent_bring as $rb_option):
+                          if ($rb_option == 'rent') {
+							$available = get_available_count_for_rent ($class_id);
+							if ($available <= 0) continue;
+							$option = 'Rent';
+						  }
+                          else $option = 'Bring instrument'; ?>
+                           <div class="radioboxes">
+                              <input type="radio" name="radio-rent-bring-<?php echo $class_id; ?>" id="radio-<?php echo $rb_option; ?>-<?php echo $class_id; ?>" value="<?php echo $rb_option; ?>"<?php if (isset($_POST ['radio-rent-bring-' . $class_id]) && $_POST ['radio-rent-bring-' . $class_id] == $rb_option) echo " checked"; ?> disabled />
+                              <label for="radio-<?php echo $rb_option; ?>-<?php echo $class_id; ?>"><?php echo $option; ?></label>
+                              <?php if ($rb_option == 'rent'): ?> 
+                              	<ul>
+                              		<li><?php echo $available; ?> available</li>
+                              		<li class="red">Rental fee of <?php echo get_instrument_rental_fee($class_id); ?> EURO per day will apply</li>
+                              	</ul>
+                              <?php endif; ?>
+                           </div>
+                        <?php endforeach;
+	                        if (in_array('rent', $rent_bring) && $available <= 0): ?>
+								<div class="indent">None available for rental</div>
+							<?php 
+							endif; 
+                        else: ?>
+                        <p class="mobile-hide">N/A</p> <?php
+                        endif; ?>
+                        </div>
+                        
                     </div>
                      <?php endwhile; ?>
                   </div>

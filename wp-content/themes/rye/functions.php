@@ -654,6 +654,66 @@ function get_gala_dinner_fee () {
 	return get_field ('gala_price', 'option');
 }
 
+// fee for instrument rental
+// pass in class (post) id
+function get_instrument_rental_fee ($class_id) {
+	return get_field ('rental_fee', $class_id);
+}
+
+
+// takes a class (post) id, finds out the initial available count to rent,
+// then queries the database to find out how many are left and 
+// determines if there are any still available
+function get_available_count_for_rent ($class_id, $reg_id = '') {
+	
+	$initial_count = get_field ('total_available', $class_id);
+	$year = get_seminar_year();
+	$previousRentalCount = 0;
+	
+	global $wpdb;
+	
+	$table = 'wp_Seminar_registrations';
+	$tableClasses = 'wp_Seminar_classes';
+	
+	$sql = "SELECT count(class_id) as count from $tableClasses
+			WHERE class_id = $class_id
+			AND RENT = 1
+			AND reg_id in (
+			SELECT reg_id
+			FROM  $table
+			WHERE reg_year = $year
+			AND cancel = 0
+			AND confirmed = 1)";
+	
+	$results = $wpdb->get_results ($sql);
+	
+	if (!empty($results)) {
+		$previousRentalCount = $results[0]->count;
+	}
+	
+	if (isset ($reg_id) && $reg_id != '') {
+		$sql = "SELECT count(class_id) as count from $tableClasses
+				WHERE class_id = $class_id
+				AND RENT = 1
+				AND reg_id in (
+				SELECT reg_id
+				FROM  $table
+				WHERE reg_year = $year
+				AND reg_id = '$reg_id' 
+				AND cancel = 0)";
+		
+		$results = $wpdb->get_results ($sql);
+		
+		if (!empty($results)) {
+			$previousRentalCount = $previousRentalCount + $results[0]->count;
+		}
+	}
+	
+	return $initial_count - $previousRentalCount;
+
+	
+}
+
 /**
  * Trim Text
  *
@@ -883,6 +943,10 @@ function sendRegisterEmail (&$registration) {
 			$message .= "Email: $row->email" . "\r\n";
 			if ($row->emergency) {
 				$message .= "Emergency Info: $row->emergency" . "\r\n";
+			}
+			$message .= "Attending for: $row->num_days days" . "\r\n";
+			if ($row->gala) {
+				$message .= "Will attend gala dinner, $row->meal_option" . "\r\n";
 			}
 		}
 		

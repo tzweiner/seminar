@@ -72,6 +72,9 @@
 .center {
 	text-align: center;
 }
+.indent {
+	padding-left: 17px;
+}
 
 @big: 1.3em;
 
@@ -218,7 +221,9 @@ fieldset {
 }
 
 .mobile-hide {
-	display: none;
+	@media @mobile {
+		display: none;
+	}
 }
 
 .home {	
@@ -1250,6 +1255,14 @@ fieldset {
 									float: left; 
 									margin-right: 4px;
 									margin-top: 4px; 
+								}
+								ul {
+									padding-bottom: 7px; 
+									margin: 0 0 0 13px;
+									li {
+										margin: 0;
+										font-size: 14px;
+									}
 								}
 							}
 							p {
