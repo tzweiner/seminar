@@ -1,3 +1,3 @@
-<?php 
-header( 'Location: /teachers-staff' ) ;
+<?php
+header ( 'Location: /teachers-staff' );
 ?>

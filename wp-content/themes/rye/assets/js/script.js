@@ -367,12 +367,15 @@ $(document).ready(function() {
 			$('.dvd-format-info-wrapper').removeClass ('show-me');
 			$('.dvd-format-wrapper').find ('input:first-child').removeClass ('required');
 		}
+		$('input[name="radio-dvd-format"]').val('');
+		$('input[name="radio-dvd-format"]').prop('checked', false).attr('checked', false);
 	});
 	
 	$('input[name="radio-gala"]').on ('click', function () {
 		var days = $('#select-broi-dni').val();
 		$('.gala-vkluchena').removeClass ('selected');
 		if ($('input[name="radio-gala"]:checked').val() == 'Yes') {
+			$('input[name="radio-gala-option"]:first-child').addClass('required');
 			$('.gala-option').addClass ('show-me');
 			if (days == 6) {
 				$('.gala-vkluchena.waive').addClass ('selected');
@@ -383,7 +386,7 @@ $(document).ready(function() {
 		}
 		else {
 			$('.gala-option').removeClass ('show-me');
-			$('input[name="radio-gala-option"]').prop('checked', false);
+			$('input[name="radio-gala-option"]').prop('checked', false).removeClass('required');;
 		}
 	});
 	
@@ -523,7 +526,7 @@ function validateForm (form_id) {
 					error_array.push (element_name);
 				
 			}
-			
+			console.log(error_array);
 		}
 		else if ($('input[name="' + element_name + '"]').val() == '' ||
 				$('input[name="' + element_name + '"]').val() == null) {

@@ -1,9 +1,11 @@
 @font-face {
 	font-family: "museo";
 	src: url('../fonts/fonts/museo.eot'); /*IE9 Compat Modes*/
-	src: url('../fonts/fonts/museo.eot?#iefix') format('embedded-opentype'), /*IE6-IE8 */
-		url('../fonts/fonts/museo.woff') format('woff'), /*Modern Browsers*/
-		url('../fonts/fonts/museo.ttf')  format('truetype'); /*Safari, Android, iOS*/	 
+	src: url('../fonts/fonts/museo.eot?#iefix') format('embedded-opentype'),
+		/*IE6-IE8 */ 
+		 url('../fonts/fonts/museo.woff') format('woff'), /*Modern Browsers*/ 
+		 url('../fonts/fonts/museo.ttf') format('truetype');
+	/*Safari, Android, iOS*/
 }
 
 .page img {
@@ -20,25 +22,24 @@
 .top-right li {
 	margin: 0;
 	padding: 0;
-	float: left; 
+	float: left;
 }
 
 .top-right li a {
-	padding: 6px 18px; 
+	padding: 6px 18px;
 	margin-right: 1px;
 	background-color: rgba(255, 255, 255, 0.6);
 	display: block;
 	text-shadow: 1px 1px rgba(255, 255, 255, 0.85);
-	font-size: 12px; 
-	font-family: "museo",Georgia, Times, serif;
+	font-size: 12px;
+	font-family: "museo", Georgia, Times, serif;
 	border-right: 1px solid #fefefe;
-	
-	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
-	filter: alpha(opacity=100);
-	-moz-opacity:1;
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+	filter: alpha(opacity = 100);
+	-moz-opacity: 1;
 	-khtml-opacity: 1;
-	opacity: 1;	
-  	transition: opacity .5s;
+	opacity: 1;
+	transition: opacity .5s;
 	-webkit-transition: opacity .5s;
 }
 
@@ -47,96 +48,94 @@
 }
 
 .top-right li a:hover {
-	text-decoration: none; 
-	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=65)";
-	filter: alpha(opacity=65);
-	-moz-opacity:.65;
+	text-decoration: none;
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=65)";
+	filter: alpha(opacity = 65);
+	-moz-opacity: .65;
 	-khtml-opacity: .65;
 	opacity: .65;
 }
 
-
 /* =WordPress Core
 -------------------------------------------------------------- */
 .alignnone {
-    margin: 5px 20px 20px 0;
+	margin: 5px 20px 20px 0;
 }
 
-.aligncenter,
-div.aligncenter {
-    display: block;
-    margin: 5px auto 5px auto;
+.aligncenter, div.aligncenter {
+	display: block;
+	margin: 5px auto 5px auto;
 }
 
 .alignright {
-    float:right;
-    margin: 5px 0 20px 20px;
+	float: right;
+	margin: 5px 0 20px 20px;
 }
 
 .alignleft {
-    float: left;
-    margin: 5px 20px 20px 0;
+	float: left;
+	margin: 5px 20px 20px 0;
 }
 
 .aligncenter {
-    display: block;
-    margin: 5px auto 5px auto;
+	display: block;
+	margin: 5px auto 5px auto;
 }
 
 a img.alignright {
-    float: right;
-    margin: 5px 0 20px 20px;
+	float: right;
+	margin: 5px 0 20px 20px;
 }
 
 a img.alignnone {
-    margin: 5px 20px 20px 0;
+	margin: 5px 20px 20px 0;
 }
 
 a img.alignleft {
-    float: left;
-    margin: 5px 20px 20px 0;
+	float: left;
+	margin: 5px 20px 20px 0;
 }
 
 a img.aligncenter {
-    display: block;
-    margin-left: auto;
-    margin-right: auto
+	display: block;
+	margin-left: auto;
+	margin-right: auto
 }
 
 .wp-caption {
-    background: #fff;
-    border: 1px solid #f0f0f0;
-    max-width: 96%; /* Image does not overflow the content area */
-    padding: 5px 3px 10px;
-    text-align: center;
+	background: #fff;
+	border: 1px solid #f0f0f0;
+	max-width: 96%; /* Image does not overflow the content area */
+	padding: 5px 3px 10px;
+	text-align: center;
 }
 
 .wp-caption.alignnone {
-    margin: 5px 20px 20px 0;
+	margin: 5px 20px 20px 0;
 }
 
 .wp-caption.alignleft {
-    margin: 5px 20px 20px 0;
+	margin: 5px 20px 20px 0;
 }
 
 .wp-caption.alignright {
-    margin: 5px 0 20px 20px;
+	margin: 5px 0 20px 20px;
 }
 
 .wp-caption img {
-    border: 0 none;
-    height: auto;
-    margin: 0;
-    max-width: 98.5%;
-    padding: 0;
-    width: auto;
+	border: 0 none;
+	height: auto;
+	margin: 0;
+	max-width: 98.5%;
+	padding: 0;
+	width: auto;
 }
 
 .wp-caption p.wp-caption-text {
-    font-size: 11px;
-    line-height: 17px;
-    margin: 0;
-    padding: 0 4px 5px;
+	font-size: 11px;
+	line-height: 17px;
+	margin: 0;
+	padding: 0 4px 5px;
 }
 
 .seminar-banner {
@@ -148,7 +147,7 @@ a img.aligncenter {
 
 .seminar-banner img {
 	border: none;
-	padding: 0; 
+	padding: 0;
 }
 
 .c12.row.banner {
@@ -157,17 +156,8 @@ a img.aligncenter {
 	min-height: 100%;
 }
 
-.page p,
-.page a,
-.page li,
-.page strong,
-.page h1,
-.page h2,
-.page h3,
-.page h4,
-.page h5,
-.page h6,
-.page td {
+.page p, .page a, .page li, .page strong, .page h1, .page h2, .page h3,
+	.page h4, .page h5, .page h6, .page td {
 	font-family: 'Tinos', serif;
 	line-height: normal;
 }
@@ -202,22 +192,24 @@ a img.aligncenter {
 	float: left;
 	list-style: none;
 	display: block;
-    position: relative;
+	position: relative;
 }
+
 .main-menu-wrapper a {
-	display: block; 
-    padding: 10px 15px;
-    position: relative;
-    line-height: 60px;
-    font-family: "museo",Georgia,Times,serif;
-    text-shadow: 1px 1px rgba(255, 255, 255, 0.75);
-    font-weight: bold;
-    text-decoration: none; 
-    width: auto;
-    height: auto;
-    color: #333;
-    text-shadow:1px 1px rgba(255,255,255,0.75);-webkit-text-shadow:1px 1px rgba(255,255,255,0.75);
-    background-color: transparent;
+	display: block;
+	padding: 10px 15px;
+	position: relative;
+	line-height: 60px;
+	font-family: "museo", Georgia, Times, serif;
+	text-shadow: 1px 1px rgba(255, 255, 255, 0.75);
+	font-weight: bold;
+	text-decoration: none;
+	width: auto;
+	height: auto;
+	color: #333;
+	text-shadow: 1px 1px rgba(255, 255, 255, 0.75);
+	-webkit-text-shadow: 1px 1px rgba(255, 255, 255, 0.75);
+	background-color: transparent;
 }
 
 .main-menu-wrapper h1 a {
@@ -231,37 +223,63 @@ a img.aligncenter {
 }
 
 .home .main-menu-wrapper h1 a {
-	max-height: 61px; 
+	max-height: 61px;
 }
 
-.main-menu-wrapper .current-menu-item a,
-.main-menu-wrapper .current-menu-item a:hover,
-.main-menu-wrapper .current-menu-item a:focus,
-.main-menu-wrapper .current-menu-item a:active {
-	text-decoration: none; 
+.main-menu-wrapper .current-menu-item a, .main-menu-wrapper .current-menu-item a:hover,
+	.main-menu-wrapper .current-menu-item a:focus, .main-menu-wrapper .current-menu-item a:active
+	{
+	text-decoration: none;
 	background-color: #9ED19E;
 	color: #fff;
-	text-shadow:none; -webkit-text-shadow: none;
+	text-shadow: none;
+	-webkit-text-shadow: none;
 }
 
-.main-menu-wrapper a:hover,
-.main-menu-wrapper a:focus,
-.main-menu-wrapper a:active {
-	text-decoration: none; 
+.main-menu-wrapper a:hover, .main-menu-wrapper a:focus,
+	.main-menu-wrapper a:active {
+	text-decoration: none;
 	background-color: #EEFCEE;
-	text-shadow:none; -webkit-text-shadow: none;
+	text-shadow: none;
+	-webkit-text-shadow: none;
 	color: #333;
 }
 
-.home .main-menu-wrapper a:hover,
-.home .main-menu-wrapper a:focus,
-.home .main-menu-wrapper a:active {
+.home .main-menu-wrapper a:hover, .home .main-menu-wrapper a:focus,
+	.home .main-menu-wrapper a:active {
 	background-color: rgba(200, 200, 200, 0.6);
 }
 
-.main-menu-wrapper > li > a:hover,.nav > li > a:focus { text-decoration: none;background-color: #eeeeee; }
-.main-menu-wrapper > li > a > img { max-width: none; }
-.main-menu-wrapper > li > a {color: #333;text-shadow:1px 1px rgba(255,255,255,0.75);font-family: "museo",Georgia, Times, serif;}
-.main-menu-wrapper > li > a:hover,.main-menu-wrapper > li > a:focus,.main-menu-wrapper > li > a.active {color: #fff;background-color: #9ED19E;text-shadow:1px 1px rgba(0, 110, 46,0.75);}
-.main-menu-wrapper > .active > a,.main-menu-wrapper > .active > a:hover,.main-menu-wrapper > .active > a:focus {color: #ffffff;background-color: #080808;}
-.main-menu-wrapper > .disabled > a,.main-menu-wrapper > .disabled > a:hover,.main-menu-wrapper > .disabled > a:focus {color: #444444;background-color: transparent;}
+.main-menu-wrapper>li>a:hover, .nav>li>a:focus {
+	text-decoration: none;
+	background-color: #eeeeee;
+}
+
+.main-menu-wrapper>li>a>img {
+	max-width: none;
+}
+
+.main-menu-wrapper>li>a {
+	color: #333;
+	text-shadow: 1px 1px rgba(255, 255, 255, 0.75);
+	font-family: "museo", Georgia, Times, serif;
+}
+
+.main-menu-wrapper>li>a:hover, .main-menu-wrapper>li>a:focus,
+	.main-menu-wrapper>li>a.active {
+	color: #fff;
+	background-color: #9ED19E;
+	text-shadow: 1px 1px rgba(0, 110, 46, 0.75);
+}
+
+.main-menu-wrapper>.active>a, .main-menu-wrapper>.active>a:hover,
+	.main-menu-wrapper>.active>a:focus {
+	color: #ffffff;
+	background-color: #080808;
+}
+
+.main-menu-wrapper>.disabled>a, .main-menu-wrapper>.disabled>a:hover,
+	.main-menu-wrapper>.disabled>a:focus {
+	color: #444444;
+	background-color: transparent;
+}
