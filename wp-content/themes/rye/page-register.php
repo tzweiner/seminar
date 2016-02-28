@@ -77,7 +77,7 @@ if (isset ( $_POST ['go_submit'] ) && $_POST ['go_submit'] != '') :
 				else
 					$state = NULL;
 				
-				if (isset ( $_POST ['txt-state'] ) && trim ( $_POST ['txt-state'] ) != '')
+				if (isset ( $_POST ['txt-kod'] ) && trim ( $_POST ['txt-kod'] ) != '')
 					$zip = trim ( mysql_real_escape_string ( $_POST ['txt-kod'] ) );
 				else
 					$zip = NULL;
@@ -575,8 +575,7 @@ $level = get_field ( 'class_levels' );
 								class="<?php if (isset ($_POST['radio-dvd']) && $_POST['radio-dvd'] == 'yes') echo 'required'; ?>"
 								<?php if (isset ($_POST['radio-dvd-format']) && $_POST['radio-dvd-format'] == 'ntsc') echo ' checked="checked"'; ?> />
 							NTSC format<br /> 
-							<input name="radio-dvd-format" value="pal"
-								type="radio"
+							<input name="radio-dvd-format" value="pal" type="radio"
 								<?php if (isset ($_POST['radio-dvd-format']) && $_POST['radio-dvd-format'] == 'pal') echo ' checked="checked"'; ?> />
 							PAL format
 						</div>
@@ -584,9 +583,7 @@ $level = get_field ( 'class_levels' );
 							class="dvd-format-info-wrapper<?php if (isset ($_POST['radio-dvd']) && $_POST['radio-dvd'] == 'yes') echo ' show-me'; ?>">
 							<p>
 								<a href="/wp-content/uploads/2016/01/PAL_NTSC_country_list.pdf"
-									target="_blank">Pal/NTSC Country List</a>, courtsey of <a
-									href="http://shop.sandbag.uk.com/OneGiantLeap/PALNTSCInfo.html"
-									target="_blank">shop.sandbag.uk.com</a>
+									target="_blank">Pal/NTSC Country List</a>
 							</p>
 						</div>
 						<input name="radio-dvd" value="no" type="radio"
@@ -857,7 +854,7 @@ $pdf = get_field ( 'paper_registration_pdf', 'option' );
 						Bank Transfer in Euros - Instructions will be emailed to you in
 						your registration confirmation email.<br />
                             <?php endif; ?>
-                     <input name="radio-payment" value="on-site"
+                     <input name="radio-payment" value="on-site" class="<?php if (!$ok_banktransfer): echo 'required'; endif; ?>"
 							type="radio"
 							<?php if (isset ($_POST['radio-payment']) && $_POST['radio-payment'] == 'on-site') echo ' checked="checked"'; ?> />
 						On-site Payment

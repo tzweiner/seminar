@@ -47,7 +47,7 @@
 		
 		if ($my_query->have_posts ()) :
 			?>
-		<h3 class="margin">Instrumental, Vocal & Language Teaching Staff</h3>
+		<h3 class="margin">Instrumental and Vocal Teaching Staff</h3>
 		
 		<?php if ($lookupYear <= 2014): ?>
 		<p>Please use the drop-down menu to view teachers from this year.</p>

@@ -366,9 +366,10 @@ $(document).ready(function() {
 			$('.dvd-format-wrapper').removeClass ('show-me');
 			$('.dvd-format-info-wrapper').removeClass ('show-me');
 			$('.dvd-format-wrapper').find ('input:first-child').removeClass ('required');
+			$('input[name="radio-dvd-format"]').val('');
+			$('input[name="radio-dvd-format"]').prop('checked', false).attr('checked', false);
 		}
-		$('input[name="radio-dvd-format"]').val('');
-		$('input[name="radio-dvd-format"]').prop('checked', false).attr('checked', false);
+		
 	});
 	
 	$('input[name="radio-gala"]').on ('click', function () {
@@ -526,7 +527,6 @@ function validateForm (form_id) {
 					error_array.push (element_name);
 				
 			}
-			console.log(error_array);
 		}
 		else if ($('input[name="' + element_name + '"]').val() == '' ||
 				$('input[name="' + element_name + '"]').val() == null) {
