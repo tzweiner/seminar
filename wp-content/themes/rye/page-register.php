@@ -9,7 +9,7 @@ $ok_banktransfer = $today <= $banktransfer_closed_date;
 $reg_closed_date = date ( 'Y-m-d', strtotime ( get_field ( 'seminar_end_date', 'option' ) ) - 2880 ); // 2 days before
 $ok_to_register = $today <= $reg_closed_date;
 
-$ok_to_register = $_GET ["dev"] == 'dev';
+//$ok_to_register = $_GET ["dev"] == 'dev';
 
 if (! $ok_to_register) : // registration is closed	?>
 <?php get_header(); ?>

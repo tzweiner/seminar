@@ -395,7 +395,7 @@ function sound_bites_func ( $atts ){
 		$sound_bites = get_field ('sound_bites', $class_id);
 		$sound_bites_courtesy = get_field ('sound_bites_courtsey', $class_id);
 	
-		$exclude = array ('Bulgarian Language', 'Bulgarian Folk Dance', 'Bulgarian Folk Singing', 'Bulgarian Choral Singing', 'Singing' , 'Dance');
+		$exclude = array ('Bulgarian Language', 'Bulgarian Folk Dance', 'Bulgarian Singing', 'Bulgarian Folk Singing', 'Bulgarian Choral Singing', 'Singing' , 'Dance');
 	
 		if (!in_array ($class_name, $exclude)) {
 			$html .= '<a href="#sound-bites-item-' . $index . '" class="sound-bites-item fancybox" rel="sound-bites-group" style="background-image: url(\'' . $thumbnail . '\')">';
@@ -1030,7 +1030,7 @@ function sendRegisterEmail (&$registration) {
 	
 	wp_mail(
 		$email,
-		'Folk Seminar Plovdiv | Registration #' . $primary->id,
+		'Folk Seminar Plovdiv ' . get_seminar_year() . ' | Registration #' . $primary->id,
 		$message,
 		$headers
 	);

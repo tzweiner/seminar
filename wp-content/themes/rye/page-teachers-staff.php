@@ -46,8 +46,14 @@
 		$my_query = new WP_Query ( $args );
 		
 		if ($my_query->have_posts ()) :
-			?>
+			if (isset ($urlYear) && $urlYear > 2014): ?>
+			<h3>
+				<div class="flt-l">Instrumental and Vocal Teaching Staff</div>
+				<div class="overflow-hidden right"><a href="/teachers-staff">Current Year</a></div>
+			</h3>
+		<?php else: ?>
 		<h3 class="margin">Instrumental and Vocal Teaching Staff</h3>
+		<?php endif; ?>
 		
 		<?php if ($lookupYear <= 2014): ?>
 		<p>Please use the drop-down menu to view teachers from this year.</p>
