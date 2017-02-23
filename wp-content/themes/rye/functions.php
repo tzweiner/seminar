@@ -959,8 +959,8 @@ function sendRegisterEmail (&$registration) {
 							if (isset ($class_row->rent) && $class_row->rent != NULL && $class_row->rent != '') {
 								$rent = $class_row->rent == 1 ? 'would like to rent' : 'bringing my own';
 							}
-							if (isset ($rent)) {
-								$message .= $rent . ', daily fee of ' . get_field('rental_fee', $class_id) . ' EURO applies.';
+							if ($class_row->rent) {
+								$message .= $rent . ', daily fee of ' . get_field('rental_fee', $class_id) . ' EURO applies';
 								
 							}
 						}

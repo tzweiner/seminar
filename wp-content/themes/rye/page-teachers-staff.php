@@ -394,10 +394,13 @@ endif;
 			<?php
 		
 $previous_years_updated = get_field ( 'previous_years_archive_after_2014_repeater' );
-		foreach ( $previous_years_updated [0] as $year ) :
+
+		foreach ( $previous_years_updated as $yearArray ) :
+		foreach ($yearArray as $year):
 			?>
 			<option value="/teachers-staff?filter=<?php echo $year; ?>"><?php echo $year; ?></option>
 			<?php
+			endforeach;
 		endforeach
 		;
 		

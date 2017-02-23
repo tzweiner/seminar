@@ -9,7 +9,7 @@ $ok_banktransfer = $today <= $banktransfer_closed_date;
 $reg_closed_date = date ( 'Y-m-d', strtotime ( get_field ( 'seminar_end_date', 'option' ) ) - 2880 ); // 2 days before
 $ok_to_register = $today <= $reg_closed_date;
 
-//$ok_to_register = $_GET ["dev"] == 'dev';
+$ok_to_register = $_GET ["dev"] == 'dev';
 
 if (! $ok_to_register) : // registration is closed	?>
 <?php get_header(); ?>
@@ -253,7 +253,174 @@ if (isset ( $_POST ['go_submit'] ) && $_POST ['go_submit'] != '') :
 		within 24 hours.</p>
 	<p class="bigger">To add another registrant, please press "Add Another
 		Person".</p>
-
+		
+	<div class="registration-details-container">
+		<h3>Details for Registration #<?php echo $registration[0]->id; ?></h3>
+		Email address: <?php echo $registration[0]->email; ?><br />
+		Total: EURO <?php echo number_format (get_balance ($registration[0]->reg_id), 2); ?><br />
+		Payment: <?php echo $payment_option; ?>	
+		
+		<?php $classes = getClassesRows ($registration[0]->reg_id); ?>
+		
+		<?php if ($payment_option == 'Bank Transfer'): ?>
+		
+		<p>You have indicated that you will be paying by Bank Transfer. Please provide your bank with the following routing information for your Bank Transfer:</p>
+		<table>
+			<tbody>
+				<tr>
+					<td>Bank Name:</td>
+					<td>UNICREDIT BULBANK</td>
+				</tr>
+				<tr>
+					<td>Bank Address:</td>
+					<td>31 Ivan Vazov Str., Plovdiv 4000, Bulgaria</td>
+				</tr>
+				<tr>
+					<td>Bank SWIFT code:</td>
+					<td>UNCRBGSF</td>
+				</tr>
+				<tr>
+					<td>Account Name:</td>
+					<td>Academy of Music Dance and Fine Arts Plovdiv</td>
+				</tr>
+				<tr>
+					<td>Account Address:</td>
+					<td>2 Todor Samodumov Str., Plovdiv 4000, Bulgaria</td>
+				</tr>
+				<tr>
+					<td>Account Number (in EURO):</td>
+					<td>3498641407</td>
+				</tr>
+				<tr>
+					<td>IBAN Number (in EURO):</td>
+					<td>BG56UNCR75273498641407</td>
+				</tr>
+			</tbody>
+		</table>
+		
+		<p>Bank Transfers should be initiated before June 15, 2017 to qualify for the fee calculated above. When you have completed your Bank Transfer, please email us at <a mailto:contact@folkseminarplovdiv.net>contact@folkseminarplovdiv.net</a>  to indicate the date of your Bank Transfer.  This will assist Seminar administrative staff with tracking your payment.  If the Bank Transfer is originating from a bank account that is not in the registrant's name, or funds are being transferred for more than one registrant, please include the name of the person who owns the account, and all registrant names associated with your Bank Transfer.</p>
+		
+		<?php else: // payment onsite ?>
+		<p>You have indicated that you will be paying on site.</p>
+		<?php endif; ?>
+		
+		<?php foreach ($registration as $index => $registrant):?>
+		<div class="registrant-container">
+			<h3>Registrant <?php echo ($index + 1); ?></h3>
+			<table>
+				<tbody>
+					<tr>
+						<td>Name:</td>
+						<td><?php echo $registrant->first_name; ?> <?php echo $registrant->last_name; ?></td>
+					</tr>
+					<?php if ($registrant->is_primary == 1): ?>
+					<tr>
+						<td>Address:</td>
+						<td><?php echo $registrant->address1; ?>
+							<?php if ($registrant->address2): ?>
+							, <?php echo $registrant->address2; ?>
+							<?php endif; ?>
+						</td>
+					</tr>
+					<tr>
+						<td>City:</td>
+						<td><?php echo $registrant->city; ?>, <?php echo $registrant->state; ?>, <?php echo $registrant->zip; ?></td>
+					</tr>
+					<tr>
+						<td>Country:</td>
+						<td><?php echo $registrant->country; ?></td>
+					</tr>
+					<tr>
+						<td>Phone:</td>
+						<td><?php echo $registrant->phone; ?></td>
+					</tr>
+					<tr>
+						<td>Email:</td>
+						<td><?php echo $registrant->email; ?></td>
+					</tr>
+					<?php endif; ?>
+					<tr>
+						<td>Gala:</td>
+						<td><?php echo ($registrant->gala == '1' ? 'Yes' : 'No'); ?>
+							<?php if ($registrant->gala == '1'):?>
+							, <?php echo $registrant->meal_option; ?>
+							<?php endif; ?>
+						</td>
+					</tr>
+					<tr>
+						<td>EEFC Member:</td>
+						<td><?php echo ($registrant->is_eefc == '1' ? 'Yes' : 'No'); ?></td>
+					</tr>
+					<tr>
+						<td>Days attending:</td>
+						<td><?php echo $registrant->num_days; ?></td>
+					</tr>
+					<tr>
+						<td>Registration type:</td>
+						<td><?php echo $registrant->age; ?></td>
+					</tr>
+				</tbody>
+			</table>
+			
+			<?php if (count($classes)): ?>
+			<h3>Classes <?php echo $registrant->first_name; ?> <?php echo $registrant->last_name; ?> is attending:</h3>
+			<?php foreach ($classes as $classKey=>$class_row): ?>
+				<?php if ($class_row->reg_slot == ($index + 1)): ?>
+					<?php 
+					$class_id = $class_row->class_id;
+					$levels = get_field ('class_levels', $class_id);
+					$rent_options = get_field ('rent_bring', $class_id);
+					
+					$class_obj = get_post ($class_id);
+					?>
+					<p><?php echo $class_obj->post_title; ?>
+					<?php 
+					$classDets = '';
+					if ($rent_options || $levels) {
+						$classDets .= ': ';
+					
+						if ($rent_options) {
+							$rent = NULL;
+							if (isset ($class_row->rent) && $class_row->rent != NULL && $class_row->rent != '') {
+								$rent = $class_row->rent == 1 ? 'would like to rent' : 'bringing my own';
+							}
+							if ($class_row->rent == 1) {
+								$classDets .= $rent . ', daily fee of ' . get_field('rental_fee', $class_id) . ' EURO applies';
+					
+							}
+							else {
+								if ($rent) {
+									$classDets .= $rent;
+								}
+							}
+						}
+						
+						if ($levels) {
+							$level = null;
+							if (isset ($class_row->level) && $class_row->level != NULL && $class_row->level != '') {
+								$level = $class_row->level;
+							}
+							if (isset ($level) && $level != '' && $level != null) {
+								if ($rent_options && isset ($rent)) {
+									$classDets .= ',';
+								}
+								$classDets .= ' ' . $level;
+							}
+						}
+					}
+					?>
+					<?php echo $classDets; ?></p>
+					<?php if (count($classes) > $classKey + 1): ?>
+					<hr />
+					<?php endif; ?>
+					
+				<?php endif; ?>
+			<?php endforeach; ?>
+			<?php endif; ?>
+		</div>
+		
+		<?php endforeach; ?>
+	</div>
 	<form id="continue-form" method="post">
 
 		<input type="hidden" name="registration_id"
@@ -316,15 +483,16 @@ $reg_id = $_POST ['registration_id'];
 
 	<p>
 		We have sent a confirmation email to you. Please refer to that email
-		for further details.<br /> Please <a
+		for further details.<br /> 
+		<span class="red">If you do not receive the confirmation email, please check your "spam" folder.  (We know this has been an issue with Gmail.)</span>
+		Please <a
 			href="mailto:contact@folkseminarplovdiv.net">contact us</a> if you
-		did not receive a confirmation email.<br /> Thank you and we look
+		did not receive the confirmation email.<br /> Thank you and we look
 		forward to seeing you in Plovdiv!
 	</p>
 	<p>
 		Larry Weiner & Dilyana Kurdova<br />International Program Coordinators
 	</p>
-
 
       <?php elseif (isset($_POST['go_cancel']) && $_POST['go_cancel'] != ''): ?>
       <?php
