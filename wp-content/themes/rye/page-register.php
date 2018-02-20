@@ -9,7 +9,7 @@ $ok_banktransfer = $today <= $banktransfer_closed_date;
 $reg_closed_date = date ( 'Y-m-d', strtotime ( get_field ( 'seminar_end_date', 'option' ) ) - 2880 ); // 2 days before
 $ok_to_register = $today <= $reg_closed_date;
 
-$ok_to_register = $_GET ["dev"] == 'dev';
+//$ok_to_register = $_GET ["dev"] == 'dev';
 
 if (! $ok_to_register) : // registration is closed	?>
 <?php get_header(); ?>
@@ -262,7 +262,7 @@ if (isset ( $_POST ['go_submit'] ) && $_POST ['go_submit'] != '') :
 		
 		<?php $classes = getClassesRows ($registration[0]->reg_id); ?>
 		
-		<?php if ($payment_option == 'Bank Transfer'): ?>
+		<?php if (strrpos($payment_option, 'Bank Transfer') !== false): ?>
 		
 		<p>You have indicated that you will be paying by Bank Transfer. Please provide your bank with the following routing information for your Bank Transfer:</p>
 		<table>

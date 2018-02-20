@@ -113,12 +113,167 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 					width: 90%;
 				}
 			</style>
+			
+			<?php 
+			if (isset($_POST['view-dvd-names-and-addresses'])):
+			$registrants = $this->getRowsWithDVDOrders ();
+				
+				if (isset($registrants) && !empty($registrants)): ?>
+				<p>Names and Addresses for DVD Orders</p>
+				
+				<table>
+					<tbody>
+						<tr>							
+							<th>FIRST NAME</th>
+							<th>LAST NAME</th>
+							<th>ADDRESS1</th>
+							<th>ADDRESS2</th>
+							<th>CITY</th>
+							<th>STATE</th>
+							<th>ZIP</th>
+							<th>COUNTRY</th>
+							<th>EMAIL</th>
+							<th>DVD Format</th>
+						</tr>
+						<?php 
+							foreach ($registrants as $registrant): 
+							$notPrimary = false;
+							if ($registrant->reg_slot != 1) $notPrimary = true;
+							$result = $this->getPrimaryRegistrant ($registrant->reg_id);
+							$primary = $result[0]; ?>
+						<tr>
+							<td><?php echo $registrant->first_name; ?></td>
+							<td><?php echo $registrant->last_name; ?></td>
+							<td><?php if ($notPrimary) echo '(company of ' . $primary->first_name . ' ' . $primary->last_name . ', reg #' . $primary->id . ')'; else echo $registrant->address1; ?></td>
+							<td><?php if ($notPrimary) echo '(company of ' . $primary->first_name . ' ' . $primary->last_name . ', reg #' . $primary->id . ')'; else echo $registrant->address2; ?></td>
+							<td><?php if ($notPrimary) echo '(company of ' . $primary->first_name . ' ' . $primary->last_name . ', reg #' . $primary->id . ')'; else echo $registrant->city; ?></td>
+							<td><?php if ($notPrimary) echo '(company of ' . $primary->first_name . ' ' . $primary->last_name . ', reg #' . $primary->id . ')'; else echo $registrant->state; ?></td>
+							<td><?php if ($notPrimary) echo '(company of ' . $primary->first_name . ' ' . $primary->last_name . ', reg #' . $primary->id . ')'; else echo $registrant->zip; ?></td>
+							<td><?php if ($notPrimary) echo '(company of ' . $primary->first_name . ' ' . $primary->last_name . ', reg #' . $primary->id . ')'; else echo $registrant->country;?></td>
+							<td><?php if ($notPrimary) echo '(company of ' . $primary->first_name . ' ' . $primary->last_name . ', reg #' . $primary->id . ')'; else echo $registrant->email; ?></td>
+							<td><?php if ($registrant->dvd_format) echo $registrant->dvd_format; else echo '(input not captured)'; ?>
+						</tr>
+						<?php endforeach; ?>
+					</tbody>
+				</table>
+				
+				<?php else: ?>
+				<p>Bad form submission</p>
+			
+				<?php endif; ?>		
+				<p><a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to Seminar Admin Area</a></p>
+			<?php 
+			elseif (isset($_POST['view-names-for-rentals'])):
+				$rentals = $this->getRentals();
+				if (isset($rentals) && !empty($rentals)): ?>
+				<h3>Registrants requesting rentals</h3> 
+				<table>
+					<tbody>
+						<tr>
+							<th>NAME</th>
+							<th>ADDRESS1</th>
+							<th>ADDRESS2</th>
+							<th>CITY</th>
+							<th>STATE</th>
+							<th>ZIP</th>
+							<th>COUNTRY</th>
+							<th>EMAIL</th>
+							<th>INSTRUMENT</th>
+						</tr>
+						<?php 
+						foreach($rentals as $rentalRow):
+							$res = $this->getRegistrantByRegIdAndSlot ($rentalRow->reg_id, $rentalRow->reg_slot);
+							if(isset($res) && !empty($res)):
+								$registrant = $res[0];
+								$notPrimary = false;
+								if ($rentalRow->reg_slot != 1) $notPrimary = true;
+								$cl = get_post($rentalRow->class_id);
+								$result = $this->getPrimaryRegistrant ($rentalRow->reg_id);
+								$primary = $result[0];
+								$primaryName = $primary->first_name . ' ' . $primary->last_name;
+								?>
+								<tr>
+									<td><?php echo $registrant->first_name . ' ' . $registrant->last_name; ?></td>
+									<td><?php if ($notPrimary) echo '(company of ' . $primaryName . ', reg #' . $primary->id . ')'; else echo $registrant->address1; ?></td>
+									<td><?php if ($notPrimary) echo '(company of ' . $primaryName . ', reg #' . $primary->id . ')'; else echo $registrant->address2; ?></td>
+									<td><?php if ($notPrimary) echo '(company of ' . $$primaryName . ', reg #' . $primary->id . ')'; else echo $registrant->city; ?></td>
+									<td><?php if ($notPrimary) echo '(company of ' . $primaryName . ', reg #' . $primary->id . ')'; else echo $registrant->state; ?></td>
+									<td><?php if ($notPrimary) echo '(company of ' . $primaryName . ', reg #' . $primary->id . ')'; else echo $registrant->zip; ?></td>
+									<td><?php if ($notPrimary) echo '(company of ' . $primaryName . ', reg #' . $primary->id . ')'; else echo $registrant->country;?></td>
+									<td><?php if ($notPrimary) echo '(company of ' . $primaryName . ', reg #' . $primary->id . ')'; else echo $registrant->email; ?></td>
+									<td><?php echo $cl->post_title; ?></td>
+								</tr>
+							<?php 
+							else:
+								continue;
+							endif;
+						endforeach;
+						?>
+					</tbody>
+				</table>
+					<?php 
+				else: ?>
+				<p>Bad form submission.</p>
+				<?php 
+				endif;
+			?>
+			<p><a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to Seminar Admin Area</a></p>
+			<?php
+			elseif (isset($_POST['view-names-and-emails'])):
+				$registrants = $this->getAllRegistrantsClean ();
+			
+				if (isset($registrants) && !empty($registrants)): ?>
+				<p>Names and Email Addresses</p>
+				
+				<table>
+					<tbody>
+						<tr>							
+							<th>FIRST NAME</th>
+							<th>LAST NAME</th>
+							<th>ADDRESS1</th>
+							<th>ADDRESS2</th>
+							<th>CITY</th>
+							<th>STATE</th>
+							<th>ZIP</th>
+							<th>COUNTRY</th>
+							<th>PHONE</th>
+							<th>EMAIL</th>
+						</tr>
+						<?php 
+							foreach ($registrants as $registrant): ?>
+						<tr>
+							<td><?php echo $registrant->first_name; ?></td>
+							<td><?php echo $registrant->last_name; ?></td>
+							<td><?php echo $registrant->address1; ?></td>
+							<td><?php echo $registrant->address2; ?></td>
+							<td><?php echo $registrant->city; ?></td>
+							<td><?php echo $registrant->state; ?></td>
+							<td><?php echo $registrant->zip; ?></td>
+							<td><?php echo $registrant->country;?></td>
+							<td><?php echo $registrant->phone; ?></td>
+							<td><?php if ($registrant->email) echo $registrant->email; else echo '(company of above)'; ?></td>
+						</tr>
+						<?php endforeach; ?>
+					</tbody>
+				</table>
+					
+				<?php 
+				else: ?>
+				<p>Bad form submission.</p> <?php 
+				endif; ?>
+				<p><a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to Seminar Admin Area</a></p> 
 			<?php 
 			
-			if (isset ($_POST['view-registration-by-id'])): 
+			elseif (isset ($_POST['view-registration-by-id'])): 
 				if (isset ($_POST['txt-registration-by-id']) && trim ($_POST['txt-registration-by-id']) != ''): 
 					$rows = $this->getRegistrant(trim ($_POST['txt-registration-by-id']));
-					if (!empty($rows)): ?>
+			
+					if (!empty($rows)): 
+						$slot = $rows[0]->reg_slot;
+						if ($slot):
+							$classes = $this->getClassesPerId($rows[0]->reg_id, intval($slot));
+						endif;
+						?>
 					<p><a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to Seminar Admin Area</a></p>
 					<p>Information about an individual registrant.</p>
 					<h3>Color coding</h3>
@@ -219,7 +374,27 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 								<?php endforeach; ?>
 							</tbody>				
 						</table>
-						</div>
+					</div>
+					
+						<?php if(isset($classes) && !empty($classes)): ?>
+					<p>CLASSES</p>
+					<table>
+						<tr>
+							<th>CLASS</th>						
+							<th>RENT</th>
+							<th>LEVEL</th>		
+						</tr>
+						<?php foreach ($classes as $classes_row): 
+							$cl = get_post($classes_row->class_id);
+						?>
+						<tr>
+							<td><?php if($cl) echo $cl->post_title; else echo '(class id: ' . $classes_row->class_id . ')'; ?></td>						
+							<td><?php if ($classes_row->rent && $classes_row->rent > 0) echo 'renting'; else echo 'bringing'; ?></td>	
+							<td><?php if ($classes_row->level) echo $classes_row->level; else echo ''; ?></td>	
+						</tr>
+						<?php endforeach; ?>
+					</table>
+						<?php endif; ?>
 					
 					<?php endif;  
 				else: ?>
@@ -645,13 +820,31 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 					<input type="submit" name="view-registration-by-id" value="Get Info" />
 				</form>
 				
+				<!-- Names and emails -->
+				<form name="form-view-names-and-emails" method="post">
+					<h3>Names and Email addresses</h3>
+					<input type="submit" name="view-names-and-emails" value="Get Info" />
+				</form>
+				
+				<!-- Names and addresses of DVD orders -->
+				<form name="form-view-dvd-names-and-addresses" method="post">
+					<h3>Registrants with DVD orders</h3>
+					<input type="submit" name="view-dvd-names-and-addresses" value="Get Info" />
+				</form>
+				
+				<!-- Names of registrants who have requested a rental -->
+				<form name="form-view-names-for-rentals" method="post">
+					<h3>Registrants with Rental orders</h3>
+					<input type="submit" name="view-names-for-rentals" value="Get Info" />
+				</form>
+				
 				<?php 
 				if (get_field ('show_dvd_available_field', $this->reg_page->ID)):
 				?>
 				<!-- Registrants with DVD orders -->
 				<form name="form-dvd" method="post">
 										
-					<input type="submit" name="get-dvd" value="Get DVD orders" />
+					<input type="submit" name="get-dvd" value="Get number of DVD orders" />
 				</form>
 				
 				<?php endif; ?>
@@ -852,6 +1045,21 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 			return $results;
 		}
 		
+		private function getClassesPerId ($reg_id, $reg_slot) {
+			global $wpdb;
+
+			$table = 'wp_Seminar_classes';
+			
+			$sql = "SELECT *
+			FROM $table
+			WHERE reg_id = '" . $reg_id . "' AND reg_slot = " . $reg_slot . "
+			ORDER BY reg_slot ASC";
+			
+			$results = $wpdb->get_results ($sql);
+			
+			return $results;
+		}
+		
 		private function getOnsite () {
 			global $wpdb;
 			$table = 'wp_Seminar_registrations';
@@ -894,6 +1102,18 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 			
 			return $results;
 			
+		}
+		
+		private function getRentals () {
+			global $wpdb;
+			$table_classes = 'wp_Seminar_classes';
+			
+			$sql = "Select * from " . $table_classes . "
+					WHERE rent = 1";
+			
+			$results = $wpdb->get_results ($sql);
+			
+			return $results;
 		}
 		
 		private function getLevelsPerClass () {
@@ -943,6 +1163,53 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 
 			$results = $wpdb->get_results ($sql);
 
+			return $results;
+		}
+		
+		private function getRowsWithDVDOrders () {
+			global $wpdb;
+			$table = 'wp_Seminar_registrations';
+				
+			$sql = "Select * from " . $table ."
+					WHERE dvd > 0
+					AND cancel = 0
+					AND confirmed = 1
+					AND reg_year = " . intval ($this->reg_year);
+			
+			$results = $wpdb->get_results ($sql);
+			
+			return $results;
+		}
+		
+		private function getPrimaryRegistrant ($reg_id) {
+
+			global $wpdb;
+			$table = 'wp_Seminar_registrations';
+			
+			$sql = "Select * from " . $table . "
+					WHERE reg_id = '" . $reg_id . "'
+					AND reg_slot = 1
+					AND reg_year = " . intval ($this->reg_year);
+				
+			$results = $wpdb->get_results ($sql);
+			
+			return $results;
+	
+		}
+		
+		private function getRegistrantByRegIdAndSlot ($reg_id, $slot) {
+			global $wpdb;
+			$table = 'wp_Seminar_registrations';
+				
+			$sql = "Select * from " . $table . "
+					WHERE reg_id = '" . $reg_id . "'
+					AND cancel <> 1
+					AND confirmed = 1
+					AND reg_slot = '" . $slot . "'
+					AND reg_year = " . intval ($this->reg_year);
+			
+			$results = $wpdb->get_results ($sql);
+				
 			return $results;
 		}
 		
