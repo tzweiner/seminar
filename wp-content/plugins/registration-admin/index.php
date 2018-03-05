@@ -49,92 +49,107 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 		public function import_form ( ) {
 			
 			?>
-			<style>
-				.blue {
-					background: blue;
-				}
-				
-				.red {
-					background: #cc0000;
-				}
-				
-				.blue td, .red td {
-					color: #fff;
-				}
-				
-				table {
-					background: #fff;
-					border-collapse: collapse;					
-				}
-				/* .tools_page_Seminar_Registration_Admin table {
+<style>
+.blue {
+	background: blue;
+}
+
+.red {
+	background: #cc0000;
+}
+
+.blue td, .red td {
+	color: #fff;
+}
+
+table {
+	background: #fff;
+	border-collapse: collapse;
+}
+/* .tools_page_Seminar_Registration_Admin table {
 					height: 500px;
 				} */
-				.tools_page_Seminar_Registration_Admin table,
-				.tools_page_Seminar_Registration_Admin tr,
-				.tools_page_Seminar_Registration_Admin th,
-				.tools_page_Seminar_Registration_Admin td {
-					border-collapse: collapse;
-					border: 1px solid #ddd;
-					background: #fff;
-				}
-				
-				tr.blue, tr.blue td {
-					background: blue;
-				}
-				tr.red,tr.red td {
-					background: #cc0000;
-				}
-				td,th {
-					min-width: 100px; 
-					padding: 10px;
-				}
-				.tools_page_Seminar_Registration_Admin tr:first-child th {
-					color: #fff;
-					background: #333;				
-				}
-				td:first-child, th:first-child {
-					min-width: 30px;
-					text-align: center;
-				}
-				.export-link {
-					float: right;
-				}
-				.export-link a {
-					display: block;
-					width: 244px;
-					padding: 10px;
-					color: #fff;
-					text-decoration: none;
-					font-size: 22px;
-					background: orange;
-					text-align: center;
-				}
-				#wpbody-content {
-					width: 90%;
-				}
-			</style>
-			
-			<?php 
+.tools_page_Seminar_Registration_Admin table,
+	.tools_page_Seminar_Registration_Admin tr,
+	.tools_page_Seminar_Registration_Admin th,
+	.tools_page_Seminar_Registration_Admin td {
+	border-collapse: collapse;
+	border: 1px solid #ddd;
+	background: #fff;
+}
+
+tr.blue, tr.blue td {
+	background: blue;
+}
+
+tr.red, tr.red td {
+	background: #cc0000;
+}
+
+td, th {
+	min-width: 100px;
+	padding: 10px;
+}
+
+.tools_page_Seminar_Registration_Admin tr:first-child th {
+	color: #fff;
+	background: #333;
+}
+
+td:first-child, th:first-child {
+	min-width: 30px;
+	text-align: center;
+}
+
+.export-link {
+	float: right;
+}
+
+.export-link a {
+	display: block;
+	width: 244px;
+	padding: 10px;
+	color: #fff;
+	text-decoration: none;
+	font-size: 22px;
+	background: orange;
+	text-align: center;
+}
+
+#wpbody-content {
+	width: 90%;
+}
+</style>
+
+<?php 
 			if (isset($_POST['view-dvd-names-and-addresses'])):
 			$registrants = $this->getRowsWithDVDOrders ();
 				
 				if (isset($registrants) && !empty($registrants)): ?>
-				<p>Names and Addresses for DVD Orders</p>
-				
-				<table>
-					<tbody>
-						<tr>							
-							<th>FIRST NAME</th>
-							<th>LAST NAME</th>
-							<th>ADDRESS1</th>
-							<th>ADDRESS2</th>
-							<th>CITY</th>
-							<th>STATE</th>
-							<th>ZIP</th>
-							<th>COUNTRY</th>
-							<th>EMAIL</th>
-							<th>DVD Format</th>
-						</tr>
+<p>Names and Addresses for DVD Orders</p>
+<p>
+	<a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to
+		Seminar Admin Area</a>
+</p>
+<p class="export-link">
+	<a href="#" class="generate-dvd-names-and-addresses">Export to
+		spreadsheet</a>
+</p>
+
+<table>
+	<tbody>
+		<tr>
+			<th>FIRST NAME</th>
+			<th>LAST NAME</th>
+			<th>ADDRESS1</th>
+			<th>ADDRESS2</th>
+			<th>CITY</th>
+			<th>STATE</th>
+			<th>ZIP</th>
+			<th>COUNTRY</th>
+			<th>EMAIL</th>
+			<th> Format</th>
+		</tr>
 						<?php 
 							foreach ($registrants as $registrant): 
 							$notPrimary = false;
@@ -142,44 +157,56 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 							$result = $this->getPrimaryRegistrant ($registrant->reg_id);
 							$primary = $result[0]; ?>
 						<tr>
-							<td><?php echo $registrant->first_name; ?></td>
-							<td><?php echo $registrant->last_name; ?></td>
-							<td><?php if ($notPrimary) echo '(company of ' . $primary->first_name . ' ' . $primary->last_name . ', reg #' . $primary->id . ')'; else echo $registrant->address1; ?></td>
-							<td><?php if ($notPrimary) echo '(company of ' . $primary->first_name . ' ' . $primary->last_name . ', reg #' . $primary->id . ')'; else echo $registrant->address2; ?></td>
-							<td><?php if ($notPrimary) echo '(company of ' . $primary->first_name . ' ' . $primary->last_name . ', reg #' . $primary->id . ')'; else echo $registrant->city; ?></td>
-							<td><?php if ($notPrimary) echo '(company of ' . $primary->first_name . ' ' . $primary->last_name . ', reg #' . $primary->id . ')'; else echo $registrant->state; ?></td>
-							<td><?php if ($notPrimary) echo '(company of ' . $primary->first_name . ' ' . $primary->last_name . ', reg #' . $primary->id . ')'; else echo $registrant->zip; ?></td>
-							<td><?php if ($notPrimary) echo '(company of ' . $primary->first_name . ' ' . $primary->last_name . ', reg #' . $primary->id . ')'; else echo $registrant->country;?></td>
-							<td><?php if ($notPrimary) echo '(company of ' . $primary->first_name . ' ' . $primary->last_name . ', reg #' . $primary->id . ')'; else echo $registrant->email; ?></td>
-							<td><?php if ($registrant->dvd_format) echo $registrant->dvd_format; else echo '(input not captured)'; ?>
-						</tr>
+			<td><?php echo $registrant->first_name; ?></td>
+			<td><?php echo $registrant->last_name; ?></td>
+			<td><?php if ($notPrimary) echo '(company of ' . $primary->first_name . ' ' . $primary->last_name . ', reg #' . $primary->id . ')'; else echo $registrant->address1; ?></td>
+			<td><?php if ($notPrimary) echo '(company of ' . $primary->first_name . ' ' . $primary->last_name . ', reg #' . $primary->id . ')'; else echo $registrant->address2; ?></td>
+			<td><?php if ($notPrimary) echo '(company of ' . $primary->first_name . ' ' . $primary->last_name . ', reg #' . $primary->id . ')'; else echo $registrant->city; ?></td>
+			<td><?php if ($notPrimary) echo '(company of ' . $primary->first_name . ' ' . $primary->last_name . ', reg #' . $primary->id . ')'; else echo $registrant->state; ?></td>
+			<td><?php if ($notPrimary) echo '(company of ' . $primary->first_name . ' ' . $primary->last_name . ', reg #' . $primary->id . ')'; else echo $registrant->zip; ?></td>
+			<td><?php if ($notPrimary) echo '(company of ' . $primary->first_name . ' ' . $primary->last_name . ', reg #' . $primary->id . ')'; else echo $registrant->country;?></td>
+			<td><?php if ($notPrimary) echo '(company of ' . $primary->first_name . ' ' . $primary->last_name . ', reg #' . $primary->id . ')'; else echo $registrant->email; ?></td>
+			<td><?php if ($registrant->dvd_format) echo $registrant->dvd_format; else echo '(input not captured)'; ?>
+						
+		
+		</tr>
 						<?php endforeach; ?>
 					</tbody>
-				</table>
-				
-				<?php else: ?>
-				<p>Bad form submission</p>
-			
-				<?php endif; ?>		
-				<p><a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to Seminar Admin Area</a></p>
-			<?php 
+</table>
+
+<?php else: ?>
+<p>Bad form submission</p>
+
+<?php endif; ?>
+<p>
+	<a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to
+		Seminar Admin Area</a>
+</p>
+<?php 
 			elseif (isset($_POST['view-names-for-rentals'])):
 				$rentals = $this->getRentals();
 				if (isset($rentals) && !empty($rentals)): ?>
-				<h3>Registrants requesting rentals</h3> 
-				<table>
-					<tbody>
-						<tr>
-							<th>NAME</th>
-							<th>ADDRESS1</th>
-							<th>ADDRESS2</th>
-							<th>CITY</th>
-							<th>STATE</th>
-							<th>ZIP</th>
-							<th>COUNTRY</th>
-							<th>EMAIL</th>
-							<th>INSTRUMENT</th>
-						</tr>
+<h3>Registrants requesting rentals</h3>
+<p>
+	<a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to
+		Seminar Admin Area</a>
+</p>
+<p class="export-link">
+	<a href="#" class="generate-names-for-rentals">Export to spreadsheet</a>
+</p>
+<table>
+	<tbody>
+		<tr>
+			<th>NAME</th>
+			<th>ADDRESS1</th>
+			<th>ADDRESS2</th>
+			<th>CITY</th>
+			<th>STATE</th>
+			<th>ZIP</th>
+			<th>COUNTRY</th>
+			<th>EMAIL</th>
+			<th>INSTRUMENT</th>
+		</tr>
 						<?php 
 						foreach($rentals as $rentalRow):
 							$res = $this->getRegistrantByRegIdAndSlot ($rentalRow->reg_id, $rentalRow->reg_slot);
@@ -193,16 +220,16 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 								$primaryName = $primary->first_name . ' ' . $primary->last_name;
 								?>
 								<tr>
-									<td><?php echo $registrant->first_name . ' ' . $registrant->last_name; ?></td>
-									<td><?php if ($notPrimary) echo '(company of ' . $primaryName . ', reg #' . $primary->id . ')'; else echo $registrant->address1; ?></td>
-									<td><?php if ($notPrimary) echo '(company of ' . $primaryName . ', reg #' . $primary->id . ')'; else echo $registrant->address2; ?></td>
-									<td><?php if ($notPrimary) echo '(company of ' . $$primaryName . ', reg #' . $primary->id . ')'; else echo $registrant->city; ?></td>
-									<td><?php if ($notPrimary) echo '(company of ' . $primaryName . ', reg #' . $primary->id . ')'; else echo $registrant->state; ?></td>
-									<td><?php if ($notPrimary) echo '(company of ' . $primaryName . ', reg #' . $primary->id . ')'; else echo $registrant->zip; ?></td>
-									<td><?php if ($notPrimary) echo '(company of ' . $primaryName . ', reg #' . $primary->id . ')'; else echo $registrant->country;?></td>
-									<td><?php if ($notPrimary) echo '(company of ' . $primaryName . ', reg #' . $primary->id . ')'; else echo $registrant->email; ?></td>
-									<td><?php echo $cl->post_title; ?></td>
-								</tr>
+			<td><?php echo $registrant->first_name . ' ' . $registrant->last_name; ?></td>
+			<td><?php if ($notPrimary) echo '(company of ' . $primaryName . ', reg #' . $primary->id . ')'; else echo $registrant->address1; ?></td>
+			<td><?php if ($notPrimary) echo '(company of ' . $primaryName . ', reg #' . $primary->id . ')'; else echo $registrant->address2; ?></td>
+			<td><?php if ($notPrimary) echo '(company of ' . $$primaryName . ', reg #' . $primary->id . ')'; else echo $registrant->city; ?></td>
+			<td><?php if ($notPrimary) echo '(company of ' . $primaryName . ', reg #' . $primary->id . ')'; else echo $registrant->state; ?></td>
+			<td><?php if ($notPrimary) echo '(company of ' . $primaryName . ', reg #' . $primary->id . ')'; else echo $registrant->zip; ?></td>
+			<td><?php if ($notPrimary) echo '(company of ' . $primaryName . ', reg #' . $primary->id . ')'; else echo $registrant->country;?></td>
+			<td><?php if ($notPrimary) echo '(company of ' . $primaryName . ', reg #' . $primary->id . ')'; else echo $registrant->email; ?></td>
+			<td><?php echo $cl->post_title; ?></td>
+		</tr>
 							<?php 
 							else:
 								continue;
@@ -210,59 +237,72 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 						endforeach;
 						?>
 					</tbody>
-				</table>
-					<?php 
+</table>
+<?php 
 				else: ?>
-				<p>Bad form submission.</p>
-				<?php 
+<p>Bad form submission.</p>
+<?php 
 				endif;
 			?>
-			<p><a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to Seminar Admin Area</a></p>
-			<?php
+<p>
+	<a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to
+		Seminar Admin Area</a>
+</p>
+<?php
 			elseif (isset($_POST['view-names-and-emails'])):
 				$registrants = $this->getAllRegistrantsClean ();
 			
 				if (isset($registrants) && !empty($registrants)): ?>
-				<p>Names and Email Addresses</p>
-				
-				<table>
-					<tbody>
-						<tr>							
-							<th>FIRST NAME</th>
-							<th>LAST NAME</th>
-							<th>ADDRESS1</th>
-							<th>ADDRESS2</th>
-							<th>CITY</th>
-							<th>STATE</th>
-							<th>ZIP</th>
-							<th>COUNTRY</th>
-							<th>PHONE</th>
-							<th>EMAIL</th>
-						</tr>
+<p>Names and Email Addresses</p>
+<p>
+	<a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to
+		Seminar Admin Area</a>
+</p>
+<p class="export-link">
+	<a href="#" class="generate-names-and-emails">Export to spreadsheet</a>
+</p>
+<table>
+	<tbody>
+		<tr>
+			<th>FIRST NAME</th>
+			<th>LAST NAME</th>
+			<th>ADDRESS1</th>
+			<th>ADDRESS2</th>
+			<th>CITY</th>
+			<th>STATE</th>
+			<th>ZIP</th>
+			<th>COUNTRY</th>
+			<th>PHONE</th>
+			<th>EMAIL</th>
+		</tr>
 						<?php 
 							foreach ($registrants as $registrant): ?>
 						<tr>
-							<td><?php echo $registrant->first_name; ?></td>
-							<td><?php echo $registrant->last_name; ?></td>
-							<td><?php echo $registrant->address1; ?></td>
-							<td><?php echo $registrant->address2; ?></td>
-							<td><?php echo $registrant->city; ?></td>
-							<td><?php echo $registrant->state; ?></td>
-							<td><?php echo $registrant->zip; ?></td>
-							<td><?php echo $registrant->country;?></td>
-							<td><?php echo $registrant->phone; ?></td>
-							<td><?php if ($registrant->email) echo $registrant->email; else echo '(company of above)'; ?></td>
-						</tr>
+			<td><?php echo $registrant->first_name; ?></td>
+			<td><?php echo $registrant->last_name; ?></td>
+			<td><?php echo $registrant->address1; ?></td>
+			<td><?php echo $registrant->address2; ?></td>
+			<td><?php echo $registrant->city; ?></td>
+			<td><?php echo $registrant->state; ?></td>
+			<td><?php echo $registrant->zip; ?></td>
+			<td><?php echo $registrant->country;?></td>
+			<td><?php echo $registrant->phone; ?></td>
+			<td><?php if ($registrant->email) echo $registrant->email; else echo '(company of above)'; ?></td>
+		</tr>
 						<?php endforeach; ?>
 					</tbody>
-				</table>
-					
-				<?php 
+</table>
+
+<?php 
 				else: ?>
-				<p>Bad form submission.</p> <?php 
+<p>Bad form submission.</p>
+<?php 
 				endif; ?>
-				<p><a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to Seminar Admin Area</a></p> 
-			<?php 
+<p>
+	<a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to
+		Seminar Admin Area</a>
+</p>
+<?php 
 			
 			elseif (isset ($_POST['view-registration-by-id'])): 
 				if (isset ($_POST['txt-registration-by-id']) && trim ($_POST['txt-registration-by-id']) != ''): 
@@ -274,60 +314,69 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 							$classes = $this->getClassesPerId($rows[0]->reg_id, intval($slot));
 						endif;
 						?>
-					<p><a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to Seminar Admin Area</a></p>
-					<p>Information about an individual registrant.</p>
-					<h3>Color coding</h3>
-					<p><span style="color: #fff; background: #cc0000;">Red: Cancelled</span> | <span style="color: #fff; background: blue;">Blue: Not confirmed/Email not sent</span></p> 
-			
-					<div style="overflow:hidden; overflow-x: scroll; width: 100%; max-height: 500px; ">
-						<table>
-							<tbody>
-								<tr>
-									<th>ID</th>
-									<th>DATE</th>
-									<th>FIRST NAME</th>
-									<th>LAST NAME</th>
-									<th>ADDRESS1</th>
-									<th>ADDRESS2</th>
-									<th>CITY</th>
-									<th>STATE</th>
-									<th>ZIP</th>
-									<th>COUNTRY</th>
-									<th>PHONE</th>
-									<th>EMAIL</th>
-									<th>EMERGENCY</th>
-									<th>NUMBER OF DAYS</th>
-									<th>GALA</th>
-									<th>MEAL OPTION</th>
-									<th>AGE GROUP</th>
-									<th>EEFC MEMBER</th>
-									<th>PAYMENT OPTION</th>
-									<th>TRANSPORTATION</th>
-									<th>DVD</th>
-									<th>DVD FORMAT</th>
-									<th>BALANCE</th>
-									<th>CANCELLED</th>
-									<th>CONFIRMED</th>
-								</tr>
+<p>
+	<a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to
+		Seminar Admin Area</a>
+</p>
+<p>Information about an individual registrant.</p>
+<h3>Color coding</h3>
+<p>
+	<span style="color: #fff; background: #cc0000;">Red: Cancelled</span> |
+	<span style="color: #fff; background: blue;">Blue: Not confirmed/Email
+		not sent</span>
+</p>
+
+<div
+	style="overflow: hidden; overflow-x: scroll; width: 100%; max-height: 500px;">
+	<table>
+		<tbody>
+			<tr>
+				<th>ID</th>
+				<th>DATE</th>
+				<th>FIRST NAME</th>
+				<th>LAST NAME</th>
+				<th>ADDRESS1</th>
+				<th>ADDRESS2</th>
+				<th>CITY</th>
+				<th>STATE</th>
+				<th>ZIP</th>
+				<th>COUNTRY</th>
+				<th>PHONE</th>
+				<th>EMAIL</th>
+				<th>EMERGENCY</th>
+				<th>NUMBER OF DAYS</th>
+				<th>GALA</th>
+				<th>MEAL OPTION</th>
+				<th>AGE GROUP</th>
+				<th>EEFC MEMBER</th>
+				<th>PAYMENT OPTION</th>
+				<th>TRANSPORTATION</th>
+				<th>DVD</th>
+				<th>DVD FORMAT</th>
+				<th>BALANCE</th>
+				<th>CANCELLED</th>
+				<th>CONFIRMED</th>
+			</tr>
 								<?php foreach ($rows as $row): ?>
-								<tr class="<?php if ($row->cancel == 1) echo 'red'; else if ($row->confirmed == 0) echo 'blue'; ?>">
-									<td><?php echo $row->id ; ?></td>
-									<td><?php echo $row->date ; ?></td>
-									<td><?php echo $row->first_name ; ?></td>
-									<td><?php echo $row->last_name ; ?></td>
-									<td><?php echo $row->address1 ; ?></td>
-									<td><?php echo $row->address2 ; ?></td>
-									<td><?php echo $row->city ; ?></td>
-									<td><?php echo $row->state ; ?></td>
-									<td><?php echo $row->zip ; ?></td>
-									<td><?php echo $row->country ; ?></td>
-									<td><?php echo $row->phone ; ?></td>
-									<td><?php echo $row->email ; ?></td>
-									<td><?php echo $row->emergency ; ?></td>
-									<td><?php echo $row->num_days ; ?></td>
-									<td><?php echo $row->gala ; ?></td>
-									<td><?php echo $row->meal_option ; ?></td>
-									<td><?php echo $row->age ; ?></td>
+								<tr
+				class="<?php if ($row->cancel == 1) echo 'red'; else if ($row->confirmed == 0) echo 'blue'; ?>">
+				<td><?php echo $row->id ; ?></td>
+				<td><?php echo $row->date ; ?></td>
+				<td><?php echo $row->first_name ; ?></td>
+				<td><?php echo $row->last_name ; ?></td>
+				<td><?php echo $row->address1 ; ?></td>
+				<td><?php echo $row->address2 ; ?></td>
+				<td><?php echo $row->city ; ?></td>
+				<td><?php echo $row->state ; ?></td>
+				<td><?php echo $row->zip ; ?></td>
+				<td><?php echo $row->country ; ?></td>
+				<td><?php echo $row->phone ; ?></td>
+				<td><?php echo $row->email ; ?></td>
+				<td><?php echo $row->emergency ; ?></td>
+				<td><?php echo $row->num_days ; ?></td>
+				<td><?php echo $row->gala ; ?></td>
+				<td><?php echo $row->meal_option ; ?></td>
+				<td><?php echo $row->age ; ?></td>
 									<?php if ($row->is_eefc): ?>
 									<td><?php echo 'Yes'; ?></td>
 									<?php else: ?>
@@ -372,201 +421,249 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 									<?php endif; ?>						
 								</tr>
 								<?php endforeach; ?>
-							</tbody>				
-						</table>
-					</div>
-					
-						<?php if(isset($classes) && !empty($classes)): ?>
-					<p>CLASSES</p>
-					<table>
-						<tr>
-							<th>CLASS</th>						
-							<th>RENT</th>
-							<th>LEVEL</th>		
-						</tr>
+							</tbody>
+	</table>
+</div>
+
+<?php if(isset($classes) && !empty($classes)): ?>
+<p>CLASSES</p>
+<table>
+	<tr>
+		<th>CLASS</th>
+		<th>RENT</th>
+		<th>LEVEL</th>
+	</tr>
 						<?php foreach ($classes as $classes_row): 
 							$cl = get_post($classes_row->class_id);
 						?>
 						<tr>
-							<td><?php if($cl) echo $cl->post_title; else echo '(class id: ' . $classes_row->class_id . ')'; ?></td>						
-							<td><?php if ($classes_row->rent && $classes_row->rent > 0) echo 'renting'; else echo 'bringing'; ?></td>	
-							<td><?php if ($classes_row->level) echo $classes_row->level; else echo ''; ?></td>	
-						</tr>
+		<td><?php if($cl) echo $cl->post_title; else echo '(class id: ' . $classes_row->class_id . ')'; ?></td>
+		<td><?php if ($classes_row->rent && $classes_row->rent > 0) echo 'renting'; else echo 'bringing'; ?></td>
+		<td><?php if ($classes_row->level) echo $classes_row->level; else echo ''; ?></td>
+	</tr>
 						<?php endforeach; ?>
 					</table>
-						<?php endif; ?>
+<?php endif; ?>
 					
 					<?php endif;  
 				else: ?>
-				<p>ERROR! No registration ID entered. Please click the back button and enter an ID.</p>
-				<?php endif; ?>
-				<p><a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to Seminar Admin Area</a></p>
-			
-			<?php 
+<p>ERROR! No registration ID entered. Please click the back button and
+	enter an ID.</p>
+<?php endif; ?>
+<p>
+	<a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to
+		Seminar Admin Area</a>
+</p>
+
+<?php 
 			elseif (isset ($_POST ['get-num-per-class'])): 
 			$rows = $this->getNumberPerClass (); 
 			if (!empty ($rows)):?>
-			<p><a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to Seminar Admin Area</a></p>
-			<p>Number of registrants per class.</p>
-			<p class="export-link"><a href="#" class="generate-number-per-class">Export to spreadsheet</a></p>
-			<div style="overflow:scroll; width: 100%; max-height: 500px; ">
-			<table>
-				<tbody>
-					<tr>
-						<th>CLASS</th>						
-						<th>COUNT</th>						
-					</tr>
+<p>
+	<a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to
+		Seminar Admin Area</a>
+</p>
+<p>Number of registrants per class.</p>
+<p class="export-link">
+	<a href="#" class="generate-number-per-class">Export to spreadsheet</a>
+</p>
+<div style="overflow: scroll; width: 100%; max-height: 500px;">
+	<table>
+		<tbody>
+			<tr>
+				<th>CLASS</th>
+				<th>COUNT</th>
+			</tr>
 					<?php foreach ($rows as $row): ?>
 					<tr>
-						<td><?php echo $row->class_name; ?></td>						
-						<td><?php echo $row->class_count; ?></td>			
-					</tr>
+				<td><?php echo $row->class_name; ?></td>
+				<td><?php echo $row->class_count; ?></td>
+			</tr>
 					<?php endforeach; ?>
-				</tbody>				
-			</table>
-			</div>
-			
-			<?php else: ?>
-			<p>Not available</p>
-			<?php endif; ?>
-			<p><a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to Seminar Admin Area</a></p>
-			
-			<?php 
+				</tbody>
+	</table>
+</div>
+
+<?php else: ?>
+<p>Not available</p>
+<?php endif; ?>
+<p>
+	<a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to
+		Seminar Admin Area</a>
+</p>
+
+<?php 
 			elseif (isset ($_POST ['get-levels-per-class'])): 
 			$rows = $this->getLevelsPerClass (); 
 			if (!empty ($rows)): ?>
-			<p><a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to Seminar Admin Area</a></p>
-			<p>Number of registrants in each class level.</p>
-			<p class="export-link"><a href="#" class="generate-levels-per-class">Export to spreadsheet</a></p>
-			<div style="overflow:scroll; width: 100%; max-height: 500px; ">
-			<table>
-				<tbody>
-					<tr>
-						<th>CLASS</th>
-						<th>LEVEL</th>
-						<th>COUNT</th>						
-					</tr>
+<p>
+	<a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to
+		Seminar Admin Area</a>
+</p>
+<p>Number of registrants in each class level.</p>
+<p class="export-link">
+	<a href="#" class="generate-levels-per-class">Export to spreadsheet</a>
+</p>
+<div style="overflow: scroll; width: 100%; max-height: 500px;">
+	<table>
+		<tbody>
+			<tr>
+				<th>CLASS</th>
+				<th>LEVEL</th>
+				<th>COUNT</th>
+			</tr>
 					<?php foreach ($rows as $row): ?>
 					<tr>
-						<td><?php echo $row->class_name; ?></td>
-						<td><?php echo $row->level; ?></td>
-						<td><?php echo $row->count; ?></td>			
-					</tr>
+				<td><?php echo $row->class_name; ?></td>
+				<td><?php echo $row->level; ?></td>
+				<td><?php echo $row->count; ?></td>
+			</tr>
 					<?php endforeach; ?>
-				</tbody>				
-			</table>
-			</div>
-			<?php else: ?>
-			<p>Not available</p>
-			<?php endif; ?>
-			
-			<p><a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to Seminar Admin Area</a></p>
-			
-			<?php 
+				</tbody>
+	</table>
+</div>
+<?php else: ?>
+<p>Not available</p>
+<?php endif; ?>
+
+<p>
+	<a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to
+		Seminar Admin Area</a>
+</p>
+
+<?php 
 			
 			elseif (isset ($_POST ['get-rentals-per-class'])): 
 			$rows = $this->getRentalsPerClass (); 
 			if (!empty ($rows)): ?>
-			<p>Number of rentals requested per class</p>
-			<p class="export-link"><a href="#" class="generate-rentals-per-class">Export to spreadsheet</a></p>
-			<div style="overflow:scroll; width: 100%; max-height: 500px; ">
-			<table>
-				<tbody>
-					<tr>
-						<th>CLASS</th>
-						<th>NUMBER OF RENTALS</th>						
-					</tr>
+<p>Number of rentals requested per class</p>
+<p>
+	<a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to
+		Seminar Admin Area</a>
+</p>
+<p class="export-link">
+	<a href="#" class="generate-rentals-per-class">Export to spreadsheet</a>
+</p>
+<div style="overflow: scroll; width: 100%; max-height: 500px;">
+	<table>
+		<tbody>
+			<tr>
+				<th>CLASS</th>
+				<th>NUMBER OF RENTALS</th>
+			</tr>
 					<?php foreach ($rows as $row): ?>
 					<tr>
-						<td><?php echo $row->class; ?></td>
-						<td><?php echo $row->rent_count; ?></td>		
-					</tr>
+				<td><?php echo $row->class; ?></td>
+				<td><?php echo $row->rent_count; ?></td>
+			</tr>
 					<?php endforeach; ?>
-				</tbody>				
-			</table>
-			</div>
-			<?php else: ?>
-			<p>No rentals requested so far.</p>
-			<?php endif; ?>
-			<p><a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to Seminar Admin Area</a></p>
-			
-			<?php 
+				</tbody>
+	</table>
+</div>
+<?php else: ?>
+<p>No rentals requested so far.</p>
+<?php endif; ?>
+<p>
+	<a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to
+		Seminar Admin Area</a>
+</p>
+
+<?php 
 			elseif (isset ($_POST ['get-dvd'])): ?>
 			<?php $results = $this->getDVDCounts (); ?>
-			<h3>DVD Orders</h3>
-			<p>PAL: <?php echo $results ['pal']; ?><br />
+<h3>DVD Orders</h3>
+<p>PAL: <?php echo $results ['pal']; ?><br />
 			NTSC: <?php echo $results ['ntsc']; ?></p>
-			
-			<p><a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to Seminar Admin Area</a></p>
-				
-			<?php 
+
+<p>
+	<a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to
+		Seminar Admin Area</a>
+</p>
+
+<?php 
 			elseif (isset ($_POST ['get-transport'])): ?>
-			<h3>Koprivshtitsa Transportation Requested</h3>
-			<?php $results = $this->getTransportationRequests(); ?>
-			<p>Round Trip: <?php echo $results['round_trip']; ?><br />
+<h3>Koprivshtitsa Transportation Requested</h3>
+<?php $results = $this->getTransportationRequests(); ?>
+<p>Round Trip: <?php echo $results['round_trip']; ?><br />
 			One-way: <?php echo $results['one_way']; ?></p>
-			<p><a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to Seminar Admin Area</a></p>
-						
-			<?php 
+<p>
+	<a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to
+		Seminar Admin Area</a>
+</p>
+
+<?php 
 			elseif (isset ($_POST ['get-all'])): 
 			$rows = $this->getAllRegistrants();
 			if (!empty ($rows)): ?>
-			
-			<p><a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to Seminar Admin Area</a></p>
-			<p>All registrants to date. This does not include information about each person's selection of classes. "Export to CSV" will give you a CSV file of all confirmed registrants (ignoring cancelled and unconfirmed registrations). </p>
-			<p class="export-link"><a href="#" class="generate-all-registrants">Export to spreadsheet</a></p>
-			<h3>Color coding</h3>
-			<p><span style="color: #fff; background: #cc0000;">Red: Cancelled</span> | <span style="color: #fff; background: blue;">Blue: Not confirmed/Email not sent</span></p> 
-			
-			<div style="overflow:scroll; width: 100%; max-height: 500px; ">
-			<table>
-				<tbody>
-					<tr>
-						<th>ID</th>
-						<th>DATE</th>
-						<th>FIRST NAME</th>
-						<th>LAST NAME</th>
-						<th>ADDRESS1</th>
-						<th>ADDRESS2</th>
-						<th>CITY</th>
-						<th>STATE</th>
-						<th>ZIP</th>
-						<th>COUNTRY</th>
-						<th>PHONE</th>
-						<th>EMAIL</th>
-						<th>EMERGENCY</th>
-						<th>NUMBER OF DAYS</th>
-						<th>GALA</th>
-						<th>MEAL OPTION</th>
-						<th>AGE GROUP</th>
-						<th>EEFC MEMBER</th>
-						<th>PAYMENT OPTION</th>
-						<th>TRANSPORTATION</th>
-						<th>DVD</th>
-						<th>DVD FORMAT</th>
-						<th>BALANCE</th>
-						<th>CANCELLED</th>
-						<th>CONFIRMED</th>
-					</tr>
+
+<p>
+	<a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to
+		Seminar Admin Area</a>
+</p>
+<p>All registrants to date. This does not include information about each
+	person's selection of classes. "Export to CSV" will give you a CSV file
+	of all confirmed registrants (ignoring cancelled and unconfirmed
+	registrations).</p>
+<p class="export-link">
+	<a href="#" class="generate-all-registrants">Export to spreadsheet</a>
+</p>
+<h3>Color coding</h3>
+<p>
+	<span style="color: #fff; background: #cc0000;">Red: Cancelled</span> |
+	<span style="color: #fff; background: blue;">Blue: Not confirmed/Email
+		not sent</span>
+</p>
+
+<div style="overflow: scroll; width: 100%; max-height: 500px;">
+	<table>
+		<tbody>
+			<tr>
+				<th>ID</th>
+				<th>DATE</th>
+				<th>FIRST NAME</th>
+				<th>LAST NAME</th>
+				<th>ADDRESS1</th>
+				<th>ADDRESS2</th>
+				<th>CITY</th>
+				<th>STATE</th>
+				<th>ZIP</th>
+				<th>COUNTRY</th>
+				<th>PHONE</th>
+				<th>EMAIL</th>
+				<th>EMERGENCY</th>
+				<th>NUMBER OF DAYS</th>
+				<th>GALA</th>
+				<th>MEAL OPTION</th>
+				<th>AGE GROUP</th>
+				<th>EEFC MEMBER</th>
+				<th>PAYMENT OPTION</th>
+				<th>TRANSPORTATION</th>
+				<th>DVD</th>
+				<th>DVD FORMAT</th>
+				<th>BALANCE</th>
+				<th>CANCELLED</th>
+				<th>CONFIRMED</th>
+			</tr>
 					<?php foreach ($rows as $row): ?>
-					<tr class="<?php if ($row->cancel == 1) echo 'red'; else if ($row->confirmed == 0) echo 'blue'; ?>">
-						<td><?php echo $row->id ; ?></td>
-						<td><?php echo $row->date ; ?></td>
-						<td><?php echo $row->first_name ; ?></td>
-						<td><?php echo $row->last_name ; ?></td>
-						<td><?php echo $row->address1 ; ?></td>
-						<td><?php echo $row->address2 ; ?></td>
-						<td><?php echo $row->city ; ?></td>
-						<td><?php echo $row->state ; ?></td>
-						<td><?php echo $row->zip ; ?></td>
-						<td><?php echo $row->country ; ?></td>
-						<td><?php echo $row->phone ; ?></td>
-						<td><?php echo $row->email ; ?></td>
-						<td><?php echo $row->emergency ; ?></td>
-						<td><?php echo $row->num_days ; ?></td>
-						<td><?php echo $row->gala ; ?></td>
-						<td><?php echo $row->meal_option ; ?></td>
-						<td><?php echo $row->age ; ?></td>
+					<tr
+				class="<?php if ($row->cancel == 1) echo 'red'; else if ($row->confirmed == 0) echo 'blue'; ?>">
+				<td><?php echo $row->id ; ?></td>
+				<td><?php echo $row->date ; ?></td>
+				<td><?php echo $row->first_name ; ?></td>
+				<td><?php echo $row->last_name ; ?></td>
+				<td><?php echo $row->address1 ; ?></td>
+				<td><?php echo $row->address2 ; ?></td>
+				<td><?php echo $row->city ; ?></td>
+				<td><?php echo $row->state ; ?></td>
+				<td><?php echo $row->zip ; ?></td>
+				<td><?php echo $row->country ; ?></td>
+				<td><?php echo $row->phone ; ?></td>
+				<td><?php echo $row->email ; ?></td>
+				<td><?php echo $row->emergency ; ?></td>
+				<td><?php echo $row->num_days ; ?></td>
+				<td><?php echo $row->gala ; ?></td>
+				<td><?php echo $row->meal_option ; ?></td>
+				<td><?php echo $row->age ; ?></td>
 						<?php if ($row->is_eefc): ?>
 						<td><?php echo 'Yes'; ?></td>
 						<?php else: ?>
@@ -611,71 +708,80 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 						<?php endif; ?>						
 					</tr>
 					<?php endforeach; ?>
-				</tbody>				
-			</table>
-			</div>
-			<?php else: ?>
-			<p>No registrants found.</p>
-			<?php endif; ?>	
-			<p><a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to Seminar Admin Area</a></p>
-			
-			<?php
+				</tbody>
+	</table>
+</div>
+<?php else: ?>
+<p>No registrants found.</p>
+<?php endif; ?>
+<p>
+	<a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to
+		Seminar Admin Area</a>
+</p>
+
+<?php
 			elseif (isset ($_POST ['get-onsite-payment'])): 
 			$rows = $this->getOnsite();
 			if (!empty ($rows)): ?>
-			
-			<p><a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to Seminar Admin Area</a></p>
-			<p>Registrants who selected On-site payment option.</p>
-			<p class="export-link"><a href="#" class="generate-onsite">Export to spreadsheet</a></p>
-			<div style="overflow:scroll; width: 100%; max-height: 500px; ">
-			<table>
-				<tbody>
-					<tr>
-						<th>ID</th>
-						<th>DATE</th>
-						<th>FIRST NAME</th>
-						<th>LAST NAME</th>
-						<th>ADDRESS1</th>
-						<th>ADDRESS2</th>
-						<th>CITY</th>
-						<th>STATE</th>
-						<th>ZIP</th>
-						<th>COUNTRY</th>
-						<th>PHONE</th>
-						<th>EMAIL</th>
-						<th>EMERGENCY</th>
-						<th>NUMBER OF DAYS</th>
-						<th>GALA</th>
-						<th>MEAL OPTION</th>
-						<th>AGE GROUP</th>
-						<th>EEFC MEMBER</th>
-						<th>PAYMENT OPTION</th>
-						<th>TRANSPORTATION</th>
-						<th>DVD</th>
-						<th>DVD FORMAT</th>
-						<th>BALANCE</th>
-						<th>CANCELLED</th>
-						<th>CONFIRMED</th>
-					</tr>
+
+<p>
+	<a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to
+		Seminar Admin Area</a>
+</p>
+<p>Registrants who selected On-site payment option.</p>
+<p class="export-link">
+	<a href="#" class="generate-onsite">Export to spreadsheet</a>
+</p>
+<div style="overflow: scroll; width: 100%; max-height: 500px;">
+	<table>
+		<tbody>
+			<tr>
+				<th>ID</th>
+				<th>DATE</th>
+				<th>FIRST NAME</th>
+				<th>LAST NAME</th>
+				<th>ADDRESS1</th>
+				<th>ADDRESS2</th>
+				<th>CITY</th>
+				<th>STATE</th>
+				<th>ZIP</th>
+				<th>COUNTRY</th>
+				<th>PHONE</th>
+				<th>EMAIL</th>
+				<th>EMERGENCY</th>
+				<th>NUMBER OF DAYS</th>
+				<th>GALA</th>
+				<th>MEAL OPTION</th>
+				<th>AGE GROUP</th>
+				<th>EEFC MEMBER</th>
+				<th>PAYMENT OPTION</th>
+				<th>TRANSPORTATION</th>
+				<th>DVD</th>
+				<th>DVD FORMAT</th>
+				<th>BALANCE</th>
+				<th>CANCELLED</th>
+				<th>CONFIRMED</th>
+			</tr>
 					<?php foreach ($rows as $row): ?>
-					<tr class="<?php if ($row->cancel == 1) echo 'red'; else if ($row->confirmed == 0) echo 'blue'; ?>">
-						<td><?php echo $row->id ; ?></td>
-						<td><?php echo $row->date ; ?></td>
-						<td><?php echo $row->first_name ; ?></td>
-						<td><?php echo $row->last_name ; ?></td>
-						<td><?php echo $row->address1 ; ?></td>
-						<td><?php echo $row->address2 ; ?></td>
-						<td><?php echo $row->city ; ?></td>
-						<td><?php echo $row->state ; ?></td>
-						<td><?php echo $row->zip ; ?></td>
-						<td><?php echo $row->country ; ?></td>
-						<td><?php echo $row->phone ; ?></td>
-						<td><?php echo $row->email ; ?></td>
-						<td><?php echo $row->emergency ; ?></td>
-						<td><?php echo $row->num_days ; ?></td>
-						<td><?php echo $row->gala ; ?></td>
-						<td><?php echo $row->meal_option ; ?></td>
-						<td><?php echo $row->age ; ?></td>
+					<tr
+				class="<?php if ($row->cancel == 1) echo 'red'; else if ($row->confirmed == 0) echo 'blue'; ?>">
+				<td><?php echo $row->id ; ?></td>
+				<td><?php echo $row->date ; ?></td>
+				<td><?php echo $row->first_name ; ?></td>
+				<td><?php echo $row->last_name ; ?></td>
+				<td><?php echo $row->address1 ; ?></td>
+				<td><?php echo $row->address2 ; ?></td>
+				<td><?php echo $row->city ; ?></td>
+				<td><?php echo $row->state ; ?></td>
+				<td><?php echo $row->zip ; ?></td>
+				<td><?php echo $row->country ; ?></td>
+				<td><?php echo $row->phone ; ?></td>
+				<td><?php echo $row->email ; ?></td>
+				<td><?php echo $row->emergency ; ?></td>
+				<td><?php echo $row->num_days ; ?></td>
+				<td><?php echo $row->gala ; ?></td>
+				<td><?php echo $row->meal_option ; ?></td>
+				<td><?php echo $row->age ; ?></td>
 						<?php if ($row->is_eefc): ?>
 						<td><?php echo 'Yes'; ?></td>
 						<?php else: ?>
@@ -720,132 +826,146 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 						<?php endif; ?>						
 					</tr>
 					<?php endforeach; ?>
-				</tbody>				
-			</table>
-			</div> 
-			<?php else: ?>
-			<p>No registrants found.</p>
-			<?php endif; ?>	
-			<p><a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to Seminar Admin Area</a></p><?php 
+				</tbody>
+	</table>
+</div>
+<?php else: ?>
+<p>No registrants found.</p>
+<?php endif; ?>
+<p>
+	<a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to
+		Seminar Admin Area</a>
+</p><?php 
 			
 			else: 
 		?>
-			<style type="text/css">
-				#import form,
-				#import div.white {
-					-webkit-box-sizing: border-box;
-					-moz-box-sizing: border-box;
-					box-sizing: border-box;
-					padding: 3%;
-					border: 1px solid #ccc;
-					background: #fff;
-					margin-bottom: 2em;
-				}
-				#import div.white form {
-					border: 0;
-					margin: 0;
-					padding: 0;
-				}
-				#import label {
-					margin-right: 20px;
-				}
-				
-				#import form h3 {
-					margin-top: 0;
-				}
-				#import .radioboxes div {
-					margin-bottom: 10px;
-				}
-				#import label.margin-left {
-					margin-left: 20px;
-				}
-				#import .text {
-					
-				}
-				#import p, #import pre {
-					clear: left;
-				}
+<style type="text/css">
+#import form, #import div.white {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	padding: 3%;
+	border: 1px solid #ccc;
+	background: #fff;
+	margin-bottom: 2em;
+}
 
-				#import .grey-box {
-					padding: 15px;
-					border: 1px #ddd solid;
-					margin-bottom: 10px;
-				}
-				
-		
-				
-			</style>
+#import div.white form {
+	border: 0;
+	margin: 0;
+	padding: 0;
+}
+
+#import label {
+	margin-right: 20px;
+}
+
+#import form h3 {
+	margin-top: 0;
+}
+
+#import .radioboxes div {
+	margin-bottom: 10px;
+}
+
+#import label.margin-left {
+	margin-left: 20px;
+}
+
+#import .text {
+	
+}
+
+#import p, #import pre {
+	clear: left;
+}
+
+#import .grey-box {
+	padding: 15px;
+	border: 1px #ddd solid;
+	margin-bottom: 10px;
+}
+</style>
 
 
-			<div id="import" class="wrap">
-				<h2><?php echo $this->title; ?></h2>
-								
-				<p class="text">Please use the forms below to query the database.<br />Results are generated for one form at a time.</p>
-				
-				<div class="white">
+<div id="import" class="wrap">
+	<h2><?php echo $this->title; ?></h2>
+
+	<p class="text">
+		Please use the forms below to query the database.<br />Results are
+		generated for one form at a time.
+	</p>
+
+	<div class="white">
 					<?php $total = $this->get_total(); ?>
-					<p>There are total of <strong><?php echo $total; ?></strong> confirmed registrants for Seminar <?php echo date ('Y', strtotime (get_field('seminar_start_date', 'option'))); ?>.</p>
+					<p>
+			There are total of <strong><?php echo $total; ?></strong> confirmed registrants for Seminar <?php echo date ('Y', strtotime (get_field('seminar_start_date', 'option'))); ?>.</p>
 					<?php if($total): ?>
 					<form name="form-view-rentals-per-class" method="post">
-						<input type="submit" name="get-all" value="Get All Registrants" />
-					</form>
+			<input type="submit" name="get-all" value="Get All Registrants" />
+		</form>
 					<?php endif; ?>
 				</div>
 				
 				<?php if ($total): ?>
 				<!-- Registrant levels by class -->
-				<form name="form-view-levels-per-class" method="post">
-										
-					<input type="submit" name="get-levels-per-class" value="Get Registrant Levels per Class" />
-				</form>
-				
-				<!-- Registrant rentals by class -->
-				<form name="form-view-rentals-per-class" method="post">
-										
-					<input type="submit" name="get-rentals-per-class" value="Get Rent/Borrow per Class" />
-				</form>
-				
-				<!-- Registrants by class -->
-				<form name="form-view-numbers-per-class" method="post">
-										
-					<input type="submit" name="get-num-per-class" value="Get Number of Registrants per Class" />
-				</form>
-				
-				<!-- View registration -->
-				<form name="form-view-registration-by-id" method="post">
-					<h3>Registration information by id</h3>
-					<p class="text">Enter a registration number and click Get Info to get all the information in the database for this registration.</p>
-					<label for="txt-registration-by-id">Registration ID *</label>
-					<input type="text" name="txt-registration-by-id" id="txt-registration-by-id" />
-					<input type="submit" name="view-registration-by-id" value="Get Info" />
-				</form>
-				
-				<!-- Names and emails -->
-				<form name="form-view-names-and-emails" method="post">
-					<h3>Names and Email addresses</h3>
-					<input type="submit" name="view-names-and-emails" value="Get Info" />
-				</form>
-				
-				<!-- Names and addresses of DVD orders -->
-				<form name="form-view-dvd-names-and-addresses" method="post">
-					<h3>Registrants with DVD orders</h3>
-					<input type="submit" name="view-dvd-names-and-addresses" value="Get Info" />
-				</form>
-				
-				<!-- Names of registrants who have requested a rental -->
-				<form name="form-view-names-for-rentals" method="post">
-					<h3>Registrants with Rental orders</h3>
-					<input type="submit" name="view-names-for-rentals" value="Get Info" />
-				</form>
+	<form name="form-view-levels-per-class" method="post">
+
+		<input type="submit" name="get-levels-per-class"
+			value="Get Registrant Levels per Class" />
+	</form>
+
+	<!-- Registrant rentals by class -->
+	<form name="form-view-rentals-per-class" method="post">
+
+		<input type="submit" name="get-rentals-per-class"
+			value="Get Rent/Borrow per Class" />
+	</form>
+
+	<!-- Registrants by class -->
+	<form name="form-view-numbers-per-class" method="post">
+
+		<input type="submit" name="get-num-per-class"
+			value="Get Number of Registrants per Class" />
+	</form>
+
+	<!-- View registration -->
+	<form name="form-view-registration-by-id" method="post">
+		<h3>Registration information by id</h3>
+		<p class="text">Enter a registration number and click Get Info to get
+			all the information in the database for this registration.</p>
+		<label for="txt-registration-by-id">Registration ID *</label> <input
+			type="text" name="txt-registration-by-id" id="txt-registration-by-id" />
+		<input type="submit" name="view-registration-by-id" value="Get Info" />
+	</form>
+
+	<!-- Names and emails -->
+	<form name="form-view-names-and-emails" method="post">
+		<h3>Names and Email addresses</h3>
+		<input type="submit" name="view-names-and-emails" value="Get Info" />
+	</form>
+
+	<!-- Names and addresses of DVD orders -->
+	<form name="form-view-dvd-names-and-addresses" method="post">
+		<h3>Registrants with DVD orders</h3>
+		<input type="submit" name="view-dvd-names-and-addresses"
+			value="Get Info" />
+	</form>
+
+	<!-- Names of registrants who have requested a rental -->
+	<form name="form-view-names-for-rentals" method="post">
+		<h3>Registrants with Rental orders</h3>
+		<input type="submit" name="view-names-for-rentals" value="Get Info" />
+	</form>
 				
 				<?php 
 				if (get_field ('show_dvd_available_field', $this->reg_page->ID)):
 				?>
 				<!-- Registrants with DVD orders -->
-				<form name="form-dvd" method="post">
-										
-					<input type="submit" name="get-dvd" value="Get number of DVD orders" />
-				</form>
+	<form name="form-dvd" method="post">
+
+		<input type="submit" name="get-dvd" value="Get number of DVD orders" />
+	</form>
 				
 				<?php endif; ?>
 				
@@ -853,22 +973,24 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 				if (get_field ('show_koprivshtitsa_transportation_field', $this->reg_page->ID)):
 				?>
 				<!-- Registrants with transportation orders -->
-				<form name="form-transport" method="post">
-										
-					<input type="submit" name="get-transport" value="Get Transportation orders" />
-				</form>
+	<form name="form-transport" method="post">
+
+		<input type="submit" name="get-transport"
+			value="Get Transportation orders" />
+	</form>
 				
 				<?php endif; ?>
 				
 				<!-- On-site payments -->
-				<form name="form-onsite-payment" method="post">
-										
-					<input type="submit" name="get-onsite-payment" value="Get Registrants with On-site payment option" />
-				</form>
-				
-				
-				<!-- Re-send email -->
-				<!-- <form name="form-send-email" method="post">
+	<form name="form-onsite-payment" method="post">
+
+		<input type="submit" name="get-onsite-payment"
+			value="Get Registrants with On-site payment option" />
+	</form>
+
+
+	<!-- Re-send email -->
+	<!-- <form name="form-send-email" method="post">
 					<h3>Re-send registration email</h3>
 					<p class="text">Enter a registration number and click Send Email to re-send registration email.</p>
 					<label for="txt-send-email">Registration ID *</label>
@@ -879,7 +1001,7 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 				<?php endif; ?>
 				
 			</div>
-			<?php
+<?php
 			endif; 
 		}
 
@@ -1170,7 +1292,7 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 			global $wpdb;
 			$table = 'wp_Seminar_registrations';
 				
-			$sql = "Select * from " . $table ."
+			$sql = "Select id, reg_id, reg_slot, first_name, last_name, address1, address2, city, state, zip, country, email, dvd_format from " . $table ."
 					WHERE dvd > 0
 					AND cancel = 0
 					AND confirmed = 1
@@ -1237,7 +1359,7 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 		
 		public function admin_javascript() {
 			?>
-		    <script type="text/javascript">
+<script type="text/javascript">
 		      jQuery(function ($) {
 		        $('body').on('click', '.generate-all-registrants', function ( e ) {
 		          e.preventDefault();
@@ -1277,8 +1399,32 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 			          generateNumberPerClass ();
 			          
 			          return false;
-			        });
+			        });		
 		        
+		        $('body').on('click', '.generate-dvd-names-and-addresses', function ( e ) {
+			          e.preventDefault();
+
+			          generateDVDNamesAndAddresses ();
+			          
+			          return false;
+			   });
+
+		        $('body').on('click', '.generate-names-for-rentals', function ( e ) {
+			          e.preventDefault();
+
+			          generateNamesForRentals ();
+			          
+			          return false;
+			   });
+
+		        $('body').on('click', '.generate-names-and-emails', function ( e ) {
+			          e.preventDefault();
+
+			          generateNamesAndEmails ();
+			          
+			          return false;
+			   });
+				           
 		      });
 
 				function generateCVSAllRegistrants() {
@@ -1296,8 +1442,184 @@ if( ! class_exists('Seminar_Registration_Admin') ) {
 				function generateNumberPerClass () {
 					window.open(ajaxurl + '?' + jQuery.param({ action: 'number_per_class_csv' }));
 				}
+				function generateDVDNamesAndAddresses () {
+					window.open(ajaxurl + '?' + jQuery.param({ action: 'dvd_names_and_addresses_csv' }));
+				}
+				function generateNamesForRentals () {
+					window.open(ajaxurl + '?' + jQuery.param({ action: 'names_for_rentals_csv' }));
+				}
+				function generateNamesAndEmails () {
+					window.open(ajaxurl + '?' + jQuery.param({ action: 'names_and_emails_csv' }));
+				}
 		    </script>
-		    <?php
+<?php
+		}
+		
+		public function admin_ajax_names_and_emails_csv () {
+			//helper vars
+			$first = true; // on first iteration of results, create the first row of column names
+			$count = 0; // keep count of current row
+			$last_index = 0; // last index of 'good' columns, used to filter out columns that come after custom questions.
+			$white_list = array ('id', 'reg_id', 'reg_slot', 'first_name', 'last_name', 'address1', 'address2', 'city', 'state', 'zip', 'country', 'phone', 'email');
+			$csv = '';
+			$rows = $this->getAllRegistrantsClean();
+			
+			$lines = array ();
+			
+			// first add the headers
+			foreach($white_list as $ind=>$header) {
+				if ($ind == 0) {
+					$lines[0][0] = "'" . strtoupper ($header);
+				}
+				else {
+					$key = strtoupper ($header);
+					$lines[0][] .= $key;
+				}
+				$last_index++;
+			}
+			
+			// now do the actual values
+			foreach ( $rows as $row_index=>$row ) {
+				$input_count = 0;
+				foreach ( $row as $index=>$value ) {
+					if (in_array($index, $white_list)) {
+						if( $input_count <= $last_index ){
+								
+							$lines[ ($row_index + 1) ][] = $this->cleanData ($value);
+								
+						}
+						$input_count++;
+					}
+				}
+					
+			}
+			
+			$csv = '';
+			foreach ( $lines as $line ) {
+				$csv .= $this->str_putcsv($line);
+			}
+			
+			// Stream file
+			header('Content-Type: text/csv');
+			//header("Content-Type: application/vnd.ms-excel");
+			header('Content-Disposition: attachment;filename="dvd_names_and_addresses-' . date('Y-m-d') . '.csv');
+			echo $csv;
+			die();
+
+		}
+
+		
+		
+		public function admin_ajax_names_for_rentals_csv () {
+			//helper vars
+			$first = true; // on first iteration of results, create the first row of column names
+			$count = 0; // keep count of current row
+			$last_index = 0; // last index of 'good' columns, used to filter out columns that come after custom questions.
+			
+			$csv = '';
+			$rows = $this->getRentals();
+			$white_list = array ('id', 'reg_id', 'reg_slot', 'first_name', 'last_name', 'address1', 'address2', 'city', 'state', 'zip', 'country', 'email', 'instrument');
+			$lines = array ();
+			
+			// first add the headers
+			foreach($white_list as $ind=>$header) {
+				if ($ind == 0) {
+					$lines[0][0] = "'" . strtoupper ($header);
+				}
+				else {
+					$key = strtoupper ($header);
+					$lines[0][] .= $key;
+				}
+				$last_index++;
+			}
+
+			// now find registrant
+			foreach ( $rows as $row_index=>$row ) {
+				$input_count = 0;
+				$res = $this->getRegistrantByRegIdAndSlot ($row->reg_id, $row->reg_slot);
+				if (isset($res) && !empty($res)) {
+					$cl = get_post($row->class_id);
+					
+					if (!isset($res[0]->instrument)) {
+						$res[0]->instrument = $cl->post_title;
+					}
+					
+					// now do the actual values
+					foreach ( $res[0] as $data_index=>$data) {
+						if (in_array($data_index, $white_list)) {
+					
+							if( $input_count <= $last_index ){
+					
+								$lines[ ($row_index + 1) ][] = $this->cleanData ($data);
+					
+							}
+							$input_count++;
+						}
+					}
+				}				
+			}
+			
+			
+			$csv = '';
+			foreach ( $lines as $line ) {
+				$csv .= $this->str_putcsv($line);
+			}
+			
+			// Stream file
+			header('Content-Type: text/csv');
+			//header("Content-Type: application/vnd.ms-excel");
+			header('Content-Disposition: attachment;filename="dvd_names_and_addresses-' . date('Y-m-d') . '.csv');
+			echo $csv;
+			die();
+		}
+		
+		public function admin_ajax_dvd_names_and_addresses_csv () {
+			//helper vars
+			$first = true; // on first iteration of results, create the first row of column names
+			$count = 0; // keep count of current row
+			$last_index = 0; // last index of 'good' columns, used to filter out columns that come after custom questions.
+				
+			$csv = '';
+			$rows = $this->getRowsWithDVDOrders();
+		
+			$lines = array ();
+
+			// first add the headers
+			foreach ( $rows[0] as $index=>$value ) {
+				if ($index == 'id') {
+					$lines[0][0] = "'" . strtoupper ($index);
+					continue;
+				}
+				$key = strtoupper ($index);
+				$lines[0][] .= $key;
+				$last_index++;
+			}
+			
+			// now do the actual values
+			foreach ( $rows as $row_index=>$row ) {
+				$input_count = 0;
+				foreach ( $row as $index=>$value ) {
+					if( $input_count <= $last_index ){
+							
+						$lines[ ($row_index + 1) ][] = $this->cleanData ($value);
+							
+					}
+					$input_count++;
+				}
+					
+			}
+				
+			$csv = '';
+			foreach ( $lines as $line ) {
+				$csv .= $this->str_putcsv($line);
+			}
+		
+			// Stream file
+			header('Content-Type: text/csv');
+			//header("Content-Type: application/vnd.ms-excel");
+			header('Content-Disposition: attachment;filename="dvd_names_and_addresses-' . date('Y-m-d') . '.csv');
+			echo $csv;
+			die();
 		}
 		
 		public function admin_ajax_number_per_class_csv () {
@@ -1584,6 +1906,9 @@ if( class_exists('Seminar_Registration_Admin') ) {
 	add_action('wp_ajax_rentals_per_class_csv', array(&$seminar_registration_admin, 'admin_ajax_rentals_per_class_csv'));
 	add_action('wp_ajax_levels_per_class_csv', array(&$seminar_registration_admin, 'admin_ajax_levels_per_class_csv'));
 	add_action('wp_ajax_number_per_class_csv', array(&$seminar_registration_admin, 'admin_ajax_number_per_class_csv'));
+	add_action('wp_ajax_dvd_names_and_addresses_csv', array(&$seminar_registration_admin, 'admin_ajax_dvd_names_and_addresses_csv'));
+	add_action('wp_ajax_names_for_rentals_csv', array(&$seminar_registration_admin, 'admin_ajax_names_for_rentals_csv'));
+	add_action('wp_ajax_names_and_emails_csv', array(&$seminar_registration_admin, 'admin_ajax_names_and_emails_csv'));
 	add_action('admin_footer', array(&$seminar_registration_admin, 'admin_javascript'));
 }
 
