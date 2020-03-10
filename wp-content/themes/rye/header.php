@@ -142,7 +142,7 @@ if ($paged >= 2 || $page >= 2)
 						<div class="by-line">
 							<span class="label">Bulgarian Folk Music &<br />Dance Seminar
 							</span><br />
-							<span class="date">July 20-26, 2014</span>
+							<span class="date">July 18-24, 2018</span>
 						</div>
 						<button type="button" class="navbar-toggle" data-toggle="collapse"
 							data-target=".navbar-collapse">

@@ -302,6 +302,63 @@ td:first-child, th:first-child {
 	<a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to
 		Seminar Admin Area</a>
 </p>
+<?php
+			elseif (isset($_POST['view-names-for-flute'])):
+				$registrants = $this->getFluteCount();
+			
+				if (isset($registrants) && !empty($registrants)): ?>
+<p>Names and Email Addresses</p>
+<p>
+	<a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to
+		Seminar Admin Area</a>
+</p>
+<p class="export-link">
+	<a href="#" class="generate-names-and-emails">Export to spreadsheet</a>
+</p>
+<table>
+	<tbody>
+		<tr>
+			<th>FIRST NAME</th>
+			<th>LAST NAME</th>
+			<th>ADDRESS1</th>
+			<th>ADDRESS2</th>
+			<th>CITY</th>
+			<th>STATE</th>
+			<th>ZIP</th>
+			<th>COUNTRY</th>
+			<th>PHONE</th>
+			<th>EMAIL</th>
+		</tr>
+						<?php 
+							foreach ($registrants as $registrant): ?>
+						<tr>
+			<td><?php echo $registrant->first_name; ?></td>
+			<td><?php echo $registrant->last_name; ?></td>
+			<td><?php echo $registrant->address1; ?></td>
+			<td><?php echo $registrant->address2; ?></td>
+			<td><?php echo $registrant->city; ?></td>
+			<td><?php echo $registrant->state; ?></td>
+			<td><?php echo $registrant->zip; ?></td>
+			<td><?php echo $registrant->country;?></td>
+			<td><?php echo $registrant->phone; ?></td>
+			<td><?php if ($registrant->email) echo $registrant->email; else echo '(company of above)'; ?></td>
+		</tr>
+						<?php endforeach; ?>
+					</tbody>
+</table>
+
+<?php 
+				else: 
+				if (empty($registrants)): ?>
+				<p>0 people.</p>
+				<?php else: ?>
+<p>Bad form submission.</p>
+<?php 				endif;
+				endif; ?>
+<p>
+	<a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to
+		Seminar Admin Area</a>
+</p>
 <?php 
 			
 			elseif (isset ($_POST['view-registration-by-id'])): 
@@ -957,6 +1014,12 @@ td:first-child, th:first-child {
 		<h3>Registrants with Rental orders</h3>
 		<input type="submit" name="view-names-for-rentals" value="Get Info" />
 	</form>
+	
+	<!-- Names of registrants who have requested a rental -->
+	<form name="form-view-names-for-flute" method="post">
+		<h3>Registrants interested in Flute class</h3>
+		<input type="submit" name="view-names-for-flute" value="Get Info" />
+	</form>
 				
 				<?php 
 				if (get_field ('show_dvd_available_field', $this->reg_page->ID)):
@@ -1238,6 +1301,20 @@ td:first-child, th:first-child {
 			return $results;
 		}
 		
+		private function getFluteCount () {
+			global $wpdb;
+			$table = 'wp_Seminar_registrations';
+				
+			$sql = "Select * from " . $table . "
+					WHERE flute = 1
+					AND cancel = 0
+					AND confirmed = 1";
+				
+			$results = $wpdb->get_results ($sql);
+				
+			return $results;
+		}
+		
 		private function getLevelsPerClass () {
 		
 			global $wpdb;
@@ -1253,7 +1330,6 @@ td:first-child, th:first-child {
 					ON (T2.reg_id = T3.reg_id AND T2.reg_slot = T3.reg_slot)
 					WHERE T1.post_status = 'publish'
 					AND T1.post_type = 'classes'
-					AND T3.reg_year = " . intval ($this->reg_year) . "
 					AND T3.cancel = 0
 					AND T3.confirmed = 1
 					GROUP BY T1.ID, T2.level";
@@ -1508,6 +1584,58 @@ td:first-child, th:first-child {
 
 		}
 
+		public function admin_ajax_flute_csv () {
+			//helper vars
+			$first = true; // on first iteration of results, create the first row of column names
+			$count = 0; // keep count of current row
+			$last_index = 0; // last index of 'good' columns, used to filter out columns that come after custom questions.
+			$white_list = array ('id', 'reg_id', 'reg_slot', 'first_name', 'last_name', 'address1', 'address2', 'city', 'state', 'zip', 'country', 'phone', 'email');
+			$csv = '';
+			$rows = $this->getFluteCount();
+				
+			$lines = array ();
+				
+			// first add the headers
+			foreach($white_list as $ind=>$header) {
+				if ($ind == 0) {
+					$lines[0][0] = "'" . strtoupper ($header);
+				}
+				else {
+					$key = strtoupper ($header);
+					$lines[0][] .= $key;
+				}
+				$last_index++;
+			}
+				
+			// now do the actual values
+			foreach ( $rows as $row_index=>$row ) {
+				$input_count = 0;
+				foreach ( $row as $index=>$value ) {
+					if (in_array($index, $white_list)) {
+						if( $input_count <= $last_index ){
+		
+							$lines[ ($row_index + 1) ][] = $this->cleanData ($value);
+		
+						}
+						$input_count++;
+					}
+				}
+					
+			}
+				
+			$csv = '';
+			foreach ( $lines as $line ) {
+				$csv .= $this->str_putcsv($line);
+			}
+				
+			// Stream file
+			header('Content-Type: text/csv');
+			//header("Content-Type: application/vnd.ms-excel");
+			header('Content-Disposition: attachment;filename="dvd_names_and_addresses-' . date('Y-m-d') . '.csv');
+			echo $csv;
+			die();
+		
+		}
 		
 		
 		public function admin_ajax_names_for_rentals_csv () {
@@ -1909,6 +2037,7 @@ if( class_exists('Seminar_Registration_Admin') ) {
 	add_action('wp_ajax_dvd_names_and_addresses_csv', array(&$seminar_registration_admin, 'admin_ajax_dvd_names_and_addresses_csv'));
 	add_action('wp_ajax_names_for_rentals_csv', array(&$seminar_registration_admin, 'admin_ajax_names_for_rentals_csv'));
 	add_action('wp_ajax_names_and_emails_csv', array(&$seminar_registration_admin, 'admin_ajax_names_and_emails_csv'));
+	add_action('wp_ajax_flute_csv', array(&$seminar_registration_admin, 'admin_ajax_flute_csv'));
 	add_action('admin_footer', array(&$seminar_registration_admin, 'admin_javascript'));
 }
 

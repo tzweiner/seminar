@@ -988,6 +988,9 @@ function sendRegisterEmail (&$registration) {
 		if ($row->dvd == 1) {
 			$message .= "DVD ordered: Yes, " . strtoupper ($row->dvd_format) ."\r\n";
 		}
+		else if ($row->dvd == 0) {
+			$message .= "DVD ordered: No\r\n";
+		}
 		
 		if ($row->gala) {
 			$message .= "Will attend gala dinner, $row->meal_option" . "\r\n";
@@ -997,7 +1000,7 @@ function sendRegisterEmail (&$registration) {
 		}
 		
 		$transport = $row->transport;
-		if (get_field('show_koprivshtitsa_transportation_field', 486) && $transport != -1) {
+		if (get_field('show_koprivshtitsa_transportation_field') && $transport != -1) {
 			if ($transport == 0) {
 				$message .= "Transport to Koprivshtitsa: No" ."\r\n";
 			}
@@ -1014,6 +1017,9 @@ function sendRegisterEmail (&$registration) {
 		
 		$eefc = $row->is_eefc == 1 ? 'Yes' : 'No';
 		$message .= "EEFC member: $eefc" . "\r\n";
+		
+		$flute = $row->flute == 1 ? 'Yes' : 'No';
+		$message .= "Interested in flute class: $flute" . "\r\n";
 		
 		if ($index == 0) {
 			$message .= "Payment: $primary->payment" . "\r\n";

@@ -42,12 +42,6 @@
 		<?php endif; ?>
 		
 		<?php
-				
-				if ($link) :
-					?>
-		<a href="<?php echo $link; ?> target="_blank">Visit Site &raquo;</a>
-		<?php endif; ?>		
-		<?php
 			endwhile
 			;
 		 else :

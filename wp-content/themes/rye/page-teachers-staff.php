@@ -261,6 +261,7 @@ endif;
 			$dance_program_coordinator = get_field ( 'dance_program_coordinator' );
 			$vocal_music_program_coordinator = get_field ( 'vocal_music_program_coordinator' );
 			$assistant_coordinator = get_field ( 'dance_program_teacher_assistant' );
+			$interpreter_clarinet = get_field ( 'interpreter_clarinet' );
 			
 			$positions = array ();
 			
@@ -331,6 +332,27 @@ endif;
 					$positions [$coord_id] [] = $object_label;
 				}
 			}
+			
+			$field_key = 'field_5c73769448861'; // interpeter
+			$object = get_field_object ( $field_key, get_the_ID () );
+			$object_label = $object ['label'];
+			
+			if (isset ($interpreter_clarinet) && $interpreter_clarinet != '') {
+				foreach ( $interpreter_clarinet as $coord ) {
+					$coord_id = $coord->ID;
+					if (! isset ( $positions [$coord_id] )) {
+						$positions [$coord_id] = array ();
+					}
+					if (! array_key_exists ( $coord_id, $positions )) {
+						$positions [$coord_id] = array ();
+					}
+						
+					if (! in_array ( $object_label, $positions [$coord_id] )) {
+						$positions [$coord_id] [] = $object_label;
+					}
+				}
+			}
+			
 			
 			foreach ( $positions as $person_id => $positions_list ) {
 				$person = get_post ( $person_id );

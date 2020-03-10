@@ -52,48 +52,48 @@ if (isset ( $_POST ['go_submit'] ) && $_POST ['go_submit'] != '') :
 				
 				// get all the POST values
 				if (isset ( $_POST ['txt-ime'] ) && trim ( $_POST ['txt-ime'] ) != '')
-					$first_name = trim ( mysql_real_escape_string ( $_POST ['txt-ime'] ) );
+					$first_name = trim ( ( $_POST ['txt-ime'] ) );
 				
 				if (isset ( $_POST ['txt-ime'] ) && trim ( $_POST ['txt-familia'] ) != '')
-					$last_name = trim ( mysql_real_escape_string ( $_POST ['txt-familia'] ) );
+					$last_name = trim ( ( $_POST ['txt-familia'] ) );
 				
 				if (isset ( $_POST ['txt-adres'] ) && trim ( $_POST ['txt-adres'] ) != '')
-					$address1 = trim ( mysql_real_escape_string ( $_POST ['txt-adres'] ) );
+					$address1 = trim ( ( $_POST ['txt-adres'] ) );
 				else
 					$address1 = NULL;
 				
 				if (isset ( $_POST ['txt-adres2'] ) && trim ( $_POST ['txt-adres2'] ) != '')
-					$address2 = trim ( mysql_real_escape_string ( $_POST ['txt-adres2'] ) );
+					$address2 = trim ( ( $_POST ['txt-adres2'] ) );
 				else
 					$address2 = NULL;
 				
 				if (isset ( $_POST ['txt-grad'] ) && trim ( $_POST ['txt-grad'] ) != '')
-					$city = trim ( mysql_real_escape_string ( $_POST ['txt-grad'] ) );
+					$city = trim ( ( $_POST ['txt-grad'] ) );
 				else
 					$city = NULL;
 				
 				if (isset ( $_POST ['txt-state'] ) && trim ( $_POST ['txt-state'] ) != '')
-					$state = trim ( mysql_real_escape_string ( $_POST ['txt-state'] ) );
+					$state = trim ( ( $_POST ['txt-state'] ) );
 				else
 					$state = NULL;
 				
 				if (isset ( $_POST ['txt-kod'] ) && trim ( $_POST ['txt-kod'] ) != '')
-					$zip = trim ( mysql_real_escape_string ( $_POST ['txt-kod'] ) );
+					$zip = trim ( ( $_POST ['txt-kod'] ) );
 				else
 					$zip = NULL;
 				
 				if (isset ( $_POST ['txt-strana'] ) && trim ( $_POST ['txt-strana'] ) != '')
-					$country = trim ( mysql_real_escape_string ( $_POST ['txt-strana'] ) );
+					$country = trim ( ( $_POST ['txt-strana'] ) );
 				else
 					$country = NULL;
 				
 				if (isset ( $_POST ['txt-tel'] ) && trim ( $_POST ['txt-tel'] ) != '')
-					$phone = trim ( mysql_real_escape_string ( $_POST ['txt-tel'] ) );
+					$phone = trim ( ( $_POST ['txt-tel'] ) );
 				else
 					$phone = NULL;
 				
 				if (isset ( $_POST ['txt-poshta'] ) && trim ( $_POST ['txt-poshta'] ) != '') {
-					$email = trim ( mysql_real_escape_string ( $_POST ['txt-poshta'] ) );
+					$email = trim ( ( $_POST ['txt-poshta'] ) );
 					$is_primary = 1;
 				} else {
 					$email = NULL;
@@ -101,7 +101,7 @@ if (isset ( $_POST ['go_submit'] ) && $_POST ['go_submit'] != '') :
 				}
 				
 				if (isset ( $_POST ['txt-speshnost'] ) && trim ( $_POST ['txt-speshnost'] ) != '') {
-					$emergency = trim ( mysql_real_escape_string ( $_POST ['txt-speshnost'] ) );
+					$emergency = trim ( ( $_POST ['txt-speshnost'] ) );
 					$is_primary = 1;
 				} else {
 					$emergency = NULL;
@@ -115,6 +115,8 @@ if (isset ( $_POST ['go_submit'] ) && $_POST ['go_submit'] != '') :
 				$eefc = ($_POST ['radio-eefc'] == 'no') ? 0 : 1;
 				
 				$dvd = ($_POST ['radio-dvd'] == 'no') ? 0 : 1;
+				
+				$fleita = ($_POST ['radio-fleita'] == 'no') ? 0 : 1;
 				
 				$gala = ($_POST ['radio-gala'] == 'No') ? 0 : 1;
 				
@@ -136,7 +138,7 @@ if (isset ( $_POST ['go_submit'] ) && $_POST ['go_submit'] != '') :
 				}
 				
 				if (isset ( $_POST ['radio-payment'] ))
-					$payment = trim ( mysql_real_escape_string ( $_POST ['radio-payment'] ) );
+					$payment = trim ( ( $_POST ['radio-payment'] ) );
 				else {
 					if (isset ( $_POST ['registration_id'] ) && trim ( $_POST ['registration_id'] ) != '') {
 						$reg_id = $_POST ['registration_id'];
@@ -206,6 +208,7 @@ if (isset ( $_POST ['go_submit'] ) && $_POST ['go_submit'] != '') :
                transport = $transport,
                dvd = $dvd,
                dvd_format = '$dvd_format',
+               flute = $fleita,
                cancel = 0,
                balance = " . (get_balance_individual ( $num_days, $gala, $age, $eefc, $payment, $dvd, $transport ) + $rental_total);
 				
@@ -298,7 +301,7 @@ if (isset ( $_POST ['go_submit'] ) && $_POST ['go_submit'] != '') :
 			</tbody>
 		</table>
 		
-		<p>Bank Transfers should be initiated before June 15, 2017 to qualify for the fee calculated above. When you have completed your Bank Transfer, please email us at <a mailto:contact@folkseminarplovdiv.net>contact@folkseminarplovdiv.net</a>  to indicate the date of your Bank Transfer.  This will assist Seminar administrative staff with tracking your payment.  If the Bank Transfer is originating from a bank account that is not in the registrant's name, or funds are being transferred for more than one registrant, please include the name of the person who owns the account, and all registrant names associated with your Bank Transfer.</p>
+		<p>Bank Transfers should be initiated before  <?php echo date ('F j, Y', strtotime(get_late_registration_deadline ())) ?> to qualify for the fee calculated above. When you have completed your Bank Transfer, please email us at <a mailto:contact@folkseminarplovdiv.net>contact@folkseminarplovdiv.net</a>  to indicate the date of your Bank Transfer.  This will assist Seminar administrative staff with tracking your payment.  If the Bank Transfer is originating from a bank account that is not in the registrant's name, or funds are being transferred for more than one registrant, please include the name of the person who owns the account, and all registrant names associated with your Bank Transfer.</p>
 		
 		<?php else: // payment onsite ?>
 		<p>You have indicated that you will be paying on site.</p>
@@ -358,6 +361,20 @@ if (isset ( $_POST ['go_submit'] ) && $_POST ['go_submit'] != '') :
 					<tr>
 						<td>Registration type:</td>
 						<td><?php echo $registrant->age; ?></td>
+					</tr>
+					<?php if (get_field ( 'show_koprivshtitsa_transportation_field' )) : ?>
+					<tr>
+						<td>Transportation To Koprivshtitsa:</td>
+						<td><?php echo ($registrant->transport == '1' ? 'Yes' : 'No'); ?></td>
+					</tr>
+					<?php endif; ?>
+					<tr>
+						<td>DVD:</td>
+						<td><?php echo ($registrant->dvd == '1' ? 'Yes' : 'No'); if(isset($registrant->dvd_format) && $registrant->dvd_format != ''): echo ': ' . strtoupper($registrant->dvd_format); endif; ?></td>
+					</tr>
+					<tr>
+						<td>Flute class:</td>
+						<td><?php echo ($registrant->flute == '1' ? 'Yes' : 'No'); ?></td>
 					</tr>
 				</tbody>
 			</table>
@@ -564,7 +581,7 @@ $reg_id = $_POST ['registration_id'];
 				</div>
 
 				<div class="input-row">
-					<label for="radio-gala">* Will you attend the Friday night gala
+					<label for="radio-gala">* Will you attend the Tuesday night gala
 						dinner:</label>
 					<div>
 						<input name="radio-gala" value="Yes" type="radio" class="required"
@@ -730,6 +747,17 @@ $level = get_field ( 'class_levels' );
 				?>
                </div>
 				<!-- END CLASSES -->
+				
+				<div class="input-row">
+					<label for="radio-fleita">We have just added a flute class to the program. Are you interested in taking the flute class?</label>
+					<div>
+						<input name="radio-fleita" value="yes" type="radio"
+								<?php if (isset ($_POST['radio-fleita']) && $_POST['radio-fleita'] == 'yes') echo ' checked="checked"'; ?> />
+							Yes<br /> <input name="radio-fleita" value="no" type="radio"
+								<?php if (!isset ($_POST['radio-fleita']) || $_POST['radio-fleita'] == 'no') echo ' checked="checked"'; ?> />
+							No
+					</div>
+				</div>
 
                <?php if (get_field ('show_dvd_available_field')): ?>
                <div class="input-row">
@@ -772,9 +800,9 @@ if (get_field ( 'show_koprivshtitsa_transportation_field' )) :
 						<input name="radio-transport" value="one-way" type="radio"
 							class="required"
 							<?php if (isset ($_POST['radio-transport']) && $_POST['radio-transport'] == 'yes') echo ' checked="checked"'; ?> /> One-way (Add <?php echo $fee; ?> EURO)<br />
-						<input name="radio-transport" value="round-trip" type="radio"
-							class="required"
-							<?php if (isset ($_POST['radio-transport']) && $_POST['radio-transport'] == 'yes') echo ' checked="checked"'; ?> /> Round Trip (Add <?php echo 2 * $fee; ?> EURO)<br />
+<!-- 						<input name="radio-transport" value="round-trip" type="radio" -->
+<!-- 							class="required" -->
+							<?php //if (isset ($_POST['radio-transport']) && $_POST['radio-transport'] == 'yes') echo ' checked="checked"'; ?><!-- Round Trip (Add --><?php //echo 2 * $fee; ?><!-- EURO)<br />-->
 						<input name="radio-transport" value="no" type="radio"
 							<?php if (isset ($_POST['radio-transport']) && $_POST['radio-transport'] == 'no') echo ' checked="checked"'; ?> />
 						No
@@ -962,7 +990,7 @@ $pdf = get_field ( 'paper_registration_pdf', 'option' );
 				</div>
 
 				<div class="input-row">
-					<label for="radio-gala">* Will you attend the Friday night gala
+					<label for="radio-gala">* Will you attend the Tuesday night gala
 						dinner:</label>
 					<div>
 						<input name="radio-gala" value="Yes" type="radio" class="required"
@@ -1158,6 +1186,17 @@ endforeach
 				?>
                </div>
 				<!-- END CLASSES -->
+				
+				<div class="input-row">
+					<label for="radio-fleita">We have just added a flute class to the program. Are you interested in taking the flute class?</label>
+					<div>
+						<input name="radio-fleita" value="yes" type="radio"
+								<?php if (isset ($_POST['radio-fleita']) && $_POST['radio-fleita'] == 'yes') echo ' checked="checked"'; ?> />
+							Yes<br /> <input name="radio-fleita" value="no" type="radio"
+								<?php if (!isset ($_POST['radio-fleita']) || $_POST['radio-fleita'] == 'no') echo ' checked="checked"'; ?> />
+							No
+					</div>
+				</div>
 
                <?php if (get_field ('show_dvd_available_field')): ?>
                <div class="input-row">
@@ -1200,9 +1239,9 @@ if (get_field ( 'show_koprivshtitsa_transportation_field' )) :
 						<input name="radio-transport" value="one-way" type="radio"
 							class="required"
 							<?php if (isset ($_POST['radio-transport']) && $_POST['radio-transport'] == 'yes') echo ' checked="checked"'; ?> /> One-way (Add <?php echo $fee; ?> EURO)<br />
-						<input name="radio-transport" value="round-trip" type="radio"
-							class="required"
-							<?php if (isset ($_POST['radio-transport']) && $_POST['radio-transport'] == 'yes') echo ' checked="checked"'; ?> /> Round Trip (Add <?php echo 2 * $fee; ?> EURO)<br />
+						<!-- <input name="radio-transport" value="round-trip" type="radio"
+							class="required" -->
+							<?php //if (isset ($_POST['radio-transport']) && $_POST['radio-transport'] == 'yes') echo ' checked="checked"'; ?><!-- /> Round Trip (Add --><?php //echo 2 * $fee; ?><!-- EURO)<br /> -->
 						<input name="radio-transport" value="no" type="radio"
 							<?php if (isset ($_POST['radio-transport']) && $_POST['radio-transport'] == 'no') echo ' checked="checked"'; ?> />
 						No
