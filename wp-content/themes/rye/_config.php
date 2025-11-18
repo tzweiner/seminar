@@ -75,7 +75,7 @@ $rye_config = array (
 				'post-thumbnails' => array (
 						'classes',
 						'teachers',
-						'dance-teachers' 
+						'dance_teachers'
 				)
         /*
         'post-thumbnails' => array('post', 'articles'),
@@ -121,21 +121,9 @@ $rye_config = array (
 		 * Declare Custom Post Types.
 		 * http://codex.wordpress.org/Function_Reference/register_post_type
 		 */
+		// Post types moved to seminar-rest-api plugin for REST API support
 		'post_types' => array(
-		/*'event' => array(
-            'labels'             => array('name' => 'Event', 'add_new_item' => 'Add New Event', 'edit_item' => 'Edit Event', 'new_item' => 'New Event', 'view_item' => 'View Event', 'search_item' => 'Search Event', 'not_found' => 'No event found'),
-            'public'             => false,
-            'publicly_queryable' => false,
-            'show_ui'            => true, 
-            'show_in_menu'       => true, 
-            'query_var'          => true,
-            'rewrite'            => true,
-            'capability_type'    => 'post',
-            'has_archive'        => true, 
-            'hierarchical'       => false,
-            'menu_position'      => 4,
-            'supports'           => array('title','thumbnail','custom-fields')
-        ),*/
+        /*
         'hotels' => array (
 						'labels' => array (
 								'name' => 'Hotels/Hostels',
@@ -243,7 +231,8 @@ $rye_config = array (
 								'post_tag' 
 						) 
 				),
-				'dance-teachers' => array (
+        */
+/*				'dance-teachers' => array (
 						'labels' => array (
 								'name' => 'Dance Teachers',
 								'add_new_item' => 'Add New Dance Teacher',
@@ -271,7 +260,7 @@ $rye_config = array (
 						'taxonomies' => array (
 								'post_tag' 
 						) 
-				)
+				)*/
         /*
         'some_type' => array(
             'labels'             => array('name' => 'Some Type'),

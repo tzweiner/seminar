@@ -170,7 +170,7 @@ endif;
 		<h3 class="margin">Dance Teachers & Village Dance Groups</h3>
 		<?php
 		$args = array (
-				'post_type' => 'dance-teachers',
+				'post_type' => 'dance_teachers',
 				'post_status' => 'publish',
 				'posts_per_page' => - 1,
 				'meta_key' => 'from_date',

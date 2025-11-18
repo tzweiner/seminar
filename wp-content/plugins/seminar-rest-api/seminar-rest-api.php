@@ -27,8 +27,27 @@ add_action('rest_api_init', function () {
         ]
     );
 
-    // Add more routes here as needed, for example:
-    // register_rest_route('seminar/v1', '/something', [...]);
+    // Contact form endpoint with nonce authentication
+    register_rest_route(
+        'seminar/v1',
+        '/contact',
+        [
+            'methods'             => 'POST',
+            'callback'            => 'seminar_handle_contact_form',
+            'permission_callback' => 'seminar_verify_nonce',
+        ]
+    );
+
+    // Endpoint to get nonce for forms
+    register_rest_route(
+        'seminar/v1',
+        '/nonce',
+        [
+            'methods'             => 'GET',
+            'callback'            => 'seminar_get_nonce',
+            'permission_callback' => '__return_true',
+        ]
+    );
 });
 
 /**
@@ -50,6 +69,53 @@ function seminar_rest_api_get_acf_options(WP_REST_Request $request)
     return new WP_REST_Response($fields, 200);
 }
 
+/**
+ * Get nonce for form submissions
+ */
+function seminar_get_nonce(WP_REST_Request $request)
+{
+    return new WP_REST_Response([
+        'nonce' => wp_create_nonce('seminar_form_nonce')
+    ], 200);
+}
+
+/**
+ * Verify nonce for form submissions
+ */
+function seminar_verify_nonce(WP_REST_Request $request)
+{
+    $nonce = $request->get_header('X-WP-Nonce') ?: $request->get_param('nonce');
+    return wp_verify_nonce($nonce, 'seminar_form_nonce');
+}
+
+/**
+ * Handle contact form submission
+ */
+function seminar_handle_contact_form(WP_REST_Request $request)
+{
+    $name = sanitize_text_field($request->get_param('name'));
+    $email = sanitize_email($request->get_param('email'));
+    $message = sanitize_textarea_field($request->get_param('message'));
+    
+    // Validate required fields
+    if (empty($name) || empty($email) || empty($message)) {
+        return new WP_Error('missing_fields', 'All fields are required.', ['status' => 400]);
+    }
+    
+    // Send email or save to database
+    $to = get_option('admin_email');
+    $subject = 'Contact Form Submission from ' . $name;
+    $body = "Name: {$name}\nEmail: {$email}\nMessage: {$message}";
+    
+    $sent = wp_mail($to, $subject, $body);
+    
+    if ($sent) {
+        return new WP_REST_Response(['message' => 'Form submitted successfully'], 200);
+    } else {
+        return new WP_Error('email_failed', 'Failed to send email.', ['status' => 500]);
+    }
+}
+
 // Ensure a global ACF Options page exists when ACF is active.
 if ( function_exists('acf_add_options_page') ) {
     acf_add_options_page();
@@ -67,6 +133,95 @@ function register_custom_post_types()
         'show_in_rest' => true,
         'rest_base' => 'acf-options',
         'supports' => ['custom-fields'],
+    ]);
+
+    // Register Hotels/Hostels
+    register_post_type('hotels', [
+        'labels' => [
+            'name' => 'Hotels/Hostels',
+            'add_new_item' => 'Add New Hotel/Hostel',
+            'edit_item' => 'Edit Hotel/Hostel',
+            'new_item' => 'New Hotel/Hostel',
+            'view_item' => 'View Hotel/Hostel',
+            'search_item' => 'Search Hotels/Hostels',
+            'not_found' => 'No hotels/hostels found'
+        ],
+        'public' => true,
+        'show_in_rest' => true,
+        'rest_base' => 'hotels',
+        'show_ui' => true,
+        'show_in_menu' => true,
+        'capability_type' => 'post',
+        'has_archive' => true,
+        'hierarchical' => true,
+        'supports' => ['title', 'editor', 'page-attributes', 'custom-fields']
+    ]);
+
+    // Register Classes
+    register_post_type('classes', [
+        'labels' => [
+            'name' => 'Classes',
+            'add_new_item' => 'Add New Class',
+            'edit_item' => 'Edit Class',
+            'new_item' => 'New Class',
+            'view_item' => 'View Class',
+            'search_item' => 'Search Classes',
+            'not_found' => 'No classes found'
+        ],
+        'public' => true,
+        'show_in_rest' => true,
+        'rest_base' => 'classes',
+        'show_ui' => true,
+        'show_in_menu' => true,
+        'capability_type' => 'page',
+        'has_archive' => true,
+        'hierarchical' => true,
+        'supports' => ['title', 'thumbnail', 'custom-fields']
+    ]);
+
+    // Register Slots
+    register_post_type('slots', [
+        'labels' => [
+            'name' => 'Slots',
+            'add_new_item' => 'Add New Slot',
+            'edit_item' => 'Edit Slot',
+            'new_item' => 'New Slot',
+            'view_item' => 'View Slot',
+            'search_item' => 'Search Slots',
+            'not_found' => 'No Slots found'
+        ],
+        'public' => true,
+        'show_in_rest' => true,
+        'rest_base' => 'slots',
+        'show_ui' => true,
+        'show_in_menu' => true,
+        'capability_type' => 'page',
+        'has_archive' => true,
+        'hierarchical' => true,
+        'supports' => ['title', 'page-attributes', 'custom-fields']
+    ]);
+
+    // Register Teachers
+    register_post_type('teachers', [
+        'labels' => [
+            'name' => 'Teachers',
+            'add_new_item' => 'Add New Teacher',
+            'edit_item' => 'Edit Teacher',
+            'new_item' => 'New Teacher',
+            'view_item' => 'View Teacher',
+            'search_item' => 'Search Teachers',
+            'not_found' => 'No Teachers found'
+        ],
+        'public' => true,
+        'show_in_rest' => true,
+        'rest_base' => 'teachers',
+        'show_ui' => true,
+        'show_in_menu' => true,
+        'capability_type' => 'page',
+        'has_archive' => true,
+        'hierarchical' => true,
+        'supports' => ['title', 'editor', 'thumbnail', 'page-attributes', 'custom-fields'],
+        'taxonomies' => ['category', 'post_tag']
     ]);
 
     // Register Dance Teachers
@@ -94,13 +249,52 @@ function seminar_flush_rewrite_rules() {
     flush_rewrite_rules();
 }
 
-// Migrate existing dance-teachers posts to dance_teachers
-function migrate_dance_teachers_posts() {
-    global $wpdb;
-    $wpdb->update(
-        $wpdb->posts,
-        ['post_type' => 'dance_teachers'],
-        ['post_type' => 'dance-teachers']
-    );
+// Security: Restrict REST API write access
+function seminar_restrict_rest_api_access($result, $server, $request) {
+    $route = $request->get_route();
+    $method = $request->get_method();
+    
+    // Allow GET requests (read-only)
+    if ($method === 'GET') {
+        return $result;
+    }
+    
+    // Allow our custom endpoints with nonce verification
+    if (strpos($route, '/seminar/v1/') === 0) {
+        return $result; // Let the endpoint handle its own permission_callback
+    }
+    
+    // Block POST, PUT, DELETE for non-authenticated users on WP core endpoints
+    if (!is_user_logged_in()) {
+        return new WP_Error(
+            'rest_forbidden',
+            'Write access forbidden for anonymous users.',
+            ['status' => 403]
+        );
+    }
+    
+    return $result;
 }
-register_activation_hook(__FILE__, 'migrate_dance_teachers_posts');
+add_filter('rest_pre_dispatch', 'seminar_restrict_rest_api_access', 10, 3);
+
+// Security: Disable REST API user enumeration
+function seminar_disable_rest_user_endpoints($endpoints) {
+    if (isset($endpoints['/wp/v2/users'])) {
+        unset($endpoints['/wp/v2/users']);
+    }
+    if (isset($endpoints['/wp/v2/users/(?P<id>[\d]+)'])) {
+        unset($endpoints['/wp/v2/users/(?P<id>[\d]+)']);
+    }
+    return $endpoints;
+}
+add_filter('rest_endpoints', 'seminar_disable_rest_user_endpoints');
+
+// Security: Add rate limiting headers
+function seminar_add_security_headers() {
+    if (strpos($_SERVER['REQUEST_URI'], '/wp-json/') !== false) {
+        header('X-Content-Type-Options: nosniff');
+        header('X-Frame-Options: DENY');
+        header('X-XSS-Protection: 1; mode=block');
+    }
+}
+add_action('send_headers', 'seminar_add_security_headers');
