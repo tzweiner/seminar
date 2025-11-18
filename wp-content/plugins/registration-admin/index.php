@@ -3,13 +3,13 @@
 Plugin Name: Seminar Registration Admin
 Description: An interface for admin activities for Seminar registrants
 Version: 1
-Author: Tzvety Weiner
+Author: Tzvety Dosseva
 */
 
 if( ! class_exists('Seminar_Registration_Admin') ) {
 
 	/**
-	 * @author Tz Weiner
+	 * @author Tz Dosseva
 	 */
 	class Seminar_Registration_Admin {
 
@@ -441,14 +441,18 @@ td:first-child, th:first-child {
 									<?php endif; ?>
 									<td><?php echo $row->payment ; ?></td>
 									<?php if ($row->transport == -1): ?>
-									<td><?php echo 'N/A' ; ?></td>
-									<?php elseif ($row->transport == 0):?>
-									<td><?php echo "No"; ?></td>
-									<?php elseif ($row->transport == 2):  ?>
-									<td><?php echo "Round trip"; ?></td>
-									<?php else: ?>
-									<td><?php echo "One-way"; ?></td>
-									<?php endif; ?></td>
+                                    <td><?php echo 'N/A' ; ?></td>
+                                    <?php elseif ($row->transport == 0):?>
+                                    <td><?php echo "No"; ?></td>
+                                    <?php elseif ($row->transport == 1):  ?>
+                                    <td><?php echo "Plovdiv to Koprivshtitsa"; ?></td>
+                                    <?php elseif ($row->transport == 2):  ?>
+                                    <td><?php echo "Koprivshtitsa to Sofia"; ?></td>
+                                    <?php elseif ($row->transport == 3):  ?>
+                                    <td><?php echo "Plovdiv to Koprivshtitsa and Koprivshtitsa to Sofia"; ?></td>
+                                    <?php else: ?>
+                                    <td><?php echo "N/A"; ?></td>
+                                    <?php endif; ?></td>
 									<?php if ($row->dvd == 1): ?>
 									<td><?php echo 'Yes' ; ?></td>
 									<?php elseif ($row->dvd == 0): ?>
@@ -639,10 +643,11 @@ td:first-child, th:first-child {
 
 <?php 
 			elseif (isset ($_POST ['get-transport'])): ?>
-<h3>Koprivshtitsa Transportation Requested</h3>
+<h3>Transportation Requested</h3>
 <?php $results = $this->getTransportationRequests(); ?>
-<p>Round Trip: <?php echo $results['round_trip']; ?><br />
-			One-way: <?php echo $results['one_way']; ?></p>
+<p>Plovdiv to Koprivshtitsa: <?php echo $results['p_to_k']; ?><br />
+Koprivshtitsa to Sofia: <?php echo $results['k_to_s']; ?><br />
+			Plovdiv to Koprivshtitsa to Sofia: <?php echo $results['p_to_k_to_s']; ?></p>
 <p>
 	<a href="/wp-admin/tools.php?page=Seminar_Registration_Admin">Back to
 		Seminar Admin Area</a>
@@ -731,10 +736,14 @@ td:first-child, th:first-child {
 						<td><?php echo 'N/A' ; ?></td>
 						<?php elseif ($row->transport == 0):?>
 						<td><?php echo "No"; ?></td>
-						<?php elseif ($row->transport == 2):  ?>
-						<td><?php echo "Round trip"; ?></td>
+						<?php elseif ($row->transport == 1):  ?>
+                        <td><?php echo "Plovdiv to Koprivshtitsa"; ?></td>
+                        <?php elseif ($row->transport == 2):  ?>
+                        <td><?php echo "Koprivshtitsa to Sofia"; ?></td>
+						<?php elseif ($row->transport == 3):  ?>
+						<td><?php echo "Plovdiv to Koprivshtitsa and Koprivshtitsa to Sofia"; ?></td>
 						<?php else: ?>
-						<td><?php echo "One-way"; ?></td>
+						<td><?php echo "N/A"; ?></td>
 						<?php endif; ?></td>
 						<?php if ($row->dvd == 1): ?>
 						<td><?php echo 'Yes' ; ?></td>
@@ -846,14 +855,18 @@ td:first-child, th:first-child {
 						<?php endif; ?>
 						<td><?php echo $row->payment ; ?></td>
 						<?php if ($row->transport == -1): ?>
-						<td><?php echo 'N/A' ; ?></td>
-						<?php elseif ($row->transport == 0):?>
-						<td><?php echo "No"; ?></td>
-						<?php elseif ($row->transport == 2):  ?>
-						<td><?php echo "Round trip"; ?></td>
-						<?php else: ?>
-						<td><?php echo "One-way"; ?></td>
-						<?php endif; ?></td>
+                        <td><?php echo 'N/A' ; ?></td>
+                        <?php elseif ($row->transport == 0):?>
+                        <td><?php echo "No"; ?></td>
+                        <?php elseif ($row->transport == 1):  ?>
+                        <td><?php echo "Plovdiv to Koprivshtitsa"; ?></td>
+                        <?php elseif ($row->transport == 2):  ?>
+                        <td><?php echo "Koprivshtitsa to Sofia"; ?></td>
+                        <?php elseif ($row->transport == 3):  ?>
+                        <td><?php echo "Plovdiv to Koprivshtitsa and Koprivshtitsa to Sofia"; ?></td>
+                        <?php else: ?>
+                        <td><?php echo "N/A"; ?></td>
+                        <?php endif; ?></td>
 						<?php if ($row->dvd == 1): ?>
 						<td><?php echo 'Yes' ; ?></td>
 						<?php elseif ($row->dvd == 0): ?>
@@ -1016,10 +1029,10 @@ td:first-child, th:first-child {
 	</form>
 	
 	<!-- Names of registrants who have requested a rental -->
-	<form name="form-view-names-for-flute" method="post">
+<!--	<form name="form-view-names-for-flute" method="post">
 		<h3>Registrants interested in Flute class</h3>
 		<input type="submit" name="view-names-for-flute" value="Get Info" />
-	</form>
+	</form>-->
 				
 				<?php 
 				if (get_field ('show_dvd_available_field', $this->reg_page->ID)):
@@ -1126,8 +1139,9 @@ td:first-child, th:first-child {
 		private function getTransportationRequests () {
 			global $wpdb;
 			$table = 'wp_Seminar_registrations';
-				
-			$sql = "SELECT count(transport) one_way
+
+            $p_to_k_count = 0;
+			$sql = "SELECT count(transport) p_to_k
 					FROM $table
 					WHERE reg_year = " . intval ($this->reg_year) . "
 					AND transport = 1
@@ -1135,23 +1149,32 @@ td:first-child, th:first-child {
 					AND confirmed = 1";
 				
 			$results = $wpdb->get_results ($sql);
-				
-			$one_way_count = 0;
-			if (!empty ($results)) $one_way_count = $results[0]->one_way;
-				
-			$sql = "SELECT count(transport) round_trip
+			if (!empty ($results)) $p_to_k_count = $results[0]->p_to_k;
+
+			$k_to_s_count = 0;
+			$sql = "SELECT count(transport) k_to_s
 					FROM $table
 					WHERE reg_year = " . intval ($this->reg_year) . "
 					AND transport = 2
 					AND cancel <> 1
 					AND confirmed = 1";
-			
+
+            $results = $wpdb->get_results ($sql);
+            if (!empty ($results)) $k_to_s_count = $results[0]->k_to_s;
+
+		    $p_to_k_to_s_count = 0;
+            $sql = "SELECT count(transport) p_to_k_to_s
+                    FROM $table
+                    WHERE reg_year = " . intval ($this->reg_year) . "
+                    AND transport = 3
+                    AND cancel <> 1
+                    AND confirmed = 1";
 			$results = $wpdb->get_results ($sql);
-			
-			$round_trip_count = 0;
-			if (!empty ($results)) $round_trip_count = $results[0]->round_trip;
+			if (!empty ($results)) $p_to_k_to_s_count = $results[0]->p_to_k_to_s;
 				
-			return array ('round_trip'=>$round_trip_count, 'one_way'=>$one_way_count);
+			return array ('p_to_k'=>$p_to_k_count,
+			'k_to_s'=>$k_to_s_count,
+			'p_to_k_to_s'=>$p_to_k_to_s_count);
 
 		}
 		
@@ -1908,6 +1931,9 @@ td:first-child, th:first-child {
 				
 			// first add the headers
 			foreach ( $rows[0] as $index=>$value ) {
+			    if ($index == 'flute') {    // does not pertain for 2025
+                    continue;
+                }
 				if ($index == 'id') {
 					$lines[0][0] = "'" . strtoupper ($index);
 					continue;
@@ -1921,6 +1947,9 @@ td:first-child, th:first-child {
 			foreach ( $rows as $row_index=>$row ) {
 				$input_count = 0;
 				foreach ( $row as $index=>$value ) {
+				    if ($index == 'flute') {    // does not pertain for 2025
+                        continue;
+                    }
 					if( $input_count <= $last_index ){
 			
 						$lines[ ($row_index + 1) ][] = $this->cleanData ($value);
@@ -1957,6 +1986,9 @@ td:first-child, th:first-child {
 			
 			// first add the headers
 			foreach ( $rows[0] as $index=>$value ) {
+                if ($index == 'flute') {    // does not pertain for 2025
+                    continue;
+                }
 				if ($index == 'id') {
 					$lines[0][0] = "'" . strtoupper ($index); 
 					continue;
@@ -1970,6 +2002,9 @@ td:first-child, th:first-child {
 			foreach ( $rows as $row_index=>$row ) {
 				$input_count = 0;
 				foreach ( $row as $index=>$value ) {
+				    if ($index == 'flute') {    // does not per tain for 2025
+                        continue;
+                    }
 					if( $input_count <= $last_index ){						
 						
 						$lines[ ($row_index + 1) ][] = $this->cleanData ($value);
@@ -2037,7 +2072,7 @@ if( class_exists('Seminar_Registration_Admin') ) {
 	add_action('wp_ajax_dvd_names_and_addresses_csv', array(&$seminar_registration_admin, 'admin_ajax_dvd_names_and_addresses_csv'));
 	add_action('wp_ajax_names_for_rentals_csv', array(&$seminar_registration_admin, 'admin_ajax_names_for_rentals_csv'));
 	add_action('wp_ajax_names_and_emails_csv', array(&$seminar_registration_admin, 'admin_ajax_names_and_emails_csv'));
-	add_action('wp_ajax_flute_csv', array(&$seminar_registration_admin, 'admin_ajax_flute_csv'));
+// 	add_action('wp_ajax_flute_csv', array(&$seminar_registration_admin, 'admin_ajax_flute_csv'));
 	add_action('admin_footer', array(&$seminar_registration_admin, 'admin_javascript'));
 }
 

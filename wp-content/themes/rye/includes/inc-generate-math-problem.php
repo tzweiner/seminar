@@ -32,7 +32,7 @@ $op = get_random ( $operators );
 
 ?>
 
-<label for="txt-math">* <?php _e('Solve this simple math problem (prevents spam submissions)', 'rye'); ?><span
+<label for="txt-math">* <?php _e('Solve this simple math problem (prevents robot submissions)', 'rye'); ?><span
 	class="error-math-incorrect"><br />Incorrect solution</span></label>
 <div>
 	<div class="form-label margin-bottom"><?php echo $op [0]; ?> <span

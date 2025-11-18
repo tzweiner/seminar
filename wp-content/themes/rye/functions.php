@@ -832,11 +832,11 @@ function get_balance_individual ($num_days, $gala, $age, $eefc, $payment, $dvd, 
 		$balance += get_field ('dvd_price', $register_page_obj->ID);
 	}
 	
-	if ($transport > 0) {
-		$balance += $transport * get_field ('koprivshtitsa_transportation_fee', $register_page_obj->ID);
-	}
+// 	if ($transport > 0) {
+// 		$balance += $transport * get_field ('transportation_fee', $register_page_obj->ID);
+// 	}
 	
-	if ($gala && $num_days < 6) {
+	if ($gala) {
 		$balance += get_gala_dinner_fee(); 
 	}
 
@@ -960,7 +960,11 @@ function sendRegisterEmail (&$registration) {
 								$rent = $class_row->rent == 1 ? 'would like to rent' : 'bringing my own';
 							}
 							if ($class_row->rent) {
-								$message .= $rent . ', daily fee of ' . get_field('rental_fee', $class_id) . ' EURO applies';
+							    if ($class_id == '249') {
+							        $message .= $rent . ', daily fee of ' . get_field('rental_fee', $class_id) . ' EURO per day, if available - payable at first tupan class';
+							    } else {
+							        $message .= $rent . ', daily fee of ' . get_field('rental_fee', $class_id) . ' EURO applies';
+							    }
 								
 							}
 						}
@@ -1002,14 +1006,17 @@ function sendRegisterEmail (&$registration) {
 		$transport = $row->transport;
 		if (get_field('show_koprivshtitsa_transportation_field') && $transport != -1) {
 			if ($transport == 0) {
-				$message .= "Transport to Koprivshtitsa: No" ."\r\n";
+				$message .= "Transportation: No" ."\r\n";
 			}
 			else if ($transport == 1) {
-				$message .= "Transport to Koprivshtitsa: One-way" ."\r\n";
+				$message .= "Transportation: Plovdiv to Koprivshtitsa" ."\r\n";
 			}
 			else if ($transport == 2) {
-				$message .= "Transport to Koprivshtitsa: Round trip" ."\r\n";
+				$message .= "Transportation: Koprivshtitsa to Sofia" ."\r\n";
 			}
+			else if ($transport == 3) {
+                $message .= "Transportation: Plovdiv to Koprivshtitsa and Koprivshtitsa to Sofia" ."\r\n";
+            }
 		}
 		
 		$message .= "Days attending: $row->num_days" ."\r\n";
@@ -1018,8 +1025,8 @@ function sendRegisterEmail (&$registration) {
 		$eefc = $row->is_eefc == 1 ? 'Yes' : 'No';
 		$message .= "EEFC member: $eefc" . "\r\n";
 		
-		$flute = $row->flute == 1 ? 'Yes' : 'No';
-		$message .= "Interested in flute class: $flute" . "\r\n";
+// 		$flute = $row->flute == 1 ? 'Yes' : 'No';
+// 		$message .= "Interested in flute class: $flute" . "\r\n";
 		
 		if ($index == 0) {
 			$message .= "Payment: $primary->payment" . "\r\n";
@@ -1067,4 +1074,45 @@ function generateRandomString($length = 10) {
 		$randomString .= $characters[rand(0, $charactersLength - 1)];
 	}
 	return $randomString;
+}
+
+if( function_exists('acf_add_options_page') ) {
+
+    acf_add_options_page();
+
+}
+
+function register_dance_teachers_func()
+{
+    register_post_type('dance-teachers', [
+        'label' => 'Dance Teachers',
+        'public' => true,
+        'show_in_rest' => true,
+        'rest_base' => 'dance-teachers',
+        'has_archive' => false,
+        'rewrite' => ['slug' => 'dance-teachers'],
+        'supports' => ['title', 'editor', 'thumbnail'],
+    ]);
+}
+add_action('init', 'register_dance_teachers_func');
+
+add_action('rest_api_init', function () {
+    register_rest_route('seminar/v1', '/options', [
+        'methods'  => 'GET',
+        'callback' => 'seminar_get_acf_options',
+        // If options are public, you can keep this open:
+        'permission_callback' => '__return_true',
+    ]);
+});
+
+function seminar_get_acf_options(WP_REST_Request $request) {
+    // Returns all ACF fields registered on the global options page
+    $fields = function_exists('get_fields') ? get_fields('option') : [];
+
+    // If no fields, return an empty object instead of null/false
+    if (!$fields) {
+        $fields = new stdClass();
+    }
+
+    return new WP_REST_Response($fields, 200);
 }
