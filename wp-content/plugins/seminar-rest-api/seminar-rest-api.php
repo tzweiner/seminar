@@ -48,6 +48,45 @@ add_action('rest_api_init', function () {
             'permission_callback' => '__return_true',
         ]
     );
+
+    // Menu endpoint
+    register_rest_route(
+        'seminar/v1',
+        '/nav-menu',
+        [
+            'methods'             => 'GET',
+            'callback'            => 'seminar_get_main_menu',
+            'permission_callback' => '__return_true',
+        ]
+    );
+
+    // Top Bar Nav endpoint
+    register_rest_route(
+        'seminar/v1',
+        '/top-bar-nav',
+        [
+            'methods'             => 'GET',
+            'callback'            => 'seminar_get_top_bar_menu',
+            'permission_callback' => '__return_true',
+        ]
+    );
+
+    // Shortcode endpoint e.g. https://folkseminarplovdiv.net/wp-json/seminar/v1/shortcode/sound_bites
+    register_rest_route(
+        'seminar/v1',
+        '/shortcode/(?P<shortcode>[a-zA-Z0-9_-]+)',
+        [
+            'methods'             => 'GET',
+            'callback'            => 'seminar_execute_shortcode',
+            'permission_callback' => '__return_true',
+        ]
+    );
+
+    register_rest_route( 'seminar/v1', '/classes-and-teachers', array(
+        'methods' => 'GET',
+        'callback' => 'seminar_get_classes_and_teacher',
+        'permission_callback' => '__return_true'
+    ) );
 });
 
 /**
@@ -89,6 +128,111 @@ function seminar_verify_nonce(WP_REST_Request $request)
 }
 
 /**
+ * Get Main Nav menu items
+ */
+function seminar_get_main_menu(WP_REST_Request $request)
+{
+    // Get all menus for debugging
+    $menus = wp_get_nav_menus();
+    $menu_names = [];
+    foreach ($menus as $menu_obj) {
+        $menu_names[] = $menu_obj->name;
+    }
+    
+    $menu = wp_get_nav_menu_object('Main Nav');
+    
+    if (!$menu) {
+        return new WP_REST_Response([
+            'error' => 'Menu not found',
+            'available_menus' => $menu_names
+        ], 404);
+    }
+    
+    $menu_items = wp_get_nav_menu_items($menu->term_id);
+    
+    if (!$menu_items) {
+        return new WP_REST_Response([], 200);
+    }
+    
+    $items = [];
+    foreach ($menu_items as $item) {
+        $items[] = [
+            'id' => $item->ID,
+            'title' => $item->title,
+            'url' => $item->url,
+            'target' => $item->target,
+            'parent' => $item->menu_item_parent,
+            'order' => $item->menu_order,
+            'classes' => implode(' ', $item->classes),
+            'description' => $item->description
+        ];
+    }
+    
+    return new WP_REST_Response($items, 200);
+}
+
+/**
+ * Get Top Bar Nav menu items
+ */
+function seminar_get_top_bar_menu(WP_REST_Request $request)
+{
+    $menu = wp_get_nav_menu_object('Top Bar Nav');
+    
+    if (!$menu) {
+        return new WP_Error('menu_not_found', 'Top Bar Nav menu not found', ['status' => 404]);
+    }
+    
+    $menu_items = wp_get_nav_menu_items($menu->term_id);
+    
+    if (!$menu_items) {
+        return new WP_REST_Response([], 200);
+    }
+    
+    $items = [];
+    foreach ($menu_items as $item) {
+        $items[] = [
+            'id' => $item->ID,
+            'title' => $item->title,
+            'url' => $item->url,
+            'target' => $item->target,
+            'parent' => $item->menu_item_parent,
+            'order' => $item->menu_order,
+            'classes' => implode(' ', $item->classes),
+            'description' => $item->description
+        ];
+    }
+    
+    return new WP_REST_Response($items, 200);
+}
+
+/**
+ * Execute shortcode and return result
+ */
+function seminar_execute_shortcode(WP_REST_Request $request)
+{
+    $shortcode = $request->get_param('shortcode');
+    $atts = $request->get_params();
+    unset($atts['shortcode']); // Remove shortcode name from attributes
+    
+    // Execute the shortcode
+    $result = do_shortcode('[' . $shortcode . ']');
+    
+    if (empty($result)) {
+        return new WP_Error('shortcode_not_found', 'Shortcode not found or returned empty', ['status' => 404]);
+    }
+    
+    // Clean up the HTML - remove extra whitespace and decode entities
+    $result = html_entity_decode($result, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    $result = preg_replace('/\s+/', ' ', $result); // Replace multiple whitespace with single space
+    $result = trim($result);
+    
+    return new WP_REST_Response([
+        'shortcode' => $shortcode,
+        'content' => $result
+    ], 200);
+}
+
+/**
  * Handle contact form submission
  */
 function seminar_handle_contact_form(WP_REST_Request $request)
@@ -114,6 +258,28 @@ function seminar_handle_contact_form(WP_REST_Request $request)
     } else {
         return new WP_Error('email_failed', 'Failed to send email.', ['status' => 500]);
     }
+}
+
+function seminar_get_classes_and_teacher( WP_REST_Request $request ) {
+    $posts = get_posts( array(
+        'posts_per_page' => -1,
+        'post_type' => 'classes',
+    ) );
+
+    $data = [];
+    foreach ( $posts as $post ) {
+        $post_data = get_post( $post ); // Get the standard post data
+        $custom_field_value = get_post_meta( $post->ID, 'your_custom_field_key', true );
+
+        $data[] = [
+            'id' => $post->ID,
+            'title' => $post->post_title,
+            'content' => $post->post_content,
+            'your_custom_field' => $custom_field_value,
+        ];
+    }
+
+    return new WP_REST_Response( $data, 200 );
 }
 
 // Ensure a global ACF Options page exists when ACF is active.
@@ -239,8 +405,31 @@ function register_custom_post_types()
         'capability_type' => 'post',
         'map_meta_cap' => true,
     ]);
+
+    // Register Team
+    register_post_type('team', [
+        'labels' => [
+            'name' => 'Team',
+            'add_new_item' => 'Add New Team Member',
+            'edit_item' => 'Edit Team Member',
+            'new_item' => 'New Team Member',
+            'view_item' => 'View Team Member',
+            'search_item' => 'Search Team',
+            'not_found' => 'No Team found'
+        ],
+        'public' => true,
+        'show_in_rest' => true,
+        'rest_base' => 'team',
+        'supports' => ['title', 'editor', 'thumbnail', 'page-attributes', 'custom-fields'],
+        'show_ui' => true,
+        'show_in_menu' => true,
+        'capability_type' => 'post',
+        'map_meta_cap' => true,
+        'hierarchical' => true
+    ]);
 }
 add_action('init', 'register_custom_post_types', 0);
+add_theme_support('post-thumbnails', array('post', 'page', 'team'));
 
 // Flush rewrite rules on plugin activation
 register_activation_hook(__FILE__, 'seminar_flush_rewrite_rules');
@@ -248,6 +437,18 @@ function seminar_flush_rewrite_rules() {
     register_custom_post_types();
     flush_rewrite_rules();
 }
+
+// Allow 'menu_order' as orderby parameter in REST API queries
+add_filter('rest_endpoints', function($endpoints) {
+    foreach ($endpoints as $route => &$endpoint) {
+        foreach ($endpoint as &$handler) {
+            if (isset($handler['args']['orderby'])) {
+                $handler['args']['orderby']['enum'][] = 'menu_order';
+            }
+        }
+    }
+    return $endpoints;
+});
 
 // Security: Restrict REST API write access
 function seminar_restrict_rest_api_access($result, $server, $request) {

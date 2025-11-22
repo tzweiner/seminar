@@ -70,8 +70,15 @@
 $flyer = get_field ( 'seminar_flyer', 'option' );
 									if ($flyer) :
 										?>
-		      	<li><a href="<?php echo $flyer['url']; ?>" target="_blank">Seminar
-						Flyer</a></li>
+		      	<li>
+		      		<?php $flyer_icon = get_field('seminar_flyer', 'option')['icon'] ?? null; ?>
+		      		<?php if ($flyer_icon) : ?>
+		      			<a href="<?php echo $flyer['url']; ?>" target="_blank">
+		      				<img src="<?php echo $flyer_icon['url']; ?>" alt="Flyer" style="width: 20px; height: 20px; margin-right: 5px; vertical-align: middle;" />
+		      			</a>
+		      		<?php endif; ?>
+		      		<a href="<?php echo $flyer['url']; ?>" target="_blank">Seminar Flyer</a>
+		      	</li>
 		      	<?php endif; ?>
 		      	<li class="facebook-icon"><a
 					href="<?php echo get_field ('facebook_url', 'option'); ?>"

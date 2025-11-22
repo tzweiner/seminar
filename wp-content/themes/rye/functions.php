@@ -62,6 +62,7 @@ function acf_load_select_actions( $field ) {
 }
 add_filter('acf/load_field/key=field_547a4bbc6c83f', 'acf_load_select_actions');	// Action sub-field
 
+
 // Populate Classes select on Teacher meta
 function acf_load_select_actions_teachers( $field ) {
 
@@ -289,7 +290,7 @@ add_shortcode( 'prices_onsite', 'prices_onsite_func' );
 // daily schedule output
 // [daily_schedule_table]
 function daily_schedule_table_func ( $atts ){
-	$html = '<table><tbody>';
+	$html = '<table class="scheduleTable"><tbody>';
 	
 	$args = array (
 			'post_type' 	=> 'slots',
@@ -371,7 +372,7 @@ function daily_schedule_table_func ( $atts ){
 add_shortcode( 'daily_schedule_table', 'daily_schedule_table_func' );
 
 
-// soubd bites on Program page
+// sound bites on Program page
 // [sound_bites]
 function sound_bites_func ( $atts ){
 	
