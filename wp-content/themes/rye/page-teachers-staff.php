@@ -40,62 +40,52 @@
 				'posts_per_page' => - 1,
 				'orderby' => 'menu_order',
 				'order' => 'ASC' 
-		)
-		;
-		
+		);
 		$my_query = new WP_Query ( $args );
-		
 		if ($my_query->have_posts ()) :
 			if (isset ($urlYear) && $urlYear > 2014): ?>
 			<h3>
 				<div class="flt-l">Instrumental and Vocal Teaching Staff</div>
 				<div class="overflow-hidden right"><a href="/teachers-staff">Current Year</a></div>
 			</h3>
-		<?php else: ?>
-		<h3 class="margin">Instrumental and Vocal Teaching Staff</h3>
-		<?php endif; ?>
-		
+            <?php else: ?>
+            <h3 class="margin">Instrumental and Vocal Teaching Staff</h3>
+            <?php endif; ?>
 		<?php if ($lookupYear <= 2014): ?>
 		<p>Please use the drop-down menu to view teachers from this year.</p>
-		
-		
-			<?php elseif ($lookupYear > get_seminar_year ()) :
-				?>
+        <?php elseif ($lookupYear > get_seminar_year ()) : ?>
 		<p>No teacher determined yet.</p>
-		
-			 <?php else :
-				while ( $my_query->have_posts () ) :
-					$my_query->the_post ();
-					$class_name = get_the_title ();
-					if ($class_name == 'Dance')
-						continue;
-					$args = array (
-							'post_type' => 'teachers',
-							'post_status' => 'publish',
-							'posts_per_page' => - 1,
-							'orderby' => 'menu_order',
-							'order' => 'ASC',
-							'tag' => $lookupYear,
-							'meta_query' => array (
-									array (
-											'key' => 'specialty',
-											'value' => $class_name,
-											'compare' => '=' 
-									) 
-							) 
-					)
-					;
-					
-					$teacher_query = new WP_Query ( $args );
-					
-					if ($teacher_query->have_posts ()) :
-						
-						while ( $teacher_query->have_posts () ) :
-							$teacher_query->the_post ();
-							$person_id = get_the_ID ();
-							$thumbnail = get_attachment_image_url ( get_post_thumbnail_id ( $person_id ), 'full' );
-							
-							?>
+         <?php else :
+            while ( $my_query->have_posts () ) :
+                $my_query->the_post ();
+                $class_name = get_the_title ();
+                if ($class_name == 'Dance') continue;
+                $args = array (
+                        'post_type' => 'teachers',
+                        'post_status' => 'publish',
+                        'posts_per_page' => - 1,
+                        'orderby' => 'menu_order',
+                        'order' => 'ASC',
+                        'tag' => $lookupYear,
+                        'meta_query' => array (
+                                array (
+                                        'key' => 'specialty',
+                                        'value' => $class_name,
+                                        'compare' => '='
+                                )
+                        )
+                );
+
+                $teacher_query = new WP_Query ( $args );
+
+                if ($teacher_query->have_posts ()) :
+
+                    while ( $teacher_query->have_posts () ) :
+                        $teacher_query->the_post ();
+                        $person_id = get_the_ID ();
+                        $thumbnail = get_attachment_image_url ( get_post_thumbnail_id ( $person_id ), 'full' );
+
+                        ?>
 				
 			<a class="person-wrapper fancybox" rel="teacher-group"
 		href="#person-wrapper-<?php echo $person_id; ?>">
