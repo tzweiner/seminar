@@ -83,11 +83,76 @@ add_action('rest_api_init', function () {
     );
 
     register_rest_route( 'seminar/v1', '/classes-and-teachers', array(
-        'methods' => 'GET',
-        'callback' => 'seminar_get_classes_and_teacher',
+        'methods' => 'POST',
+        'callback' => 'seminar_get_classes_and_teachers',
+        'permission_callback' => '__return_true',
+    ) );
+
+    register_rest_route( 'seminar/v1', '/save-registrants', array(
+        'methods' => 'POST',
+        'callback' => 'seminar_save_registrants',
+        'permission_callback' => function() {
+            $nonce = $_SERVER['HTTP_X_WP_NONCE'] ?? '';
+            return (bool) wp_verify_nonce( $nonce, 'wp_rest' );
+        }
+    ) );
+
+    register_rest_route( 'seminar/v1', '/confirm-registrants', array(
+        'methods' => 'POST',
+        'callback' => 'seminar_confirm_registrants',
+        'permission_callback' => function() {
+            $nonce = $_SERVER['HTTP_X_WP_NONCE'] ?? '';
+            return (bool) wp_verify_nonce( $nonce, 'wp_rest' );
+        }
+    ) );
+
+    register_rest_route( 'seminar/v1', '/dance-teachers', array(
+        'methods' => 'POST',
+        'callback' => 'seminar_get_dance_teacher',
         'permission_callback' => '__return_true'
     ) );
+
+    register_rest_field(
+        'teachers', // Or 'page', 'product', or your custom post type
+        'featured_image_url', // The name of your custom field
+        array(
+            'get_callback'    => 'seminar_get_featured_image_url_callback',
+            'update_callback' => null,
+            'schema'          => null,
+        )
+    );
+
+    register_rest_field(
+        'team',
+        'featured_image_url',
+        array(
+            'get_callback'    => 'seminar_get_featured_image_url_callback',
+            'update_callback' => null,
+            'schema'          => null,
+        )
+    );
+
+    register_rest_field(
+        'classes',
+        'featured_image_url',
+        array(
+            'get_callback'    => 'seminar_get_featured_image_url_callback',
+            'update_callback' => null,
+            'schema'          => null,
+        )
+    );
 });
+
+function seminar_get_featured_image_url_callback( $object, $field_name, $request ) {
+    if ( empty( $object['featured_media'] ) ) {
+        return null; // No featured image set
+    }
+
+    $image_id = $object['featured_media'];
+    $image_url = wp_get_attachment_image_url( $image_id, 'full' ); // 'full' for the original size, or specify a different size
+
+    return $image_url;
+}
 
 /**
  * Callback: return ACF options as JSON.
@@ -260,26 +325,131 @@ function seminar_handle_contact_form(WP_REST_Request $request)
     }
 }
 
-function seminar_get_classes_and_teacher( WP_REST_Request $request ) {
-    $posts = get_posts( array(
+function seminar_save_registrants( WP_REST_Request $request ) {
+    // Get the data from the POST request body
+    $payload = $request->get_params();
+    // Sanitize and save data
+//    $year = sanitize_text_field( $payload['year'] );
+
+
+    // INSERT statements here
+    $data = []; // return response
+    return new WP_REST_Response( $data, 200 );
+}
+
+function seminar_confirm_registrants( WP_REST_Request $request ) {
+    // Get the data from the POST request body
+    $payload = $request->get_params();
+
+
+    // UPDATE statement here
+    $data = []; // return response
+    return new WP_REST_Response( $data, 200 );
+}
+
+function seminar_get_classes_and_teachers( WP_REST_Request $request ) {
+    // Get the data from the POST request body
+    $payload = $request->get_params();
+    // Sanitize and save data
+    $year = sanitize_text_field( $payload['year'] );
+    $class_categories = array (
+        7,
+        6,
+        8,
+        9
+    ); // 'instrument', 'singing', 'dance', 'language'
+
+    $classes = get_posts( array(
         'posts_per_page' => -1,
         'post_type' => 'classes',
+        'orderby' => 'menu_order',
+        'order' => 'ASC'
     ) );
 
     $data = [];
-    foreach ( $posts as $post ) {
-        $post_data = get_post( $post ); // Get the standard post data
-        $custom_field_value = get_post_meta( $post->ID, 'your_custom_field_key', true );
+    foreach ( $classes as $classItem ) {
+        $className = $classItem->post_title;
 
-        $data[] = [
-            'id' => $post->ID,
-            'title' => $post->post_title,
-            'content' => $post->post_content,
-            'your_custom_field' => $custom_field_value,
-        ];
+        $teachers = get_posts( array(
+            'post_type' => 'teachers',
+            'post_status' => 'publish',
+            'posts_per_page' => - 1,
+//            'orderby' => 'menu_order',
+            'order' => 'ASC',
+            'tag' => $year,
+            'meta_query' => array (
+                array (
+                    'key' => 'specialty',
+                    'value' => $className,
+                    'compare' => '='
+                )
+            )
+        ) );
+
+        foreach($teachers as $teacher){
+            $thumbnail_url = null;
+            $post_thumbnail_id = get_post_thumbnail_id( $teacher );
+            if ($post_thumbnail_id) {
+                $thumbnail_url = wp_get_attachment_image_url( $post_thumbnail_id, 'post-thumbnail' );
+            }
+
+            if ($thumbnail_url) {
+                $teacher->thumbnail = $thumbnail_url;
+            }
+            $teacher->acf = get_fields( $teacher->ID );
+        }
+
+        $data[$className] = $teachers;
     }
 
     return new WP_REST_Response( $data, 200 );
+}
+
+function seminar_get_dance_teacher( WP_REST_Request $request ) {
+    // Get the data from the POST request body
+    $payload = $request->get_params();
+    // Sanitize and save data
+    $year = sanitize_text_field( $payload['year'] );
+
+    $danceTeachers = get_posts( array(
+        'post_type' => 'dance_teachers',
+        'post_status' => 'publish',
+        'posts_per_page' => - 1,
+        'meta_key' => 'from_date',
+        'orderby' => 'meta_value_num',
+        'order' => 'ASC',
+        'tag' => $year
+    ) );
+
+    $items = [];
+    foreach ($danceTeachers as $item) {
+        $thumbnail_url = null;
+        $post_thumbnail_id = get_post_thumbnail_id( $item );
+        if ($post_thumbnail_id) {
+            $thumbnail_url = wp_get_attachment_image_url( $post_thumbnail_id, 'post-thumbnail' );
+        }
+
+        $items[] = [
+            'id' => $item->ID,
+            'title' => $item->post_title,
+            'order' => $item->menu_order,
+            'thumbnail' => $thumbnail_url,
+            'content' => $item->post_content,
+            'acf' => get_fields( $item->ID )
+        ];
+    }
+
+//    $post_data = get_post( $classItem ); // Get the standard post data
+//    $custom_field_value = get_post_meta( $post->ID, 'your_custom_field_key', true );
+
+//    $data[] = [
+//        'id' => $post->ID,
+//        'title' => $post->post_title,
+//        'content' => $post->post_content,
+//        'your_custom_field' => $custom_field_value,
+//    ];
+
+    return new WP_REST_Response( $items, 200 );
 }
 
 // Ensure a global ACF Options page exists when ACF is active.
@@ -404,6 +574,7 @@ function register_custom_post_types()
         'show_in_menu' => true,
         'capability_type' => 'post',
         'map_meta_cap' => true,
+        'taxonomies' => ['category', 'post_tag']
     ]);
 
     // Register Team
@@ -450,21 +621,33 @@ add_filter('rest_endpoints', function($endpoints) {
     return $endpoints;
 });
 
+add_action( 'wp_enqueue_scripts', 'seminar_enqueue_scripts' );
+function seminar_enqueue_scripts() {
+    // Enqueue your Angular app's main JS file
+    wp_enqueue_script( 'app-js', 'app.js', array(), '1.0.0', true );
+
+    // Localize the script to pass data to Angular
+    wp_localize_script( 'app-js', 'WP_API_Settings', array(
+        'root' => esc_url_raw( rest_url() ),
+        'nonce' => wp_create_nonce( 'wp_rest' )
+    ) );
+}
+
 // Security: Restrict REST API write access
 function seminar_restrict_rest_api_access($result, $server, $request) {
     $route = $request->get_route();
     $method = $request->get_method();
-    
+
     // Allow GET requests (read-only)
     if ($method === 'GET') {
         return $result;
     }
-    
+
     // Allow our custom endpoints with nonce verification
     if (strpos($route, '/seminar/v1/') === 0) {
         return $result; // Let the endpoint handle its own permission_callback
     }
-    
+
     // Block POST, PUT, DELETE for non-authenticated users on WP core endpoints
     if (!is_user_logged_in()) {
         return new WP_Error(
@@ -473,7 +656,7 @@ function seminar_restrict_rest_api_access($result, $server, $request) {
             ['status' => 403]
         );
     }
-    
+
     return $result;
 }
 add_filter('rest_pre_dispatch', 'seminar_restrict_rest_api_access', 10, 3);
