@@ -91,36 +91,18 @@ add_action('rest_api_init', function () {
     register_rest_route( 'seminar/v1', '/save-registrants', array(
         'methods' => 'POST',
         'callback' => 'seminar_save_registrants',
-        'permission_callback' => function(WP_REST_Request $request) {
-            $nonce = $request->get_header('X-WP-Nonce');
-
-            if (empty($nonce)) {
-                return new WP_Error('missing_nonce', 'Nonce is required', array('status' => 403));
-            }
-
-            if (!wp_verify_nonce($nonce, 'wp_rest')) {
-                return new WP_Error('invalid_nonce', 'Invalid nonce', array('status' => 403));
-            }
-
-            return true;
+        'permission_callback' => function() {
+            $nonce = $_SERVER['HTTP_X_WP_NONCE'] ?? '';
+            return (bool) wp_verify_nonce( $nonce, 'wp_rest' );
         }
     ) );
 
     register_rest_route( 'seminar/v1', '/confirm-registrants', array(
         'methods' => 'POST',
         'callback' => 'seminar_confirm_registrants',
-        'permission_callback' => function(WP_REST_Request $request) {
-            $nonce = $request->get_header('X-WP-Nonce');
-
-            if (empty($nonce)) {
-                return new WP_Error('missing_nonce', 'Nonce is required', array('status' => 403));
-            }
-
-            if (!wp_verify_nonce($nonce, 'wp_rest')) {
-                return new WP_Error('invalid_nonce', 'Invalid nonce', array('status' => 403));
-            }
-
-            return true;
+        'permission_callback' => function() {
+            $nonce = $_SERVER['HTTP_X_WP_NONCE'] ?? '';
+            return (bool) wp_verify_nonce( $nonce, 'wp_rest' );
         }
     ) );
 
