@@ -124,6 +124,26 @@ add_action('rest_api_init', function () {
         }
     ) );
 
+    register_rest_route('seminar/v1', '/save-registration-event',
+        [
+            'methods'             => 'POST',
+            'callback'            => 'seminar_save_registration_event',
+            'permission_callback' => function(WP_REST_Request $request) {
+                $nonce = $request->get_header('X-WP-Nonce');
+
+                if (empty($nonce)) {
+                    return new WP_Error('missing_nonce', 'Nonce is required', array('status' => 403));
+                }
+
+                if (!wp_verify_nonce($nonce, 'wp_rest')) {
+                    return new WP_Error('invalid_nonce', 'Invalid nonce', array('status' => 403));
+                }
+
+                return true;
+            }
+        ]
+    );
+
     register_rest_route( 'seminar/v1', '/dance-teachers', array(
         'methods' => 'POST',
         'callback' => 'seminar_get_dance_teacher',
@@ -358,129 +378,138 @@ function seminar_handle_contact_form(WP_REST_Request $request)
     }
 }
 
-function seminar_save_registrants( WP_REST_Request $request ) {
+function seminar_save_registration_event( WP_REST_Request $request ) {
     global $wpdb;
 
     $payload = $request->get_json_params();
-
-    // Early validation error - no data saved
-    if ( empty( $payload['participants'] ) ) {
-        return new WP_REST_Response( [
-            'success' => false,
-            'error' => 'No participants provided'
-        ], 400 );
+    $participants = $payload['participants'] ?? [];
+    if ( empty( $participants ) ) {
+        return new WP_REST_Response( [ 'success' => false, 'error' => 'No participants provided' ], 400 );
     }
 
-    $table = $wpdb->prefix . 'Seminar_registrations';
+    $primary_participant = null;
+    foreach ( $participants as $index => $p ) {
+        if (empty( $p['isAdditional'] )) {
+            $primary_participant = $p;
+            break;
+        }
+    }
+    if ( !$primary_participant ) {
+        return new WP_REST_Response( [ 'success' => false, 'error' => 'No primary participants provided' ], 400 );
+    }
+
+    // sanitize event-level fields
+    $submitted_at = sanitize_text_field( $payload['submittedAt'] ?? current_time( 'mysql' ) );
+    $reg_year = intval( $primary_participant['regYear'] ?? 0 );
+    $address1 = sanitize_text_field( $primary_participant['address1'] ?? '' );
+    $address2 = sanitize_text_field( $primary_participant['address2'] ?? '' );
+    $city = sanitize_text_field( $primary_participant['city'] ?? '' );
+    $state = sanitize_text_field( $primary_participant['state'] ?? '' );
+    $zip = sanitize_text_field( $primary_participant['zip'] ?? '' );
+    $country = sanitize_text_field( $primary_participant['country'] ?? '' );
+    $phone = sanitize_text_field( $primary_participant['phone'] ?? '' );
+    $email = sanitize_email( $primary_participant['email'] ?? '' );
+    $emergency = sanitize_text_field( $primary_participant['emergency'] ?? '' );
+    $payment = sanitize_text_field( $primary_participant['payment'] ?? '' );
+    $registration_status = 'confirmed';
+
+    $table_events = $wpdb->prefix . 'Seminar_registration_events';
+    $table_registrants = $wpdb->prefix . 'Seminar_registrants';
     $table_classes = $wpdb->prefix . 'Seminar_classes';
-    $participants = $payload['participants'];
-    $submitted_at = sanitize_text_field( $payload['submittedAt'] );
+
+    $primary_registrant_id = null;
     $participant_count = count( $participants );
-    $reg_id = '';
 
     // Start transaction
-    $wpdb->query('START TRANSACTION');
-
+    $wpdb->query( 'START TRANSACTION' );
     try {
-        // Process each participant
-        foreach ( $participants as $index => $participant ) {
-            $is_primary = empty( $participant['isAdditional'] ) ? 1 : 0;
-            $reg_slot = $index;
+        // Insert event row
+        $wpdb->insert(
+            $table_events,
+            [
+                'registration_date' => $submitted_at,
+                'reg_year' => $reg_year,
+                'address1' => $address1,
+                'address2' => $address2,
+                'city' => $city,
+                'state' => $state,
+                'zip' => $zip,
+                'country' => $country,
+                'phone' => $phone,
+                'email' => $email,
+                'emergency' => $emergency,
+                'payment' => $payment,
+                'registration_status' => $registration_status,
+                'registration_email_sent' => 0
+            ],
+            [ '%s', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d' ]
+        );
+        if ( $wpdb->last_error ) {
+            throw new Exception( 'Event insert failed: ' . $wpdb->last_error );
+        }
+        $registration_event_id = intval( $wpdb->insert_id );
 
-            // Sanitize all fields
-            $reg_id = sanitize_text_field( $participant['regId'] );
-            $first_name = sanitize_text_field( $participant['firstName'] );
-            $last_name = sanitize_text_field( $participant['lastName'] );
-            $address1 = sanitize_text_field( $participant['address'] ?? '' );
-            $address2 = sanitize_text_field( $participant['address2'] ?? '' );
-            $city = sanitize_text_field( $participant['city'] ?? '' );
-            $state = sanitize_text_field( $participant['stateProvince'] ?? '' );
-            $zip = sanitize_text_field( $participant['zipPostal'] ?? '' );
-            $country = sanitize_text_field( $participant['country'] ?? '' );
-            $phone = sanitize_text_field( $participant['phoneNumber'] ?? '' );
-            $email = sanitize_email( $participant['email'] ?? '' );
-            $emergency = sanitize_text_field( $participant['emergencyContact'] ?? '' );
-            $num_days = intval( $participant['seminarDays'] );
-            $gala = $participant['galaDinner'] ? 1 : 0;
-            $gala_option = sanitize_text_field( $participant['dinnerType'] ?? '' );
-            $age = sanitize_text_field( $participant['registrationType'] );
-            $eefc = $participant['eefcMember'] ? 1 : 0;
-            $payment = sanitize_text_field( $participant['paymentMethod'] );
-            $dvd = $participant['dvdSet'] ? 1 : 0;
-            $dvd_format = sanitize_text_field( $participant['dvdSetFormat'] ?? '' );
-            $reg_year = intval( $participant['regYear'] );
-            $balance = floatval( $participant['total'] ?? 0 );
+        // Insert registrants and classes
+        foreach ( $participants as $index => $p ) {
+            $is_primary = empty( $p['isAdditional'] ) ? 1 : 0;
+            $first_name = sanitize_text_field( $p['firstName'] ?? '' );
+            $last_name = sanitize_text_field( $p['lastName'] ?? '' );
+            $num_days = intval( $p['seminarDays'] ?? 0 );
+            $gala = !empty( $p['galaDinner'] ) ? 1 : 0;
+            $meal_option = sanitize_text_field( $p['dinnerType'] ?? '' );
+            $age = sanitize_text_field( $p['registrationType'] ?? '' );
+            $is_eefc = !empty( $p['eefcMember'] ) ? 1 : 0;
+            $is_bulgarian = !empty( $p['isBulgarian'] ) ? 1 : 0;
+            $transport = isset( $p['transportation'] ) ? intval( $p['transportation'] ) : -1;
+            $dvd = !empty( $p['dvdSet'] ) ? 1 : -1;
+            $dvd_format = sanitize_text_field( $p['dvdSetFormat'] ?? '' );
+            $balance = floatval( $p['total'] ?? 0 );
 
-            // Convert transportation string to integer
-            $transport_map = [
-                'no' => 0,
-                'plovdiv-koprivshtitsa' => 1,
-                'koprivshtitsa-sofia' => 2,
-                'both' => 3
-            ];
-            $transport_string = sanitize_text_field( $participant['transportation'] ?? 'no' );
-            $transport = $transport_map[$transport_string] ?? 0;
-
-            // Insert into registrations table
             $wpdb->insert(
-                $table,
+                $table_registrants,
                 [
-                    'reg_id' => $reg_id,
+                    'registration_event_id' => $registration_event_id,
                     'is_primary' => $is_primary,
-                    'date' => $submitted_at,
-                    'reg_year' => $reg_year,
-                    'reg_slot' => $reg_slot,
                     'first_name' => $first_name,
                     'last_name' => $last_name,
-                    'address1' => $address1,
-                    'address2' => $address2,
-                    'city' => $city,
-                    'state' => $state,
-                    'zip' => $zip,
-                    'country' => $country,
-                    'phone' => $phone,
-                    'email' => $email,
-                    'emergency' => $emergency,
                     'num_days' => $num_days,
                     'gala' => $gala,
-                    'meal_option' => $gala_option,
+                    'meal_option' => $meal_option,
                     'age' => $age,
-                    'is_eefc' => $eefc,
-                    'payment' => $payment,
+                    'is_eefc' => $is_eefc,
+                    'is_bulgarian' => $is_bulgarian,
                     'transport' => $transport,
                     'dvd' => $dvd,
                     'dvd_format' => $dvd_format,
-                    'flute' => 0,
-                    'cancel' => 0,
                     'balance' => $balance
                 ],
-                [
-                    '%s', '%d', '%s', '%d', '%d', '%s', '%s', '%s', '%s', '%s',
-                    '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%s',
-                    '%d', '%s', '%d', '%d', '%s', '%d', '%d', '%f'
-                ]
+                [ '%d', '%d', '%s', '%s', '%d', '%d', '%s', '%s', '%d', '%d', '%d', '%d', '%s', '%f' ]
             );
-
             if ( $wpdb->last_error ) {
-                throw new Exception( 'Participant insert failed: ' . $wpdb->last_error );
+                throw new Exception( 'Registrant insert failed: ' . $wpdb->last_error );
+            }
+            $registrant_id = intval( $wpdb->insert_id );
+
+            if ( $is_primary && $primary_registrant_id === null ) {
+                $primary_registrant_id = $registrant_id;
             }
 
-            // Insert selected classes
-            if ( !empty( $participant['selectedClasses'] ) ) {
-                foreach ( $participant['selectedClasses'] as $class ) {
-                    $rent_bring = ( $class['rent_bring'] === 'rent' ) ? 1 : 0;
+            // classes per registrant (if provided)
+            if ( !empty( $p['selectedClasses'] ) && is_array( $p['selectedClasses'] ) ) {
+                foreach ( $p['selectedClasses'] as $class ) {
+                    $rent = ( isset( $class['rent_bring'] ) && $class['rent_bring'] === 'rent' ) ? 1 : 0;
                     $level = sanitize_text_field( $class['level'] ?? '' );
+                    $class_id = intval( $class['id'] ?? 0 );
 
                     $wpdb->insert(
                         $table_classes,
                         [
-                            'reg_id' => $reg_id,
-                            'reg_slot' => $reg_slot,
-                            'class_id' => $class['id'],
-                            'rent' => $rent_bring,
-                            'level' => $level
+                            'class_id' => $class_id,
+                            'rent' => $rent,
+                            'level' => $level,
+                            'registrant_id' => $registrant_id
                         ],
-                        ['%s', '%d', '%d', '%d', '%s']
+                        [ '%d', '%d', '%s', '%d' ]
                     );
 
                     if ( $wpdb->last_error ) {
@@ -490,139 +519,391 @@ function seminar_save_registrants( WP_REST_Request $request ) {
             }
         }
 
-        // Commit transaction if all successful
-        $wpdb->query('COMMIT');
+        // Commit
+        $wpdb->query( 'COMMIT' );
 
     } catch ( Exception $e ) {
-        // Rollback on any error
-        $wpdb->query('ROLLBACK');
-
-        return new WP_REST_Response( [
-            'success' => false,
-            'error' => $e->getMessage(),
-            'failed_at_participant' => $index ?? 0
-        ], 500 );
-    }
-
-    return new WP_REST_Response( [
-        'success' => true,
-        'message' => 'Registration saved successfully',
-        'reg_id' => $reg_id,
-        'participant_count' => $participant_count,
-        'registration_data' => $payload
-    ], 200 );
-}
-
-function seminar_confirm_registrants( WP_REST_Request $request ) {
-    global $wpdb;
-
-    $payload = $request->get_json_params();
-
-    if ( empty( $payload['registrationId'] ) ) {
-        return new WP_REST_Response( [
-            'success' => false,
-            'error' => 'No registration ID provided'
-        ], 400 );
-    }
-
-    $reg_id = sanitize_text_field( $payload['registrationId'] );
-    $table = $wpdb->prefix . 'Seminar_registrations';
-    $table_classes = $wpdb->prefix . 'Seminar_classes';
-
-    // Start transaction
-    $wpdb->query('START TRANSACTION');
-
-    try {
-        // Get all participants for this registration
-        $registration = $wpdb->get_results(
-            $wpdb->prepare(
-                "SELECT * FROM $table WHERE reg_id = %s ORDER BY reg_slot ASC",
-                $reg_id
-            )
-        );
-
-        if ( $wpdb->last_error ) {
-            throw new Exception( 'Database error fetching registration: ' . $wpdb->last_error );
-        }
-
-        if ( empty( $registration ) ) {
-            $wpdb->query('ROLLBACK');
-            return new WP_REST_Response( [
-                'success' => false,
-                'error' => 'Registration not found'
-            ], 404 );
-        }
-
-        // Update confirmed status
-        $updated = $wpdb->update(
-            $table,
-            ['confirmed' => 1],
-            ['reg_id' => $reg_id],
-            ['%d'],
-            ['%s']
-        );
-
-        if ( $wpdb->last_error ) {
-            throw new Exception( 'Database error updating confirmation: ' . $wpdb->last_error );
-        }
-
-        if ( $updated === false ) {
-            throw new Exception( 'Failed to update confirmation status' );
-        }
-
-        // Get all classes for this registration
-        $classes = $wpdb->get_results(
-            $wpdb->prepare(
-                "SELECT * FROM $table_classes WHERE reg_id = %s",
-                $reg_id
-            )
-        );
-
-        if ( $wpdb->last_error ) {
-            throw new Exception( 'Database error fetching classes: ' . $wpdb->last_error );
-        }
-
-        // Commit transaction before sending email
-        $wpdb->query('COMMIT');
-
-        // Send confirmation email (outside transaction)
-        $email_sent = send_registration_email( $registration, $classes );
-
-        return new WP_REST_Response( [
-            'success' => true,
-            'message' => 'Registration confirmed' . ( $email_sent ? ' and email sent' : ' but email failed' ),
-            'reg_id' => $reg_id,
-            'email_sent' => $email_sent
-        ], 200 );
-
-    } catch ( Exception $e ) {
-        // Rollback on any error
-        $wpdb->query('ROLLBACK');
-
+        $wpdb->query( 'ROLLBACK' );
         return new WP_REST_Response( [
             'success' => false,
             'error' => $e->getMessage()
         ], 500 );
     }
+
+    // schedule async email job (does not affect success)
+    if ( ! empty( $registration_event_id ) ) {
+        if ( ! wp_next_scheduled( 'seminar_send_registration_email_event', [ $registration_event_id ] ) ) {
+            wp_schedule_single_event( time() + 10, 'seminar_send_registration_email_event', [ $registration_event_id ] );
+        }
+    }
+
+    return new WP_REST_Response( [
+        'success' => true,
+        'message' => 'Registration saved successfully',
+        'registration_event_id' => $registration_event_id,
+        'primary_registrant_id' => $primary_registrant_id,
+        'participant_count' => $participant_count
+    ], 200 );
 }
 
-function send_registration_email( $registration, $classes ) {
-    if ( empty( $registration ) ) {
+// Async worker: load event + registrants + classes, call existing send_registration_email(), update event flags
+add_action( 'seminar_send_registration_email_event', function( $registration_event_id ) {
+    global $wpdb;
+
+    $table_events      = $wpdb->prefix . 'Seminar_registration_events';
+    $table_registrants = $wpdb->prefix . 'Seminar_registrants';
+    $table_classes     = $wpdb->prefix . 'Seminar_classes';
+
+    $registration_event_id = intval( $registration_event_id );
+    if ( $registration_event_id <= 0 ) {
+        return;
+    }
+
+    $event = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table_events} WHERE registration_event_id = %d", $registration_event_id ) );
+    if ( ! $event ) {
+        return;
+    }
+
+    // Get registrants, primary first
+    $registrants = $wpdb->get_results( $wpdb->prepare(
+        "SELECT * FROM {$table_registrants} WHERE registration_event_id = %d ORDER BY is_primary DESC, registrant_id ASC",
+        $registration_event_id
+    ) );
+    if ( empty( $registrants ) ) {
+        return;
+    }
+
+    // Fetch classes for these registrants
+    $registrant_ids = array_map( 'intval', wp_list_pluck( $registrants, 'registrant_id' ) );
+    $classes = [];
+    if ( ! empty( $registrant_ids ) ) {
+        $in = implode( ',', $registrant_ids ); // sanitized by intval above
+        $classes = $wpdb->get_results( "SELECT * FROM {$table_classes} WHERE registrant_id IN ({$in})" );
+    }
+
+    // Build classes map keyed by registrant_id
+    $classes_by_registrant = [];
+    foreach ( $classes as $c ) {
+        $rid = intval( $c->registrant_id ?? 0 );
+        if ( $rid === 0 ) {
+            continue;
+        }
+        if ( ! isset( $classes_by_registrant[ $rid ] ) ) {
+            $classes_by_registrant[ $rid ] = [];
+        }
+        $classes_by_registrant[ $rid ][] = $c;
+    }
+
+    // Attach classes to registrants
+    $registrants_with_classes = array_map( function( $r ) use ( $classes_by_registrant ) {
+        $obj = is_object( $r ) ? $r : (object) $r;
+        $rid = intval( $obj->registrant_id ?? 0 );
+        $obj->classes = $classes_by_registrant[ $rid ] ?? [];
+        return $obj;
+    }, $registrants );
+
+    // Call email sender
+    $email_sent = false;
+    try {
+        $email_sent = (bool) send_registration_email( $event, $registrants_with_classes );
+    } catch ( Exception $e ) {
+        $email_sent = false;
+        error_log( 'send_registration_email error: ' . $e->getMessage() );
+    }
+
+    // Update event flags on success (do not roll back registration if email fails)
+    if ( $email_sent ) {
+        $updated = $wpdb->update(
+            $table_events,
+            [
+                'registration_email_sent' => 1,
+                'registration_email_sent_timestamp' => current_time( 'mysql', 1 )
+            ],
+            [ 'registration_event_id' => $registration_event_id ],
+            [ '%d', '%s' ],
+            [ '%d' ]
+        );
+        if ( $wpdb->last_error ) {
+            error_log( 'Failed updating registration_email_sent for event ' . $registration_event_id . ': ' . $wpdb->last_error );
+        }
+    }
+} );
+
+
+
+//function seminar_save_registrants( WP_REST_Request $request ) {
+//    global $wpdb;
+//
+//    $payload = $request->get_json_params();
+//
+//    // Early validation error - no data saved
+//    if ( empty( $payload['participants'] ) ) {
+//        return new WP_REST_Response( [
+//            'success' => false,
+//            'error' => 'No participants provided'
+//        ], 400 );
+//    }
+//
+//    $table = $wpdb->prefix . 'Seminar_registrations';
+//    $table_classes = $wpdb->prefix . 'Seminar_classes';
+//    $participants = $payload['participants'];
+//    $submitted_at = sanitize_text_field( $payload['submittedAt'] );
+//    $participant_count = count( $participants );
+//
+//    // Start transaction
+//    $wpdb->query('START TRANSACTION');
+//
+//    try {
+//        // Process each participant
+//        foreach ( $participants as $index => $participant ) {
+//            $is_primary = empty( $participant['isAdditional'] ) ? 1 : 0;
+//
+//            // Sanitize all fields
+//            $first_name = sanitize_text_field( $participant['firstName'] );
+//            $last_name = sanitize_text_field( $participant['lastName'] );
+//            $address1 = sanitize_text_field( $participant['address'] ?? '' );
+//            $address2 = sanitize_text_field( $participant['address2'] ?? '' );
+//            $city = sanitize_text_field( $participant['city'] ?? '' );
+//            $state = sanitize_text_field( $participant['stateProvince'] ?? '' );
+//            $zip = sanitize_text_field( $participant['zipPostal'] ?? '' );
+//            $country = sanitize_text_field( $participant['country'] ?? '' );
+//            $phone = sanitize_text_field( $participant['phoneNumber'] ?? '' );
+//            $email = sanitize_email( $participant['email'] ?? '' );
+//            $emergency = sanitize_text_field( $participant['emergencyContact'] ?? '' );
+//            $num_days = intval( $participant['seminarDays'] );
+//            $gala = $participant['galaDinner'] ? 1 : 0;
+//            $gala_option = sanitize_text_field( $participant['dinnerType'] ?? '' );
+//            $age = sanitize_text_field( $participant['registrationType'] );
+//            $eefc = $participant['eefcMember'] ? 1 : 0;
+//            $payment = sanitize_text_field( $participant['paymentMethod'] );
+//            $dvd = $participant['dvdSet'] ? 1 : 0;
+//            $dvd_format = sanitize_text_field( $participant['dvdSetFormat'] ?? '' );
+//            $reg_year = intval( $participant['regYear'] );
+//            $balance = floatval( $participant['total'] ?? 0 );
+//
+//            // Convert transportation string to integer
+//            $transport_map = [
+//                'no' => 0,
+//                'plovdiv-koprivshtitsa' => 1,
+//                'koprivshtitsa-sofia' => 2,
+//                'both' => 3
+//            ];
+//            $transport_string = sanitize_text_field( $participant['transportation'] ?? 'no' );
+//            $transport = $transport_map[$transport_string] ?? 0;
+//
+//            // Insert into registrations table
+//            $wpdb->insert(
+//                $table,
+//                [
+//                    'is_primary' => $is_primary,
+//                    'date' => $submitted_at,
+//                    'reg_year' => $reg_year,
+//                    'first_name' => $first_name,
+//                    'last_name' => $last_name,
+//                    'address1' => $address1,
+//                    'address2' => $address2,
+//                    'city' => $city,
+//                    'state' => $state,
+//                    'zip' => $zip,
+//                    'country' => $country,
+//                    'phone' => $phone,
+//                    'email' => $email,
+//                    'emergency' => $emergency,
+//                    'num_days' => $num_days,
+//                    'gala' => $gala,
+//                    'meal_option' => $gala_option,
+//                    'age' => $age,
+//                    'is_eefc' => $eefc,
+//                    'payment' => $payment,
+//                    'transport' => $transport,
+//                    'dvd' => $dvd,
+//                    'dvd_format' => $dvd_format,
+//                    'cancel' => 0,
+//                    'balance' => $balance
+//                ],
+//                [
+//                    '%s', '%d', '%s', '%d', '%d', '%s', '%s', '%s', '%s', '%s',
+//                    '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%s',
+//                    '%d', '%s', '%d', '%d', '%s', '%d', '%d', '%f'
+//                ]
+//            );
+//
+//            if ( $wpdb->last_error ) {
+//                throw new Exception( 'Participant insert failed: ' . $wpdb->last_error );
+//            }
+//
+//            // Insert selected classes
+//            if ( !empty( $participant['selectedClasses'] ) ) {
+//                foreach ( $participant['selectedClasses'] as $class ) {
+//                    $rent_bring = ( $class['rent_bring'] === 'rent' ) ? 1 : 0;
+//                    $level = sanitize_text_field( $class['level'] ?? '' );
+//
+//                    $wpdb->insert(
+//                        $table_classes,
+//                        [
+//                            'registration_event_id' => $registration_event_id,
+//                            'class_id' => $class['id'],
+//                            'rent' => $rent_bring,
+//                            'level' => $level
+//                        ],
+//                        ['%d', '%d', '%d', '%s']
+//                    );
+//
+//                    if ( $wpdb->last_error ) {
+//                        throw new Exception( 'Class insert failed: ' . $wpdb->last_error );
+//                    }
+//                }
+//            }
+//        }
+//
+//        // Commit transaction if all successful
+//        $wpdb->query('COMMIT');
+//
+//    } catch ( Exception $e ) {
+//        // Rollback on any error
+//        $wpdb->query('ROLLBACK');
+//
+//        return new WP_REST_Response( [
+//            'success' => false,
+//            'error' => $e->getMessage(),
+//            'failed_at_participant' => $index ?? 0
+//        ], 500 );
+//    }
+//
+//    return new WP_REST_Response( [
+//        'success' => true,
+//        'message' => 'Registration saved successfully',
+//        'registration_event_id' => $registration_event_id,
+//        'participant_count' => $participant_count,
+//        'registration_data' => $payload
+//    ], 200 );
+//}
+//
+//function seminar_confirm_registrants( WP_REST_Request $request ) {
+//    global $wpdb;
+//
+//    $payload = $request->get_json_params();
+//
+//    if ( empty( $payload['registrationId'] ) ) {
+//        return new WP_REST_Response( [
+//            'success' => false,
+//            'error' => 'No registration ID provided'
+//        ], 400 );
+//    }
+//
+//    $registration_event_id = sanitize_text_field( $payload['registrationId'] );
+//    $table = $wpdb->prefix . 'Seminar_registrations';
+//    $table_classes = $wpdb->prefix . 'Seminar_classes';
+//
+//    // Start transaction
+//    $wpdb->query('START TRANSACTION');
+//
+//    try {
+//        // Get all participants for this registration
+//        $registration = $wpdb->get_results(
+//            $wpdb->prepare(
+//                "SELECT * FROM $table WHERE registration_event_id = %s ORDER BY reg_slot ASC",
+//                $registration_event_id
+//            )
+//        );
+//
+//        if ( $wpdb->last_error ) {
+//            throw new Exception( 'Database error fetching registration: ' . $wpdb->last_error );
+//        }
+//
+//        if ( empty( $registration ) ) {
+//            $wpdb->query('ROLLBACK');
+//            return new WP_REST_Response( [
+//                'success' => false,
+//                'error' => 'Registration not found'
+//            ], 404 );
+//        }
+//
+//        // Update confirmed status
+//        $updated = $wpdb->update(
+//            $table,
+//            ['confirmed' => 1],
+//            ['registration_event_id' => $registration_event_id],
+//            ['%d'],
+//            ['%s']
+//        );
+//
+//        if ( $wpdb->last_error ) {
+//            throw new Exception( 'Database error updating confirmation: ' . $wpdb->last_error );
+//        }
+//
+//        if ( $updated === false ) {
+//            throw new Exception( 'Failed to update confirmation status' );
+//        }
+//
+//        // Get all classes for this registration
+//        $classes = $wpdb->get_results(
+//            $wpdb->prepare(
+//                "SELECT * FROM $table_classes WHERE registration_event_id = %s",
+//                $registration_event_id
+//            )
+//        );
+//
+//        if ( $wpdb->last_error ) {
+//            throw new Exception( 'Database error fetching classes: ' . $wpdb->last_error );
+//        }
+//
+//        // Commit transaction before sending email
+//        $wpdb->query('COMMIT');
+//
+//        // Send confirmation email (outside transaction)
+//        $email_sent = send_registration_email( $registration, $classes );
+//
+//        return new WP_REST_Response( [
+//            'success' => true,
+//            'message' => 'Registration confirmed' . ( $email_sent ? ' and email sent' : ' but email failed' ),
+//            'registration_event_id' => $registration_event_id,
+//            'email_sent' => $email_sent
+//        ], 200 );
+//
+//    } catch ( Exception $e ) {
+//        // Rollback on any error
+//        $wpdb->query('ROLLBACK');
+//
+//        return new WP_REST_Response( [
+//            'success' => false,
+//            'error' => $e->getMessage()
+//        ], 500 );
+//    }
+//}
+
+function send_registration_email( $event, $registrants ) {
+    if ( empty( $event ) || empty( $registrants ) ) {
         return false;
     }
 
-    $primary = $registration[0];
-    $reg_id = $primary->reg_id;
-    $email = $primary->email;
+    // Normalize registrants to objects, ensure primary first
+    $registrants = array_map( function( $r ) { return is_object( $r ) ? $r : (object) $r; }, $registrants );
+    usort( $registrants, function( $a, $b ) {
+        $pa = intval( $a->is_primary ?? 0 );
+        $pb = intval( $b->is_primary ?? 0 );
+        if ( $pa === $pb ) {
+            return intval( $a->registrant_id ?? 0 ) - intval( $b->registrant_id ?? 0 );
+        }
+        return $pa > $pb ? -1 : 1;
+    } );
 
-    // Build email message
-    $message = "Seminar Registration #" . $primary->id . "\r\n";
-    $message .= "Email Address: " . $primary->email . "\r\n";
-    $message .= "Total: EURO " . get_registration_balance( $reg_id, $registration ) . "\r\n";
-    $message .= "Payment: " . $primary->payment . "\r\n\r\n";
+    $primary = $registrants[0];
+    $registration_event_id = intval( $event->registration_event_id ?? $primary->registration_event_id ?? 0 );
+    $email = sanitize_email( $event->email ?? $primary->email ?? '' );
+    if ( empty( $email ) ) {
+        return false;
+    }
+
+    // Header
+    $message = "Seminar Registration (Event ID: {$registration_event_id}) - Primary Registrant #" . intval( $primary->registrant_id ) . "\r\n";
+    $message .= "Email Address: " . $email . "\r\n";
+    $message .= "Total: EURO " . get_registration_balance( $registration_event_id, $registrants ) . "\r\n";
+    $message .= "Payment: " . ( $event->payment ?? $primary->payment ?? 'N/A' ) . "\r\n\r\n";
 
     // Payment instructions
-    if ( $primary->payment === 'onsite' || $primary->payment === 'on-site' ) {
+    $payment_method = strtolower( trim( $event->payment ?? $primary->payment ?? '' ) );
+    if ( $payment_method === 'onsite' || $payment_method === 'on-site' ) {
         $message .= "You have indicated that you will be submitting payment On-site (at the Music Academy). Please bring a copy of your registration for verification purposes.\r\n\r\n";
     } else {
         $message .= "You have indicated that you will be paying by Bank Transfer. Please provide your bank with the following routing information for your Bank Transfer:\r\n\r\n";
@@ -634,76 +915,66 @@ function send_registration_email( $registration, $classes ) {
         $message .= "Account Number (in EURO):\t3498641407\r\n";
         $message .= "IBAN Number (in EURO):\tBG56UNCR75273498641407\r\n\r\n";
 
-        $late_deadline = get_field( 'late_registration_deadline', 'option' );
+        $late_deadline = function_exists('get_field') ? get_field( 'late_registration_deadline', 'option' ) : null;
         if ( $late_deadline ) {
             $message .= "Bank Transfers should be initiated before " . date( 'F j, Y', strtotime( $late_deadline ) ) . " to qualify for the fee calculated above.\r\n";
         }
         $message .= "When you have completed your Bank Transfer, please email us at contact@folkseminarplovdiv.net to indicate the date of your Bank Transfer. This will assist Seminar administrative staff with tracking your payment. If the Bank Transfer is originating from a bank account that is not in the registrant's name, or funds are being transferred for more than one registrant, please include the name of the person who owns the account, and all registrant names associated with your Bank Transfer.\r\n\r\n";
     }
 
-    $message .= "Thank you and see you in Plovdiv!\r\nLarry Weiner & Dilyana Kurdova\r\nInternational Program Coordinators";
-    $message .= "\r\n\r\n";
+    $message .= "Thank you and see you in Plovdiv!\r\nLarry Weiner & Dilyana Kurdova\r\nInternational Program Coordinators\r\n\r\n";
 
-    // Add participant details
-    foreach ( $registration as $index => $participant ) {
-        $message .= "\r\n*** REGISTRANT " . $participant->reg_slot . " ***\r\n";
+    // Event-level contact details (primary contact)
+    $message .= "*** PRIMARY CONTACT (Event) ***\r\n";
+    $message .= "Registration Date: " . ( $event->registration_date ?? 'N/A' ) . "\r\n";
+    $addr = trim( ($event->address1 ?? '') . ( !empty($event->address2) ? ', ' . $event->address2 : '' ) );
+    $message .= "Address: " . ( $addr ?: 'N/A' ) . "\r\n";
+    $message .= "City: " . ( $event->city ?? 'N/A' ) . ", " . ( $event->state ?? '' ) . ", " . ( $event->zip ?? '' ) . "\r\n";
+    $message .= "Country: " . ( $event->country ?? 'N/A' ) . "\r\n";
+    $message .= "Phone: " . ( $event->phone ?? 'N/A' ) . "\r\n";
+    if ( ! empty( $event->emergency ) ) {
+        $message .= "Emergency Info: " . $event->emergency . "\r\n";
+    }
+    $message .= "\r\n";
+
+    // Per-registrant details and their classes (attached as ->classes)
+    foreach ( $registrants as $index => $participant) {
+        $message .= "\r\n*** REGISTRANT " . intval( $index ) . " ***\r\n";
         $message .= "----------------------------------\r\n";
-        $message .= "Name: " . $participant->first_name . " " . $participant->last_name . "\r\n";
+        $message .= "Name: " . trim( ($participant->first_name ?? '') . ' ' . ($participant->last_name ?? '') ) . "\r\n";
 
-        // Primary participant gets full address
-        if ( $index === 0 ) {
-            $message .= "Address: " . $participant->address1;
-            if ( !empty( $participant->address2 ) ) {
-                $message .= ', ' . $participant->address2;
-            }
-            $message .= "\r\n";
-            $message .= "City: " . $participant->city . ", " . $participant->state . ", " . $participant->zip . "\r\n";
-            $message .= "Country: " . $participant->country . "\r\n";
-            $message .= "Phone: " . $participant->phone . "\r\n";
-            $message .= "Email: " . $participant->email . "\r\n";
-            if ( !empty( $participant->emergency ) ) {
-                $message .= "Emergency Info: " . $participant->emergency . "\r\n";
-            }
-        }
-
-        // Classes for this participant
-        $participant_classes = array_filter( $classes, function( $class ) use ( $participant ) {
-            return $class->reg_slot == $participant->reg_slot;
-        });
-
-        if ( !empty( $participant_classes ) ) {
-            $message .= "\r\n\r\nCLASSES:\r\n\r\n";
+        $participant_classes = $participant->classes ?? [];
+        if ( ! empty( $participant_classes ) ) {
+            $message .= "\r\nCLASSES:\r\n\r\n";
             foreach ( $participant_classes as $class_row ) {
-                $class_post = get_post( $class_row->class_id );
+                $class_post = get_post( intval( $class_row->class_id ?? 0 ) );
                 if ( $class_post ) {
                     $message .= $class_post->post_title;
-
-                    $levels = get_field( 'class_levels', $class_row->class_id );
-                    $rent_options = get_field( 'rent_bring', $class_row->class_id );
+                    $levels = function_exists('get_field') ? get_field( 'class_levels', $class_row->class_id ) : null;
+                    $rent_options = function_exists('get_field') ? get_field( 'rent_bring', $class_row->class_id ) : null;
 
                     if ( $rent_options || $levels ) {
-                        $message .= ': ';
-
+                        $parts = [];
                         if ( $rent_options && isset( $class_row->rent ) ) {
-                            $rent_text = $class_row->rent == 1 ? 'would like to rent' : 'bringing my own';
-                            if ( $class_row->rent == 1 ) {
-                                $rental_fee = get_field( 'rental_fee', $class_row->class_id );
-                                if ( $class_row->class_id == 249 ) {
-                                    $message .= $rent_text . ', daily fee of ' . $rental_fee . ' EURO per day, if available - payable at first tupan class';
+                            $rent_text = intval( $class_row->rent ) === 1 ? 'would like to rent' : 'bringing my own';
+                            if ( intval( $class_row->rent ) === 1 ) {
+                                $rental_fee = function_exists('get_field') ? get_field( 'rental_fee', $class_row->class_id ) : '';
+                                if ( intval( $class_row->class_id ) === 249 ) {
+                                    $parts[] = $rent_text . ', daily fee of ' . $rental_fee . ' EURO per day, if available - payable at first tupan class';
                                 } else {
-                                    $message .= $rent_text . ', daily fee of ' . $rental_fee . ' EURO applies';
+                                    $parts[] = $rent_text . ( $rental_fee ? ', daily fee of ' . $rental_fee . ' EURO applies' : '' );
                                 }
+                            } else {
+                                $parts[] = $rent_text;
                             }
                         }
-
-                        if ( $levels && isset( $class_row->level ) && !empty( $class_row->level ) ) {
-                            if ( $rent_options && isset( $class_row->rent ) ) {
-                                $message .= ',';
-                            }
-                            $message .= ' ' . $class_row->level;
+                        if ( $levels && ! empty( $class_row->level ) ) {
+                            $parts[] = $class_row->level;
+                        }
+                        if ( ! empty( $parts ) ) {
+                            $message .= ': ' . implode( ', ', $parts );
                         }
                     }
-
                     $message .= "\r\n";
                 }
             }
@@ -711,61 +982,53 @@ function send_registration_email( $registration, $classes ) {
         }
 
         // DVD
-        if ( $participant->dvd == 1 ) {
-            $message .= "DVD ordered: Yes, " . strtoupper( $participant->dvd_format ) . "\r\n";
-        } else {
-            $message .= "DVD ordered: No\r\n";
-        }
+        $message .= "DVD ordered: " . ( intval( $participant->dvd ?? -1 ) === 1 ? 'Yes, ' . strtoupper( $participant->dvd_format ?? '' ) : 'No' ) . "\r\n";
 
         // Gala dinner
-        if ( $participant->gala ) {
-            $message .= "Will attend gala dinner, " . $participant->meal_option . "\r\n";
-        } else {
-            $message .= "Gala dinner: No\r\n";
-        }
+        $message .= "Gala dinner: " . ( ! empty( $participant->gala ) ? 'Yes, ' . ( $participant->meal_option ?? '' ) : 'No' ) . "\r\n";
 
-        // Transportation
-        $show_transport = get_field( 'show_koprivshtitsa_transportation_field', 'option' );
-        if ( $show_transport && isset( $participant->transport ) && $participant->transport != -1 ) {
+        // Transportation, conditional
+        $show_transport = function_exists('get_field') ? get_field( 'show_koprivshtitsa_transportation_field', 'option' ) : null;
+        if ( $show_transport && isset( $participant->transport ) && intval( $participant->transport ) !== -1 ) {
             $transport_labels = [
                 0 => 'No',
                 1 => 'Plovdiv to Koprivshtitsa',
                 2 => 'Koprivshtitsa to Sofia',
                 3 => 'Plovdiv to Koprivshtitsa and Koprivshtitsa to Sofia'
             ];
-            $message .= "Transportation: " . ( $transport_labels[$participant->transport] ?? 'No' ) . "\r\n";
+            $message .= "Transportation: " . ( $transport_labels[ intval( $participant->transport ) ] ?? 'No' ) . "\r\n";
         }
 
-        $message .= "Days attending: " . $participant->num_days . "\r\n";
-        $message .= "Registration type: " . $participant->age . "\r\n";
+        $message .= "Days attending: " . intval( $participant->num_days ?? 0 ) . "\r\n";
+        $message .= "Registration type: " . ( $participant->age ?? 'N/A' ) . "\r\n";
+        $message .= "EEFC member: " . ( intval( $participant->is_eefc ?? 0 ) === 1 ? 'Yes' : 'No' ) . "\r\n";
+        $message .= "Bulgarian: " . ( intval( $participant->is_bulgarian ?? 0 ) === 1 ? 'Yes' : 'No' ) . "\r\n";
 
-        $eefc = $participant->is_eefc == 1 ? 'Yes' : 'No';
-        $message .= "EEFC member: " . $eefc . "\r\n";
-
-        if ( $index === 0 ) {
-            $message .= "Payment: " . $primary->payment . "\r\n";
+        if ( intval( $participant->is_primary ?? 0 ) === 1 ) {
+            $message .= "Payment: " . ( $event->payment ?? $participant->payment ?? 'N/A' ) . "\r\n";
         }
-        $message .= "Balance: EURO " . $participant->balance . "\r\n";
+        $message .= "Balance: EURO " . number_format( floatval( $participant->balance ?? 0 ), 2 ) . "\r\n";
     }
 
     // Send email
-    $seminar_year = get_field( 'seminar_year', 'option' );
+    $seminar_year = function_exists('get_field') ? get_field( 'seminar_year', 'option' ) : '';
+    $site_name = get_bloginfo( 'name' );
+    $admin_email = get_bloginfo( 'admin_email' );
+
     $headers = [
-        'From: ' . get_bloginfo( 'name' ) . ' ' . $seminar_year . ' <' . get_bloginfo( 'admin_email' ) . '>',
-        'Reply-To: ' . get_bloginfo( 'admin_email' ),
-        'Cc: ' . get_bloginfo( 'admin_email' )
+        'From: ' . $site_name . ( $seminar_year ? ' ' . $seminar_year : '' ) . ' <' . $admin_email . '>',
+        'Reply-To: ' . $admin_email,
+        'Cc: ' . $admin_email
     ];
 
-    $sent = wp_mail(
-        $email,
-        'Folk Seminar Plovdiv ' . $seminar_year . ' | Registration #' . $primary->id,
-        $message,
-        $headers
-    );
-    return $sent;
+    $subject = 'Folk Seminar Plovdiv ' . trim( $seminar_year ) . ' | Registration #' . intval( $primary->registrant_id );
+
+    return (bool) wp_mail( $email, $subject, $message, $headers );
 }
 
-function get_registration_balance( $reg_id, $registration ) {
+
+
+function get_registration_balance( $registration_event_id, $registration ) {
     $total_balance = 0;
     foreach ( $registration as $participant ) {
         $total_balance += floatval( $participant->balance );
