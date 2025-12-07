@@ -967,17 +967,17 @@ Koprivshtitsa to Sofia: <?php echo $results['k_to_s']; ?><br />
 	</p>
 
 	<div class="white">
-					<?php $total = $this->get_total(); ?>
+					<?php $totalRegistrants = $this->get_total(); ?>
 					<p>
-			There are total of <strong><?php echo $total; ?></strong> confirmed registrants for Seminar <?php echo date ('Y', strtotime (get_field('seminar_start_date', 'option'))); ?>.</p>
-					<?php if($total): ?>
+			There are total of <strong><?php echo $totalRegistrants; ?></strong> confirmed registrants for Seminar <?php echo date ('Y', strtotime (get_field('seminar_start_date', 'option'))); ?>.</p>
+					<?php if($totalRegistrants): ?>
 					<form name="form-view-rentals-per-class" method="post">
 			<input type="submit" name="get-all" value="Get All Registrants" />
 		</form>
 					<?php endif; ?>
 				</div>
 				
-				<?php if ($total): ?>
+				<?php if ($totalRegistrants): ?>
 				<!-- Registrant levels by class -->
 	<form name="form-view-levels-per-class" method="post">
 
@@ -1028,109 +1028,6 @@ Koprivshtitsa to Sofia: <?php echo $results['k_to_s']; ?><br />
 		<input type="submit" name="view-names-for-rentals" value="Get Info" />
 	</form>
 
-    <!-- Cancel registration by registration ID -->
-    <div style="background-color: #ecb7b7; padding: 20px; border-radius: 5px; border: 1px solid #d85050; margin-bottom: 20px;">
-        <form name="form-cancel-registration-by-id" method="post">
-            <h3>Cancel Registration by Registration ID</h3>
-            <p class="text">Enter a registration number and click View Registration. If information is correct, you can proceed to cancellation.</p>
-            <label for="txt-cancel-registration-by-id">Registration ID *</label> <input
-                    type="text" name="txt-cancel-registration-by-id" id="txt-cancel-registration-by-id" />
-            <input type="submit" name="input-view-cancel-registration-by-id" value="View Registration" />
-        </form>
-        <!-- Cancel Registration by ID code -->
-        <?php
-        // View registrations for a given registration ID (lookup reg_id then show all rows)
-            if ( isset( $_POST['input-view-cancel-registration-by-id'] ) ) {
-                if ( ! current_user_can( 'edit_users' ) ) {
-                    echo '<p>Insufficient permissions.</p>';
-                } else {
-                    $input_id = intval( $_POST['txt-cancel-registration-by-id'] ?? 0 );
-                    if ( $input_id <= 0 ) {
-                        echo '<p>ERROR! No registration ID entered. Please enter a numeric ID.</p>';
-                    } else {
-                        global $wpdb;
-                        $table = $this->table;
-
-                        // get reg_id for the specific row
-                        $row = $wpdb->get_row( $wpdb->prepare(
-                                "SELECT reg_id FROM {$table} WHERE id = %d",
-                                $input_id
-                        ) );
-
-                        if ( ! $row || empty( $row->reg_id ) ) {
-                            echo '<p>No registrations found for that ID.</p>';
-                        } else {
-                            $reg_id = $row->reg_id;
-                            $rows = $wpdb->get_results( $wpdb->prepare(
-                                    "SELECT * FROM {$table} WHERE reg_id = %s ORDER BY id ASC",
-                                    $reg_id
-                            ) );
-
-                            if ( empty( $rows ) ) {
-                                echo '<p>No rows found for registration ID: ' . esc_html( $input_id ) . '</p>';
-                            } else {
-                                echo '<p>Showing registration group for registration ID: ' . esc_html( $input_id ) . '</p>';
-                                echo '<div style="overflow: auto; max-height: 300px;"><table><thead><tr>';
-                                echo '<th>ID</th><th>NAME</th><th>EMAIL</th><th>CONFIRMED</th><th>CANCELLED</th>';
-                                echo '</tr></thead><tbody>';
-                                foreach ( $rows as $r ) {
-                                    $class = ( $r->cancel == 1 ) ? 'red' : ( $r->confirmed != 1 ? 'blue' : '' );
-                                    echo '<tr class="' . esc_attr( $class ) . '">';
-                                    echo '<td>' . esc_html( $r->id ) . '</td>';
-                                    echo '<td>' . esc_html( $r->first_name ) . ' ' . esc_html( $r->last_name ) . '</td>';
-                                    echo '<td>' . esc_html( $r->email ) . '</td>';
-                                    echo '<td>' . ( $r->confirmed ? 'Yes' : 'No' ) . '</td>';
-                                    echo '<td>' . ( $r->cancel ? 'Yes' : 'No' ) . '</td>';
-                                    echo '</tr>';
-                                }
-                                echo '</tbody></table>
-                                    <p>
-                                        <span style="color: #fff; background: #cc0000;">Red: Cancelled</span> |
-                                        <span style="color: #fff; background: blue;">Blue: Not confirmed/Email
-                                            not sent</span>
-                                    </p></div>';
-
-                                // confirmation form (no nonce)
-                                echo '<form method="post" style="margin-top:1em;">';
-                                echo '<input type="hidden" name="cancel_reg_id" value="' . esc_attr( $reg_id ) . '" />';
-                                echo '<input type="hidden" name="cancel_input_id" value="' . esc_attr( $input_id ) . '" />';
-                                echo '<input type="submit" name="confirm-cancel-registration" value="Cancel Registration (mark all rows cancelled)" onclick="return confirm(\'Are you sure you want to cancel this registration group?\');" />';
-                                echo '</form>';
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Confirmation handler: perform the UPDATE
-            if ( isset( $_POST['confirm-cancel-registration'] ) ) {
-                if ( ! current_user_can( 'edit_users' ) ) {
-                    echo '<p>Insufficient permissions.</p>';
-                } else {
-                    $reg_id = sanitize_text_field( $_POST['cancel_reg_id'] ?? '' );
-                    $input_id = sanitize_text_field( $_POST['cancel_input_id'] ?? '' );
-                    if ( $reg_id === '' ) {
-                        echo '<p>Missing registration group id.</p>';
-                    } else {
-                        global $wpdb;
-                        $table = $this->table;
-                        $updated = $wpdb->query( $wpdb->prepare(
-                                "UPDATE {$table} SET cancel = 1 WHERE reg_id = %s",
-                                $reg_id
-                        ) );
-
-                        if ( $updated === false ) {
-                            echo '<p>Database update failed.</p>';
-                        } else {
-                            echo '<p>Marked ' . intval( $updated ) . ' row(s) cancelled for registration ID: ' . esc_html( $input_id ) . '.</p>';
-                        }
-                    }
-                }
-            }
-            ?>
-    </div>
-        <!-- END Cancel Registration by ID code -->
-
 	<!-- Names of registrants who have requested a rental -->
 <!--	<form name="form-view-names-for-flute" method="post">
 		<h3>Registrants interested in Flute class</h3>
@@ -1142,7 +1039,6 @@ Koprivshtitsa to Sofia: <?php echo $results['k_to_s']; ?><br />
 				?>
 				<!-- Registrants with DVD orders -->
 	<form name="form-dvd" method="post">
-
 		<input type="submit" name="get-dvd" value="Get number of DVD orders" />
 	</form>
 				
@@ -1162,10 +1058,113 @@ Koprivshtitsa to Sofia: <?php echo $results['k_to_s']; ?><br />
 				
 				<!-- On-site payments -->
 	<form name="form-onsite-payment" method="post">
-
 		<input type="submit" name="get-onsite-payment"
 			value="Get Registrants with On-site payment option" />
 	</form>
+
+    <!-- Cancel registration by registration ID -->
+    <hr />
+    <div style="background-color: #ecb7b7; padding: 20px; border-radius: 5px; border: 1px solid #d85050; margin-bottom: 20px;">
+        <form name="form-cancel-registration-by-id" method="post">
+            <h3>Cancel Registration by Registration ID</h3>
+            <p class="text">Enter a registration number and click View Registration. If information is correct, you can proceed to cancellation.</p>
+            <label for="txt-cancel-registration-by-id">Registration ID *</label> <input
+                    type="text" name="txt-cancel-registration-by-id" id="txt-cancel-registration-by-id" />
+            <input type="submit" name="input-view-cancel-registration-by-id" value="View Registration" />
+        </form>
+        <!-- Cancel Registration by ID code -->
+        <?php
+        // View registrations for a given registration ID (lookup reg_id then show all rows)
+        if ( isset( $_POST['input-view-cancel-registration-by-id'] ) ) {
+            if ( ! current_user_can( 'edit_users' ) ) {
+                echo '<p>Insufficient permissions.</p>';
+            } else {
+                $input_id = intval( $_POST['txt-cancel-registration-by-id'] ?? 0 );
+                if ( $input_id <= 0 ) {
+                    echo '<p>ERROR! No registration ID entered. Please enter a numeric ID.</p>';
+                } else {
+                    global $wpdb;
+                    $table = $this->table;
+
+                    // get reg_id for the specific row
+                    $row = $wpdb->get_row( $wpdb->prepare(
+                            "SELECT reg_id FROM {$table} WHERE id = %d",
+                            $input_id
+                    ) );
+
+                    if ( ! $row || empty( $row->reg_id ) ) {
+                        echo '<p>No registrations found for that ID.</p>';
+                    } else {
+                        $reg_id = $row->reg_id;
+                        $rows = $wpdb->get_results( $wpdb->prepare(
+                                "SELECT * FROM {$table} WHERE reg_id = %s ORDER BY id ASC",
+                                $reg_id
+                        ) );
+
+                        if ( empty( $rows ) ) {
+                            echo '<p>No rows found for registration ID: ' . esc_html( $input_id ) . '</p>';
+                        } else {
+                            echo '<p>Showing registration group for registration ID: ' . esc_html( $input_id ) . '</p>';
+                            echo '<div style="overflow: auto; max-height: 300px;"><table><thead><tr>';
+                            echo '<th>ID</th><th>NAME</th><th>EMAIL</th><th>CONFIRMED</th><th>CANCELLED</th>';
+                            echo '</tr></thead><tbody>';
+                            foreach ( $rows as $r ) {
+                                $class = ( $r->cancel == 1 ) ? 'red' : ( $r->confirmed != 1 ? 'blue' : '' );
+                                echo '<tr class="' . esc_attr( $class ) . '">';
+                                echo '<td>' . esc_html( $r->id ) . '</td>';
+                                echo '<td>' . esc_html( $r->first_name ) . ' ' . esc_html( $r->last_name ) . '</td>';
+                                echo '<td>' . esc_html( $r->email ) . '</td>';
+                                echo '<td>' . ( $r->confirmed ? 'Yes' : 'No' ) . '</td>';
+                                echo '<td>' . ( $r->cancel ? 'Yes' : 'No' ) . '</td>';
+                                echo '</tr>';
+                            }
+                            echo '</tbody></table>
+                    <p>
+                        <span style="color: #fff; background: #cc0000;">Red: Cancelled</span> |
+                        <span style="color: #fff; background: blue;">Blue: Not confirmed/Email
+                            not sent</span>
+                    </p></div>';
+
+                            // confirmation form (no nonce)
+                            echo '<form method="post" style="margin-top:1em;">';
+                            echo '<input type="hidden" name="cancel_reg_id" value="' . esc_attr( $reg_id ) . '" />';
+                            echo '<input type="hidden" name="cancel_input_id" value="' . esc_attr( $input_id ) . '" />';
+                            echo '<input type="submit" name="confirm-cancel-registration" value="Cancel Registration (mark all rows cancelled)" onclick="return confirm(\'Are you sure you want to cancel this registration group?\');" />';
+                            echo '</form>';
+                        }
+                    }
+                }
+            }
+        }
+
+        // Confirmation handler: perform the UPDATE
+        if ( isset( $_POST['confirm-cancel-registration'] ) ) {
+            if ( ! current_user_can( 'edit_users' ) ) {
+                echo '<p>Insufficient permissions.</p>';
+            } else {
+                $reg_id = sanitize_text_field( $_POST['cancel_reg_id'] ?? '' );
+                $input_id = sanitize_text_field( $_POST['cancel_input_id'] ?? '' );
+                if ( $reg_id === '' ) {
+                    echo '<p>Missing registration group id.</p>';
+                } else {
+                    global $wpdb;
+                    $table = $this->table;
+                    $updated = $wpdb->query( $wpdb->prepare(
+                            "UPDATE {$table} SET cancel = 1 WHERE reg_id = %s",
+                            $reg_id
+                    ) );
+
+                    if ( $updated === false ) {
+                        echo '<p>Database update failed.</p>';
+                    } else {
+                        echo '<p>Marked ' . intval( $updated ) . ' row(s) cancelled for registration ID: ' . esc_html( $input_id ) . '.</p>';
+                    }
+                }
+            }
+        }
+        ?>
+    </div>
+    <!-- END Cancel Registration by ID code -->
 
 
 	<!-- Re-send email -->
