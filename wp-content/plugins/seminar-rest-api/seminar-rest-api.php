@@ -401,16 +401,16 @@ function seminar_save_registration_event( WP_REST_Request $request ) {
     // sanitize event-level fields
     $submitted_at = sanitize_text_field( $payload['submittedAt'] ?? current_time( 'mysql' ) );
     $reg_year = intval( $primary_participant['regYear'] ?? 0 );
-    $address1 = sanitize_text_field( $primary_participant['address1'] ?? '' );
+    $address1 = sanitize_text_field( $primary_participant['address'] ?? '' );
     $address2 = sanitize_text_field( $primary_participant['address2'] ?? '' );
     $city = sanitize_text_field( $primary_participant['city'] ?? '' );
-    $state = sanitize_text_field( $primary_participant['state'] ?? '' );
-    $zip = sanitize_text_field( $primary_participant['zip'] ?? '' );
+    $state = sanitize_text_field( $primary_participant['stateProvince'] ?? '' );
+    $zip = sanitize_text_field( $primary_participant['zipPostal'] ?? '' );
     $country = sanitize_text_field( $primary_participant['country'] ?? '' );
-    $phone = sanitize_text_field( $primary_participant['phone'] ?? '' );
+    $phone = sanitize_text_field( $primary_participant['phoneNumber'] ?? '' );
     $email = sanitize_email( $primary_participant['email'] ?? '' );
-    $emergency = sanitize_text_field( $primary_participant['emergency'] ?? '' );
-    $payment = sanitize_text_field( $primary_participant['payment'] ?? '' );
+    $emergency = sanitize_text_field( $primary_participant['emergencyContact'] ?? '' );
+    $payment = sanitize_text_field( $primary_participant['paymentMethod'] ?? '' );
     $registration_status = 'confirmed';
 
     $table_events = $wpdb->prefix . 'Seminar_registration_events';
