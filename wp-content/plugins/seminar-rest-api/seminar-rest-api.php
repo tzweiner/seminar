@@ -461,8 +461,7 @@ function seminar_save_registration_event( WP_REST_Request $request ) {
             $is_eefc = !empty( $p['eefcMember'] ) ? 1 : 0;
             $is_bulgarian = !empty( $p['isBulgarian'] ) ? 1 : 0;
             $transport = isset( $p['transportation'] ) ? intval( $p['transportation'] ) : -1;
-            $dvd = !empty( $p['dvdSet'] ) ? 1 : -1;
-            $dvd_format = sanitize_text_field( $p['dvdSetFormat'] ?? '' );
+            $media = $p['media'] ? 1 : 0;
             $balance = floatval( $p['total'] ?? 0 );
 
             $wpdb->insert(
@@ -479,11 +478,10 @@ function seminar_save_registration_event( WP_REST_Request $request ) {
                     'is_eefc' => $is_eefc,
                     'is_bulgarian' => $is_bulgarian,
                     'transport' => $transport,
-                    'dvd' => $dvd,
-                    'dvd_format' => $dvd_format,
+                    'media' => $media,
                     'balance' => $balance
                 ],
-                [ '%d', '%d', '%s', '%s', '%d', '%d', '%s', '%s', '%d', '%d', '%d', '%d', '%s', '%f' ]
+                [ '%d', '%d', '%s', '%s', '%d', '%d', '%s', '%s', '%d', '%d', '%d', '%d', '%f' ]
             );
             if ( $wpdb->last_error ) {
                 throw new Exception( 'Registrant insert failed: ' . $wpdb->last_error );
@@ -676,8 +674,7 @@ add_action( 'seminar_send_registration_email_event', function( $registration_eve
 //            $age = sanitize_text_field( $participant['registrationType'] );
 //            $eefc = $participant['eefcMember'] ? 1 : 0;
 //            $payment = sanitize_text_field( $participant['paymentMethod'] );
-//            $dvd = $participant['dvdSet'] ? 1 : 0;
-//            $dvd_format = sanitize_text_field( $participant['dvdSetFormat'] ?? '' );
+//            $media = $p['media'] ? 1 : 0;
 //            $reg_year = intval( $participant['regYear'] );
 //            $balance = floatval( $participant['total'] ?? 0 );
 //
@@ -716,8 +713,7 @@ add_action( 'seminar_send_registration_email_event', function( $registration_eve
 //                    'is_eefc' => $eefc,
 //                    'payment' => $payment,
 //                    'transport' => $transport,
-//                    'dvd' => $dvd,
-//                    'dvd_format' => $dvd_format,
+//                    'media' => $media,
 //                    'cancel' => 0,
 //                    'balance' => $balance
 //                ],
@@ -981,8 +977,8 @@ function send_registration_email( $event, $registrants ) {
             $message .= "\r\n";
         }
 
-        // DVD
-        $message .= "DVD ordered: " . ( intval( $participant->dvd ?? -1 ) === 1 ? 'Yes, ' . strtoupper( $participant->dvd_format ?? '' ) : 'No' ) . "\r\n";
+        // Media
+        $message .= "Video ordered: " . ( intval( $participant->media ?? -1 ) === 1 ? 'Yes' : 'No' ) . "\r\n";
 
         // Gala dinner
         $message .= "Gala dinner: " . ( ! empty( $participant->gala ) ? 'Yes, ' . ( $participant->meal_option ?? '' ) : 'No' ) . "\r\n";
@@ -1013,7 +1009,8 @@ function send_registration_email( $event, $registrants ) {
     // Send email
     $seminar_year = function_exists('get_field') ? get_field( 'seminar_year', 'option' ) : '';
     $site_name = get_bloginfo( 'name' );
-    $admin_email = get_bloginfo( 'admin_email' );
+//    $admin_email = get_bloginfo( 'admin_email' );
+    $admin_email = 'tzvetydosseva@gmail.com';
 
     $headers = [
         'From: ' . $site_name . ( $seminar_year ? ' ' . $seminar_year : '' ) . ' <' . $admin_email . '>',
