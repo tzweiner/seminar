@@ -535,13 +535,21 @@ function seminar_save_registration_event( WP_REST_Request $request ) {
         }
     }
 
-    return new WP_REST_Response( [
+    // Calculate total balance from all participants
+    $total_balance = 0;
+    foreach ($participants as $p) {
+        $total_balance += floatval($p['total'] ?? 0);
+    }
+
+    return new WP_REST_Response([
         'success' => true,
         'message' => 'Registration saved successfully',
         'registration_event_id' => $registration_event_id,
         'primary_registrant_id' => $primary_registrant_id,
-        'participant_count' => $participant_count
-    ], 200 );
+        'participant_count' => $participant_count,
+        'total_balance' => $total_balance,
+        'payment_method' => $payment
+    ], 200);
 }
 
 // Async worker: load event + registrants + classes, call existing send_registration_email(), update event flags
@@ -892,7 +900,7 @@ function send_registration_email( $event, $registrants ) {
     }
 
     // Header
-    $message = "Seminar Registration (Event ID: {$registration_event_id}) - Primary Registrant #" . intval( $primary->registrant_id ) . "\r\n";
+    $message = "Seminar Registration #" . intval( $primary->registrant_id ) . "\r\n";
     $message .= "Email Address: " . $email . "\r\n";
     $message .= "Total: EURO " . get_registration_balance( $registration_event_id, $registrants ) . "\r\n";
     $message .= "Payment: " . ( $event->payment ?? $primary->payment ?? 'N/A' ) . "\r\n\r\n";
@@ -921,7 +929,7 @@ function send_registration_email( $event, $registrants ) {
     $message .= "Thank you and see you in Plovdiv!\r\nLarry Weiner & Dilyana Kurdova\r\nInternational Program Coordinators\r\n\r\n";
 
     // Event-level contact details (primary contact)
-    $message .= "*** PRIMARY CONTACT (Event) ***\r\n";
+    $message .= "*** REGISTRATION " . $primary -> registrant_id . "***\r\n";
     $message .= "Registration Date: " . ( $event->registration_date ?? 'N/A' ) . "\r\n";
     $addr = trim( ($event->address1 ?? '') . ( !empty($event->address2) ? ', ' . $event->address2 : '' ) );
     $message .= "Address: " . ( $addr ?: 'N/A' ) . "\r\n";
@@ -935,7 +943,7 @@ function send_registration_email( $event, $registrants ) {
 
     // Per-registrant details and their classes (attached as ->classes)
     foreach ( $registrants as $index => $participant) {
-        $message .= "\r\n*** REGISTRANT " . intval( $index ) . " ***\r\n";
+        $message .= "\r\n*** REGISTRANT " . (intval( $index ) + 1) . " ***\r\n";
         $message .= "----------------------------------\r\n";
         $message .= "Name: " . trim( ($participant->first_name ?? '') . ' ' . ($participant->last_name ?? '') ) . "\r\n";
 
@@ -1009,8 +1017,8 @@ function send_registration_email( $event, $registrants ) {
     // Send email
     $seminar_year = function_exists('get_field') ? get_field( 'seminar_year', 'option' ) : '';
     $site_name = get_bloginfo( 'name' );
-//    $admin_email = get_bloginfo( 'admin_email' );
-    $admin_email = 'tzvetydosseva@gmail.com';
+    $admin_email = get_bloginfo( 'admin_email' );
+//    $admin_email = 'tzvetydosseva@gmail.com';
 
     $headers = [
         'From: ' . $site_name . ( $seminar_year ? ' ' . $seminar_year : '' ) . ' <' . $admin_email . '>',

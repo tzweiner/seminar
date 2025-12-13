@@ -1,0 +1,9 @@
+/* File: wp-content/plugins/registration-admin/assets/css/admin.css */
+.sr-wrap { max-width: 1100px; }
+.sr-form { margin-bottom: 18px; }
+.sr-button { margin-top: 8px; }
+
+.sr-table { border-collapse: collapse; width: 100%; }
+.sr-table th, .sr-table td { padding: 6px 8px; border: 1px solid #ddd; text-align: left; }
+.sr-table thead tr { background: #333; color: #fff; }
+.sr-table tbody tr:nth-child(odd) { background: #fafafa; }
