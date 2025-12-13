@@ -21,6 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                 <thead>
                 <tr>
                     <th>NAME</th>
+                    <th>REG NUMBER</th>
                     <th>ADDRESS1</th>
                     <th>ADDRESS2</th>
                     <th>CITY</th>
@@ -34,6 +35,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                 <?php foreach ( $display_rows as $r ) : ?>
                     <tr>
                         <td><?php echo $r->name; ?></td>
+                        <td><?php echo $r->registration_number; ?></td>
                         <td><?php echo $r->address1; ?></td>
                         <td><?php echo $r->address2; ?></td>
                         <td><?php echo $r->city; ?></td>

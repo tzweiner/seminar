@@ -84,6 +84,7 @@ if ( ! class_exists( 'Seminar_Registration_Admin' ) ) {
             $first_name = isset( $registrant->first_name ) ? (string) $registrant->first_name : '';
             $last_name  = isset( $registrant->last_name ) ? (string) $registrant->last_name : '';
             $name = trim( $first_name . ' ' . $last_name );
+            $registration_number = isset( $registrant->registration_number ) ? $registrant->registration_number : $registrant->registrant_id;
 
             $address1 = isset( $registrant->address1 ) ? trim( (string) $registrant->address1 ) : '';
             $address2 = isset( $registrant->address2 ) ? trim( (string) $registrant->address2 ) : '';
@@ -93,42 +94,9 @@ if ( ! class_exists( 'Seminar_Registration_Admin' ) ) {
             $country  = isset( $registrant->country ) ? trim( (string) $registrant->country ) : '';
             $email    = isset( $registrant->email ) ? trim( (string) $registrant->email ) : '';
 
-            $other_empty = $address2 === '' && $city === '' && $state === '' && $zip === '' && $country === '' && $email === '';
-            $is_co_note = $address1 !== '' && preg_match( '/\b(?:c\/o|care of|careof|reg(?:istration)?\s*#)\b/i', $address1 );
-
-            if ( $is_co_note && $other_empty ) {
-                return (object) array(
-                    'name'     => esc_html( $name ),
-                    'address1' => esc_html( $address1 ),
-                    'address2' => '',
-                    'city'     => '',
-                    'state'    => '',
-                    'zip'      => '',
-                    'country'  => '',
-                    'email'    => '',
-                );
-            }
-
-            $is_not_primary = isset( $registrant->reg_slot ) && intval( $registrant->reg_slot ) !== 1;
-            if ( $is_not_primary && ! empty( $registrant->registration_event_id ) ) {
-                $primary = $this->getPrimaryRegistrant( $registrant->registration_event_id );
-                if ( $primary ) {
-                    $company_note = '(company of ' . esc_html( trim( ( $primary->first_name ?? '' ) . ' ' . ( $primary->last_name ?? '' ) ) ) . ', reg #' . intval( $primary->registrant_id ) . ')';
-                    return (object) array(
-                        'name'     => esc_html( $name ),
-                        'address1' => $company_note,
-                        'address2' => '',
-                        'city'     => '',
-                        'state'    => '',
-                        'zip'      => '',
-                        'country'  => '',
-                        'email'    => '',
-                    );
-                }
-            }
-
             return (object) array(
                 'name'     => esc_html( $name ),
+                'registration_number'     => esc_html( $registration_number ),
                 'address1' => esc_html( $address1 ),
                 'address2' => esc_html( $address2 ),
                 'city'     => esc_html( $city ),
