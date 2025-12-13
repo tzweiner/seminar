@@ -1,5 +1,5 @@
 <?php
-// File: wp-content/plugins/registration-admin/templates/media-orders.php
+// File: `wp-content/plugins/registration-admin/templates/media-orders.php`
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
@@ -8,13 +8,23 @@ if ( ! defined( 'ABSPATH' ) ) {
     <h1>Registrants with media orders</h1>
     <p>Query: confirmed, not cancelled, with media orders for year <?php echo esc_html( $reg_year ); ?></p>
 
-    <form method="post" class="sr-form">
-        <?php wp_nonce_field( 'sr_media_orders', 'sr_media_orders_nonce' ); ?>
-        <input type="submit" name="view-media-orders-names-and-addresses" value="Get Names &amp; Addresses" class="button button-primary sr-button" />
-    </form>
+    <div class="sr-forms">
+        <form method="post" class="sr-form" style="display:inline-block;margin-right:12px;">
+            <?php wp_nonce_field( 'sr_media_orders', 'sr_media_orders_nonce' ); ?>
+            <input type="submit" name="view-media-orders-names-and-addresses" value="Get Names &amp; Addresses" class="button button-primary sr-button" />
+        </form>
+
+        <?php if ( ! empty( $display_rows ) ) : ?>
+            <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sr-form" style="display:inline-block;">
+                <?php wp_nonce_field( 'sr_media_orders', 'sr_media_orders_nonce' ); ?>
+                <input type="hidden" name="action" value="sr_export_media_orders" />
+                <input type="submit" name="export-media-orders-csv" value="Export CSV (Excel)" class="button sr-button" />
+            </form>
+        <?php endif; ?>
+    </div>
 
     <?php if ( empty( $display_rows ) ) : ?>
-        <p>No registrants found.</p>
+        <p>No registrants found or results not yet generated.</p>
     <?php else : ?>
         <div class="sr-table-wrap">
             <table class="sr-table">

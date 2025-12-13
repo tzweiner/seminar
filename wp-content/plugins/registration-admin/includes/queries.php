@@ -14,19 +14,5 @@ if ( ! class_exists( 'Seminar_Registration_Queries' ) ) {
             SELECT * FROM wp_view_media_orders
         ";
         }
-
-        /**
-         * SQL template for the primary registrant lookup.
-         * Expecting %s for registration_event_id and %d for reg_year.
-         */
-        public static function primary_registrant_by_event_sql() {
-            return "
-            SELECT * FROM {table}
-            WHERE registration_event_id = %s
-              AND is_primary = 1
-              AND reg_year = %d
-            LIMIT 1
-        ";
-        }
     }
 }
