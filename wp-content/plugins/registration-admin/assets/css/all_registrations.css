@@ -1,0 +1,50 @@
+/* Seminar All Registrations Plugin Styles */
+.sr-wrap {
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    max-width: 1200px;
+}
+
+.sr-forms {
+    margin-bottom: 16px;
+}
+
+.sr-form .sr-button {
+    margin-right: 6px;
+}
+
+.sr-table-wrap {
+    overflow: auto;
+    max-height: 600px;
+    border: 1px solid #e5e5e5;
+    background: #fff;
+}
+
+.sr-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.sr-table th, .sr-table td {
+    padding: 8px 10px;
+    border: 1px solid #eee;
+    text-align: left;
+    vertical-align: top;
+    font-size: 12px;
+}
+
+.sr-table thead th {
+    background: #333;
+    color: #fff;
+    font-weight: 700;
+    position: sticky;
+    top: 0;
+}
+
+.sr-table tbody tr:nth-child(odd) {
+    background: #fafafa;
+}
+
+.sr-table tbody tr:hover {
+    background: #f0f8ff;
+}

@@ -27,7 +27,7 @@ if ( ! class_exists( 'Seminar_Registration_Queries' ) ) {
          */
         public static function all_registrants_sql() {
             return "
-            SELECT * FROM wp_Seminar_registrations
+            SELECT * FROM {table}
         ";
         }
     }

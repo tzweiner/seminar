@@ -111,7 +111,7 @@ if ( ! class_exists( 'Seminar_Registration_Confirmed' ) ) {
             $first_name = isset( $registrant->first_name ) ? (string) $registrant->first_name : '';
             $last_name  = isset( $registrant->last_name ) ? (string) $registrant->last_name : '';
             $name = trim( $first_name . ' ' . $last_name );
-            $registration_number = isset( $registrant->registrant_id ) ? intval( $registrant->registrant_id ) : '';
+            $registration_number = isset( $registrant->registration_event_id ) ? intval( $registrant->registration_event_id ) : '';
 
             $address1 = isset( $registrant->address1 ) ? trim( (string) $registrant->address1 ) : '';
             $address2 = isset( $registrant->address2 ) ? trim( (string) $registrant->address2 ) : '';
@@ -167,7 +167,7 @@ if ( ! class_exists( 'Seminar_Registration_Confirmed' ) ) {
             fputcsv( $out, $headers );
 
             foreach ( $rows as $r ) {
-                $registration_number = isset( $r->registrant_id ) ? intval( $r->registrant_id ) : '';
+                $registration_number = isset( $r->registration_event_id ) ? intval( $r->registration_event_id ) : '';
                 $name  = trim( (string) ( $r->first_name ?? '' ) . ' ' . ( $r->last_name ?? '' ) );
                 $email = wp_strip_all_tags( $r->email ?? '' );
                 $address1 = wp_strip_all_tags( $r->address1 ?? '' );
