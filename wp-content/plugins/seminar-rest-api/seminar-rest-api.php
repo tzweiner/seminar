@@ -460,9 +460,17 @@ function seminar_save_registration_event( WP_REST_Request $request ) {
             $age = sanitize_text_field( $p['registrationType'] ?? '' );
             $is_eefc = !empty( $p['eefcMember'] ) ? 1 : 0;
             $is_bulgarian = !empty( $p['isBulgarian'] ) ? 1 : 0;
-            $transport = isset( $p['transportation'] ) ? intval( $p['transportation'] ) : -1;
             $media = $p['media'] ? 1 : 0;
             $balance = floatval( $p['total'] ?? 0 );
+
+            $transport_map = [
+                'no' => 0,
+                'plovdiv-koprivshtitsa' => 1,
+                'koprivshtitsa-sofia' => 2,
+                'both' => 3
+            ];
+            $transport_string = sanitize_text_field( $p['transportation'] ?? 'no' );
+            $transport = $transport_map[$transport_string] ?? 0;
 
             $wpdb->insert(
                 $table_registrants,
