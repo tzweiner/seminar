@@ -900,7 +900,7 @@ function send_registration_email( $event, $registrants ) {
     }
 
     // Header
-    $message = "Seminar Registration #" . intval( $primary->registrant_id ) . "\r\n";
+    $message = "Seminar Registration #" . intval( $primary->registration_event_id ) . "\r\n";
     $message .= "Email Address: " . $email . "\r\n";
     $message .= "Total: EURO " . get_registration_balance( $registration_event_id, $registrants ) . "\r\n";
     $message .= "Payment: " . ( $event->payment ?? $primary->payment ?? 'N/A' ) . "\r\n\r\n";
@@ -1026,7 +1026,7 @@ function send_registration_email( $event, $registrants ) {
         'Cc: ' . $admin_email
     ];
 
-    $subject = 'Folk Seminar Plovdiv ' . trim( $seminar_year ) . ' | Registration #' . intval( $primary->registrant_id );
+    $subject = 'Folk Seminar Plovdiv ' . trim( $seminar_year ) . ' | Registration #' . intval( $primary->registration_event_id );
 
     return (bool) wp_mail( $email, $subject, $message, $headers );
 }

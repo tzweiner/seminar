@@ -30,5 +30,19 @@ if ( ! class_exists( 'Seminar_Registration_Queries' ) ) {
             SELECT * FROM {table}
         ";
         }
+
+        /**
+         * SQL to get registration event by registration_event_id
+         */
+        public static function get_registration_event_sql() {
+            return "SELECT * FROM {registration_events_table} WHERE registration_event_id = %s";
+        }
+
+        /**
+         * SQL to cancel registration by registration_event_id
+         */
+        public static function cancel_registration_by_event_id_sql() {
+            return "UPDATE {registration_events_table} SET registration_status = 'cancelled' WHERE registration_event_id = %s";
+        }
     }
 }

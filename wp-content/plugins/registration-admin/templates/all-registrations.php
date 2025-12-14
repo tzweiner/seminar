@@ -55,7 +55,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                 </thead>
                 <tbody>
                 <?php foreach ( $display_rows as $r ) : ?>
-                    <tr>
+                    <tr class="<?php if ($r->registration_status === 'cancelled') echo 'cancelled'; ?>">
                         <td><?php echo $r->name; ?></td>
                         <td><?php echo $r->registration_number; ?></td>
                         <td><?php echo $r->address1; ?></td>

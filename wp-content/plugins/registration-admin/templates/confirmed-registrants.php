@@ -5,7 +5,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 <div class="wrap sr-wrap">
     <h1>Confirmed Registrants</h1>
-    <p>List for year <?php echo esc_html( $reg_year ); ?></p>
 
     <div class="sr-forms">
         <form method="post" class="sr-form" style="display:inline-block;margin-right:12px;">
@@ -23,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     </div>
 
     <?php if ( empty( $display_rows ) ) : ?>
-        <p>No registrants found or results not yet generated.</p>
+        <p>No registrants found.</p>
     <?php else : ?>
         <div class="sr-table-wrap">
             <table class="sr-table">

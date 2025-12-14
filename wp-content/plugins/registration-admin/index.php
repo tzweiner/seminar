@@ -38,3 +38,7 @@ if ( file_exists( SR_INCLUDES_DIR . '/class-seminar-registration-confirmed.php' 
 if ( file_exists( SR_INCLUDES_DIR . '/class-seminar-all-registrations.php' ) ) {
     require_once SR_INCLUDES_DIR . '/class-seminar-all-registrations.php';
 }
+
+if ( file_exists( SR_INCLUDES_DIR . '/class-cancel-registration-by-id.php' ) ) {
+    require_once SR_INCLUDES_DIR . '/class-cancel-registration-by-id.php';
+}
