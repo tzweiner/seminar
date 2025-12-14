@@ -27,16 +27,20 @@ if ( file_exists( SR_INCLUDES_DIR . '/queries.php' ) ) {
 }
 
 /* load admin classes (each class file will instantiate itself when required) */
-if ( file_exists( SR_INCLUDES_DIR . '/class-seminar-media-orders.php' ) ) {
-    require_once SR_INCLUDES_DIR . '/class-seminar-media-orders.php';
-}
-
 if ( file_exists( SR_INCLUDES_DIR . '/class-seminar-registration-confirmed.php' ) ) {
     require_once SR_INCLUDES_DIR . '/class-seminar-registration-confirmed.php';
 }
 
 if ( file_exists( SR_INCLUDES_DIR . '/class-seminar-all-registrations.php' ) ) {
     require_once SR_INCLUDES_DIR . '/class-seminar-all-registrations.php';
+}
+
+if ( file_exists( SR_INCLUDES_DIR . '/class-seminar-media-orders.php' ) ) {
+    require_once SR_INCLUDES_DIR . '/class-seminar-media-orders.php';
+}
+
+if ( file_exists( SR_INCLUDES_DIR . '/class-seminar-transportation-counts.php' ) ) {
+    require_once SR_INCLUDES_DIR . '/class-seminar-transportation-counts.php';
 }
 
 if ( file_exists( SR_INCLUDES_DIR . '/class-cancel-registration-by-id.php' ) ) {

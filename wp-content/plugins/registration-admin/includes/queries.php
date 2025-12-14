@@ -44,5 +44,12 @@ if ( ! class_exists( 'Seminar_Registration_Queries' ) ) {
         public static function cancel_registration_by_event_id_sql() {
             return "UPDATE {registration_events_table} SET registration_status = 'cancelled' WHERE registration_event_id = %s";
         }
+
+        /**
+         * SQL to get count for transport options
+         */
+        public static function get_transportation_counts_sql() {
+            return "SELECT * FROM {table}";
+        }
     }
 }
