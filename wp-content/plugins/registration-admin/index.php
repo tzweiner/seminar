@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Seminar Registration Admin Tool
-Description: Admin UI for Seminar Registration (media orders + confirmed registrants)
+Description: Admin UI for Seminar Registration. View and export registrant and classes data.
 Version: 2.2
 Author: Tzvety Dosseva
 */
@@ -45,6 +45,10 @@ if ( file_exists( SR_INCLUDES_DIR . '/class-seminar-transportation-counts.php' )
 
 if ( file_exists( SR_INCLUDES_DIR . '/class-seminar-onsite-payment.php' ) ) {
     require_once SR_INCLUDES_DIR . '/class-seminar-onsite-payment.php';
+}
+
+if ( file_exists( SR_INCLUDES_DIR . '/class-seminar-counts-per-class.php' ) ) {
+    require_once SR_INCLUDES_DIR . '/class-seminar-counts-per-class.php';
 }
 
 //if ( file_exists( SR_INCLUDES_DIR . '/class-seminar-bulgarian-registrants.php' ) ) {

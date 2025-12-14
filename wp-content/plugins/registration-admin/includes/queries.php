@@ -65,5 +65,12 @@ if ( ! class_exists( 'Seminar_Registration_Queries' ) ) {
         public static function get_bulgarian_registrants_sql() {
             return "SELECT * FROM {table}";
         }
+
+        /**
+         * SQL to get count per class
+         */
+        public static function get_counts_per_class_sql() {
+            return "SELECT * FROM {table}";
+        }
     }
 }
