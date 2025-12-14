@@ -51,5 +51,19 @@ if ( ! class_exists( 'Seminar_Registration_Queries' ) ) {
         public static function get_transportation_counts_sql() {
             return "SELECT * FROM {table}";
         }
+
+        /**
+         * SQL to get registrants for onsite payment option
+         */
+        public static function get_onsite_payment_sql() {
+            return "SELECT * FROM {table}";
+        }
+
+        /**
+         * SQL to get Bulgarian registrants
+         */
+        public static function get_bulgarian_registrants_sql() {
+            return "SELECT * FROM {table}";
+        }
     }
 }

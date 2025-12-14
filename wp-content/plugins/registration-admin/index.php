@@ -43,6 +43,14 @@ if ( file_exists( SR_INCLUDES_DIR . '/class-seminar-transportation-counts.php' )
     require_once SR_INCLUDES_DIR . '/class-seminar-transportation-counts.php';
 }
 
+if ( file_exists( SR_INCLUDES_DIR . '/class-seminar-onsite-payment.php' ) ) {
+    require_once SR_INCLUDES_DIR . '/class-seminar-onsite-payment.php';
+}
+
+//if ( file_exists( SR_INCLUDES_DIR . '/class-seminar-bulgarian-registrants.php' ) ) {
+//    require_once SR_INCLUDES_DIR . '/class-seminar-bulgarian-registrants.php';
+//}
+
 if ( file_exists( SR_INCLUDES_DIR . '/class-cancel-registration-by-id.php' ) ) {
     require_once SR_INCLUDES_DIR . '/class-cancel-registration-by-id.php';
 }
