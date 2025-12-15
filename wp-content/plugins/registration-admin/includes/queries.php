@@ -72,5 +72,12 @@ if ( ! class_exists( 'Seminar_Registration_Queries' ) ) {
         public static function get_counts_per_class_sql() {
             return "SELECT * FROM {table}";
         }
+
+        /**
+         * SQL to get registrants with rented instruments
+         */
+        public static function get_rented_sql() {
+            return "SELECT * FROM {table}";
+        }
     }
 }

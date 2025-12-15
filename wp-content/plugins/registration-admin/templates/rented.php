@@ -1,24 +1,23 @@
 <?php
-// File: `wp-content/plugins/registration-admin/templates/media-orders.php`
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 ?>
 <div class="wrap sr-wrap">
-    <h1>Registrants with Onsite payment</h1>
-    <p>Gets confirmed registrants' information with Onsite payment option selected.</p>
+    <h1>Registrants with requests to rent an instrument</h1>
+    <p>Gets confirmed registrants' information for those who have requested instrument rental.</p>
 
     <div class="sr-forms">
         <form method="post" class="sr-form" style="display:inline-block;margin-right:12px;">
-            <?php wp_nonce_field( 'sr_onsite_registrants', 'sr_onsite_registrants_nonce' ); ?>
-            <input type="submit" name="view-onsite-registrants" value="Get Registrants with Onside Payment" class="button button-primary sr-button" />
+            <?php wp_nonce_field( 'sr_rented', 'sr_rented_nonce' ); ?>
+            <input type="submit" name="view-rented" value="Get Rentals" class="button button-primary sr-button" />
         </form>
 
         <?php if ( ! empty( $display_rows ) ) : ?>
             <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="sr-form" style="display:inline-block;">
-                <?php wp_nonce_field( 'sr_onsite_registrants', 'sr_onsite_registrants_nonce' ); ?>
-                <input type="hidden" name="action" value="sr_export_onsite_registrants" />
-                <input type="submit" name="export-onsite-registrants-csv" value="Export CSV (Excel)" class="button sr-button" />
+                <?php wp_nonce_field( 'sr_rented', 'sr_rented_nonce' ); ?>
+                <input type="hidden" name="action" value="sr_export_rented" />
+                <input type="submit" name="export-rented-csv" value="Export CSV" class="button sr-button" />
             </form>
         <?php endif; ?>
     </div>
@@ -39,6 +38,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                     <th>ZIP</th>
                     <th>COUNTRY</th>
                     <th>EMAIL</th>
+                    <th>INSTRUMENT</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -53,6 +53,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                         <td><?php echo $r->zip; ?></td>
                         <td><?php echo $r->country; ?></td>
                         <td><?php echo $r->email; ?></td>
+                        <td><?php echo $r->class_name; ?></td>
                     </tr>
                 <?php endforeach; ?>
                 </tbody>

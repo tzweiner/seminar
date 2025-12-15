@@ -51,6 +51,10 @@ if ( file_exists( SR_INCLUDES_DIR . '/class-seminar-counts-per-class.php' ) ) {
     require_once SR_INCLUDES_DIR . '/class-seminar-counts-per-class.php';
 }
 
+if ( file_exists( SR_INCLUDES_DIR . '/class-seminar-rented.php' ) ) {
+    require_once SR_INCLUDES_DIR . '/class-seminar-rented.php';
+}
+
 //if ( file_exists( SR_INCLUDES_DIR . '/class-seminar-bulgarian-registrants.php' ) ) {
 //    require_once SR_INCLUDES_DIR . '/class-seminar-bulgarian-registrants.php';
 //}
