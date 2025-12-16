@@ -153,7 +153,7 @@ if ( ! class_exists( 'Seminar_Registrant_by_ID' ) ) {
                 'age' => esc_html( $age ),
                 'is_eefc' => esc_html( $is_eefc ),
                 'is_bulgarian' => esc_html( $is_bulgarian ),
-                'transport' => esc_html( $transport ),
+                'transport' => $this->transport_label(esc_html( $transport )),
                 'media' => esc_html( $media ),
                 'balance' => esc_html( $balance ),
                 'payment' => esc_html( $payment ),
@@ -166,6 +166,7 @@ if ( ! class_exists( 'Seminar_Registrant_by_ID' ) ) {
 
         private function getRegistrantById( $registrant_id ) {
             global $wpdb;
+            
             if ( ! class_exists( 'Seminar_Registration_Queries' ) ) {
                 return array( 'error' => true, 'message' => 'Queries class not found' );
             }

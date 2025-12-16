@@ -28,6 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     <?php if ( empty( $registrant ) || empty($classes) ) : ?>
         <p>No registrants found.</p>
     <?php else : ?>
+        <h2>Registrant Information</h2>
         <div class="sr-table-wrap">
             <table class="sr-table">
                 <thead>
@@ -83,6 +84,28 @@ if ( ! defined( 'ABSPATH' ) ) {
                         <td><?php echo $r->registration_date; ?></td>
                         <td><?php echo $r->registration_email_sent ? $r->registration_email_sent_timestamp : 'No'; ?></td>
                         <td><?php echo $r->registration_status; ?></td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+
+        <h2>Classes</h2>
+        <div class="sr-table-wrap">
+            <table class="sr-table">
+                <thead>
+                <tr>
+                    <th>CLASS NAME</th>
+                    <th>RENT/BRING</th>
+                    <th>LEVEL</th>
+                </tr>
+                </thead>
+                <tbody>
+                <?php foreach ( $classes as $class ) : ?>
+                    <tr>
+                        <td><?php echo esc_html( $class->class_name ?? '' ); ?></td>
+                        <td><?php echo esc_html( $class->rent  === 1 ? 'Yes' : 'No' ); ?></td>
+                        <td><?php echo esc_html( $class->level ?? '' ); ?></td>
                     </tr>
                 <?php endforeach; ?>
                 </tbody>
