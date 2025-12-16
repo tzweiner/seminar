@@ -86,5 +86,19 @@ if ( ! class_exists( 'Seminar_Registration_Queries' ) ) {
         public static function get_class_level_counts_sql() {
             return "SELECT * FROM {table}";
         }
+
+        /**
+         * SQL to get registrant
+         */
+        public static function get_registrant_sql() {
+            return "SELECT * FROM {registrant_table} WHERE registrant_id = %s";
+        }
+
+        /**
+         * SQL to get registrant's classes
+         */
+        public static function get_registrant_classes_sql() {
+            return "SELECT * FROM {classes_table} WHERE registrant_id = %s";
+        }
     }
 }
