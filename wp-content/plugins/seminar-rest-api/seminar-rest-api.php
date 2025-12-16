@@ -1323,18 +1323,6 @@ add_filter('rest_endpoints', function($endpoints) {
     return $endpoints;
 });
 
-// DELETE THIS - it gets wiped out by functions.php
-//add_action( 'wp_enqueue_scripts', 'seminar_enqueue_scripts' );
-//function seminar_enqueue_scripts() {
-//    // Enqueue your Angular app's main JS file
-//    wp_enqueue_script( 'app-js', 'app.js', array(), '1.0.0', true );
-//
-//    // Localize the script to pass data to Angular
-//    wp_localize_script( 'app-js', 'WP_API_Settings', array(
-//        'root' => esc_url_raw( rest_url() ),
-//        'nonce' => wp_create_nonce( 'wp_rest' )
-//    ) );
-//}
 
 // Security: Restrict REST API write access
 function seminar_restrict_rest_api_access($result, $server, $request) {
@@ -1385,3 +1373,224 @@ function seminar_add_security_headers() {
     }
 }
 add_action('send_headers', 'seminar_add_security_headers');
+
+
+/**
+ * CACHING
+ */
+
+
+// PHP
+
+// --- REST response caching for public GET endpoints ---
+// Configure which routes (regex) to cache and their TTLs (seconds)
+function seminar_rest_cacheable_routes()
+{
+    return [
+        '~^/wp/v2/pages/\d+$~' => DAY_IN_SECONDS * 30, // single pages
+        '~^/wp/v2/pages$~' => DAY_IN_SECONDS * 30,     // pages collection (with query string)
+        '~^/wp/v2/classes$~' => DAY_IN_SECONDS * 30,   // custom post type collection
+        '~^/wp/v2/classes-and-teachers$~' => DAY_IN_SECONDS * 30,   // custom post type collection
+        '~^/wp/v2/dance-teachers$~' => DAY_IN_SECONDS * 30,   // custom post type collection
+        '~^/wp/v2/classes\?~' => DAY_IN_SECONDS * 30,
+        '~^/wp/v2/tags$~' => DAY_IN_SECONDS * 30,            // tags
+        '~^/wp/v2/categories$~' => DAY_IN_SECONDS * 30,      // categories
+        '~^/seminar/v1/nav-menu$~' => DAY_IN_SECONDS * 30,
+        '~^/seminar/v1/top-bar-nav$~' => DAY_IN_SECONDS * 30,
+        '~^/seminar/v1/options$~' => DAY_IN_SECONDS * 30,
+
+    ];
+}
+
+// Build deterministic cache key including version and sorted query params
+function seminar_rest_cache_build_key(\WP_REST_Request $request)
+{
+    $version = seminar_rest_cache_get_version();
+    $method = strtoupper($request->get_method());
+    $route = $request->get_route(); // e.g. /wp/v2/pages/9
+    $query = $request->get_query_params() ?: [];
+    ksort($query);
+    $query_serial = serialize($query);
+    return 'seminar_rest_cache_v' . intval($version) . '_' . md5($method . '|' . $route . '|' . $query_serial);
+}
+
+function seminar_rest_cache_get_version()
+{
+    $v = wp_cache_get('seminar_rest_cache_version', 'seminar_rest');
+    if ($v === false) {
+        $v = get_transient('seminar_rest_cache_version');
+        if ($v === false) {
+            $v = time(); // initial version
+            set_transient('seminar_rest_cache_version', $v, 0);
+        }
+        wp_cache_set('seminar_rest_cache_version', $v, 'seminar_rest', 0);
+    }
+    return $v;
+}
+
+function seminar_rest_cache_bump_version()
+{
+    $v = intval(seminar_rest_cache_get_version());
+    $v++;
+    set_transient('seminar_rest_cache_version', $v, 0);
+    wp_cache_set('seminar_rest_cache_version', $v, 'seminar_rest', 0);
+    return $v;
+}
+
+// Check if route is cacheable (matches regex list)
+function seminar_rest_route_is_cacheable(\WP_REST_Request $request)
+{
+    if (strtoupper($request->get_method()) !== 'GET') {
+        return false;
+    }
+    $route = $request->get_route();
+    $map = seminar_rest_cacheable_routes();
+    foreach ($map as $pattern => $ttl) {
+        if (preg_match($pattern, $route)) {
+            return $ttl;
+        }
+    }
+    return false;
+}
+
+// Safer rest_pre_dispatch that won't cause a fatal error on edge cases
+add_filter('rest_pre_dispatch', function ($result, $server, $request) {
+    try {
+        // Only proceed if route is cacheable
+        $ttl = seminar_rest_route_is_cacheable($request);
+        if (!$ttl) {
+            return $result;
+        }
+
+        // Guard: ensure $request is a WP_REST_Request before using it
+        $refresh = false;
+        if ($request instanceof \WP_REST_Request) {
+            $refresh = filter_var($request->get_param('refresh'), FILTER_VALIDATE_BOOLEAN);
+        }
+
+        // Only allow admin bypass when current_user_can exists and returns true
+        if ($refresh && function_exists('current_user_can') && current_user_can('manage_options')) {
+            return $result; // bypass cache for admins
+        }
+
+        $key = seminar_rest_cache_build_key($request);
+
+        // Try object cache safely
+        $cached = false;
+        if (function_exists('wp_cache_get')) {
+            $cached = wp_cache_get($key, 'seminar_rest');
+        }
+
+        if ($cached !== false) {
+            $resp = new WP_REST_Response($cached['data'], $cached['status']);
+            if (!empty($cached['headers']) && is_array($cached['headers'])) {
+                $resp->set_headers($cached['headers']);
+            }
+            return $resp;
+        }
+
+        // Fallback to transient
+        if (function_exists('get_transient')) {
+            $cached = get_transient($key);
+            if ($cached !== false) {
+                // repopulate object cache for speed if available
+                if (function_exists('wp_cache_set')) {
+                    wp_cache_set($key, $cached, 'seminar_rest', 0);
+                }
+                $resp = new WP_REST_Response($cached['data'], $cached['status']);
+                if (!empty($cached['headers']) && is_array($cached['headers'])) {
+                    $resp->set_headers($cached['headers']);
+                }
+                return $resp;
+            }
+        }
+
+        return $result; // cache miss
+    } catch (\Throwable $e) {
+        // Avoid bringing the site down; log error if debugging is enabled
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('seminar_rest_cache error: ' . $e->getMessage());
+        }
+        return $result;
+    }
+}, 5, 3);
+
+// After dispatch, cache successful responses
+add_filter('rest_post_dispatch', function ($result, $server, $request) {
+    // Only cache if route is eligible
+    $ttl = seminar_rest_route_is_cacheable($request);
+    if (!$ttl) {
+        return $result;
+    }
+
+    // Only cache WP_REST_Response with successful status
+    if ($result instanceof WP_REST_Response) {
+        $status = intval($result->get_status());
+        if ($status >= 200 && $status < 300) {
+            $data = $result->get_data();
+            $headers = method_exists($result, 'get_headers') ? $result->get_headers() : (property_exists($result, 'headers') ? $result->headers : []);
+            $cached = [
+                'data' => $data,
+                'status' => $status,
+                'headers' => $headers
+            ];
+            $key = seminar_rest_cache_build_key($request);
+            // store in both object cache and transient
+            wp_cache_set($key, $cached, 'seminar_rest', 0);
+            set_transient($key, $cached, $ttl);
+        }
+    }
+
+    return $result;
+}, 10, 3);
+
+// Invalidate caches when relevant content changes occur by bumping version
+add_action('save_post', function ($post_id, $post, $update) {
+    // Only bump for public content types that affect frontend
+    $public_types = ['page', 'post', 'classes', 'teachers', 'dance_teachers', 'team', 'acf_options'];
+    if (in_array($post->post_type, $public_types, true)) {
+        seminar_rest_cache_bump_version();
+    }
+}, 10, 3);
+
+add_action('delete_post', function ($post_id) {
+    seminar_rest_cache_bump_version();
+}, 10, 1);
+
+add_action('create_term', function () {
+    seminar_rest_cache_bump_version();
+}, 10, 3);
+add_action('edit_term', function () {
+    seminar_rest_cache_bump_version();
+}, 10, 3);
+add_action('delete_term', function () {
+    seminar_rest_cache_bump_version();
+}, 10, 3);
+
+// Menus changes
+add_action('wp_update_nav_menu', function () {
+    seminar_rest_cache_bump_version();
+});
+add_action('wp_delete_nav_menu', function () {
+    seminar_rest_cache_bump_version();
+});
+
+// Optional: API to programmatically clear cache (callable elsewhere)
+function seminar_rest_cache_clear_all()
+{
+    seminar_rest_cache_bump_version();
+    return true;
+}
+
+// bump cache version when ACF options are saved
+if (function_exists('add_action')) {
+    add_action('acf/save_post', function ($post_id) {
+        if ($post_id === 'options') {
+            seminar_rest_cache_bump_version();
+        }
+    });
+}
+
+/**
+ * END CACHING
+ */
