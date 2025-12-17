@@ -2160,7 +2160,7 @@ Koprivshtitsa to Sofia: <?php echo $results['k_to_s']; ?><br />
 
 if( class_exists('Seminar_Registration_Admin') ) {
 
-	$seminar_registration_admin = new Seminar_Registration_Admin();
+	$seminar_registration_admin = new Seminar_Media_Orders();
 
 	register_activation_hook(__FILE__, array(&$seminar_registration_admin, 'install'));
 

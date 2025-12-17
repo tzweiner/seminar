@@ -34,7 +34,7 @@ if ( ! class_exists('Seminar_Onsite_Payment') ) {
         public function enqueue_assets( $hook ) {
             if ( isset( $_GET['page'] ) && $_GET['page'] === $this->page_slug ) {
                 if ( defined( 'SR_ASSETS_URL' ) ) {
-                    wp_register_style( 'sr-admin-onsite_registrants', SR_ASSETS_URL . '/css/onsite_registrants.css', array(), '0.1' );
+                    wp_register_style( 'sr-admin-onsite_registrants', SR_ASSETS_URL . '/css/common.css', array(), '1.1' );
                     wp_enqueue_style( 'sr-admin-onsite_registrants' );
                 }
             }

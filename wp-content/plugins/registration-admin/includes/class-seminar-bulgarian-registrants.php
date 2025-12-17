@@ -34,7 +34,7 @@ if ( ! class_exists('Seminar_Bulgarian_Registrants') ) {
         public function enqueue_assets( $hook ) {
             if ( isset( $_GET['page'] ) && $_GET['page'] === $this->page_slug ) {
                 if ( defined( 'SR_ASSETS_URL' ) ) {
-                    wp_register_style( 'sr-admin-bulgarian-registrants', SR_ASSETS_URL . '/css/bulgarian_registrants.css', array(), '0.1' );
+                    wp_register_style( 'sr-admin-bulgarian-registrants', SR_ASSETS_URL . '/css/common.css', array(), '1.1' );
                     wp_enqueue_style( 'sr-admin-bulgarian-registrants' );
                 }
             }

@@ -33,7 +33,7 @@ if ( ! class_exists('Seminar_Transportation_Counts') ) {
         public function enqueue_assets( $hook ) {
             if ( isset( $_GET['page'] ) && $_GET['page'] === $this->page_slug ) {
                 if ( defined( 'SR_ASSETS_URL' ) ) {
-                    wp_register_style( 'sr-admin-transportation-counts', SR_ASSETS_URL . '/css/transportation_counts.css', array(), '0.1' );
+                    wp_register_style( 'sr-admin-transportation-counts', SR_ASSETS_URL . '/css/common.css', array(), '1.1' );
                     wp_enqueue_style( 'sr-admin-transportation-counts' );
                 }
             }

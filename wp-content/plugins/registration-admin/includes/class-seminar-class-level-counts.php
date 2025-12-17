@@ -33,7 +33,7 @@ if ( ! class_exists('Seminar_Class_Level_Counts') ) {
         public function enqueue_assets( $hook ) {
             if ( isset( $_GET['page'] ) && $_GET['page'] === $this->page_slug ) {
                 if ( defined( 'SR_ASSETS_URL' ) ) {
-                    wp_register_style( 'sr-admin-class-level-counts', SR_ASSETS_URL . '/css/class_level_counts.css', array(), '1.0' );
+                    wp_register_style( 'sr-admin-class-level-counts', SR_ASSETS_URL . '/css/common.css', array(), '1.2' );
                     wp_enqueue_style( 'sr-admin-class-level-counts' );
                 }
             }
