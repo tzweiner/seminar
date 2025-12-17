@@ -20,21 +20,22 @@ if ( ! class_exists('Seminar_Media_Orders') ) {
         }
 
         public function admin_menu() {
-            $capability = 'edit_users';
-            add_submenu_page(
-                'tools.php',
-                'Seminar Media Orders',
-                'Seminar Media Orders',
-                $capability,
-                $this->page_slug,
-                array( $this, 'render_page' )
-            );
+            //            $capability = 'edit_users';
+//            $capability = 'manage_options';
+//            add_submenu_page(
+//                Seminar_Admin_Tools_Menu::SLUG,
+//                'Seminar Media Orders',
+//                'Seminar Media Orders',
+//                $capability,
+//                $this->page_slug,
+//                array( $this, 'render_page' )
+//            );
         }
 
         public function enqueue_assets( $hook ) {
             if ( isset( $_GET['page'] ) && $_GET['page'] === $this->page_slug ) {
                 if ( defined( 'SR_ASSETS_URL' ) ) {
-                    wp_register_style( 'sr-admin-media', SR_ASSETS_URL . '/css/common.css', array(), '1.2' );
+                    wp_register_style( 'sr-admin-media', SR_ASSETS_URL . '/css/common.css', array(), '1.3' );
                     wp_enqueue_style( 'sr-admin-media' );
                 }
             }
@@ -115,7 +116,7 @@ if ( ! class_exists('Seminar_Media_Orders') ) {
                 wp_die( 'No data to export.' );
             }
 
-            $filename = 'media-orders-' . $this->reg_year . '.csv';
+            $filename = 'video-orders-' . $this->reg_year . '.csv';
 
             while ( ob_get_level() ) {
                 ob_end_clean();
@@ -183,6 +184,6 @@ if ( ! class_exists('Seminar_Media_Orders') ) {
 }
 
 /* instantiate when included (guarded to avoid double instantiation) */
-if ( class_exists( 'Seminar_Media_Orders' ) && ! isset( $seminar_media_orders ) ) {
-    $seminar_media_orders = new Seminar_Media_Orders();
+if ( class_exists( 'Seminar_Media_Orders' ) && ! isset( $seminar_registration_media_orders ) ) {
+    $seminar_registration_media_orders = new Seminar_Media_Orders();
 }

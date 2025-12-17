@@ -26,6 +26,11 @@ if ( file_exists( SR_INCLUDES_DIR . '/queries.php' ) ) {
     require_once SR_INCLUDES_DIR . '/queries.php';
 }
 
+/* main menu item */
+if ( file_exists( SR_INCLUDES_DIR . '/class-seminar-admin-menu.php' ) ) {
+    require_once SR_INCLUDES_DIR . '/class-seminar-admin-menu.php';
+}
+
 /* load admin classes (each class file will instantiate itself when required) */
 if ( file_exists( SR_INCLUDES_DIR . '/class-seminar-registration-confirmed.php' ) ) {
     require_once SR_INCLUDES_DIR . '/class-seminar-registration-confirmed.php';

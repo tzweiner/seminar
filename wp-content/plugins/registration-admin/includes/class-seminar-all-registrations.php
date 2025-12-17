@@ -22,15 +22,16 @@ if ( ! class_exists( 'Seminar_All_Registrations' ) ) {
         }
 
         public function admin_menu() {
-            $capability = 'edit_users';
-            add_submenu_page(
-                'tools.php',
-                'Seminar All Registrations',
-                'Seminar All Registrations',
-                $capability,
-                $this->page_slug,
-                array( $this, 'render_page' )
-            );
+            //            $capability = 'edit_users';
+//            $capability = 'manage_options';
+//            add_submenu_page(
+//                Seminar_Admin_Tools_Menu::SLUG,
+//                'Seminar All Registrations',
+//                'Seminar All Registrations',
+//                $capability,
+//                $this->page_slug,
+//                array( $this, 'render_page' )
+//            );
         }
 
         public function enqueue_assets( $hook ) {

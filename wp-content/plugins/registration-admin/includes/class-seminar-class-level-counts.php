@@ -19,15 +19,16 @@ if ( ! class_exists('Seminar_Class_Level_Counts') ) {
         }
 
         public function admin_menu() {
-            $capability = 'edit_users';
-            add_submenu_page(
-                'tools.php',
-                'Seminar Class Level Counts',
-                'Seminar Class Level Counts',
-                $capability,
-                $this->page_slug,
-                array( $this, 'render_page' )
-            );
+            //            $capability = 'edit_users';
+//            $capability = 'manage_options';
+//            add_submenu_page(
+//                Seminar_Admin_Tools_Menu::SLUG,
+//                'Seminar Class Level Counts',
+//                'Seminar Class Level Counts',
+//                $capability,
+//                $this->page_slug,
+//                array( $this, 'render_page' )
+//            );
         }
 
         public function enqueue_assets( $hook ) {
