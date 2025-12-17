@@ -36,7 +36,6 @@
 @orange: #f36c42;
 @green: #9ed19e;
 @light-green: #e2fbe2;
-@light-green2: rgba(158, 209, 158, 0.22);
 /*@dark-green: #326532;*/
 @dark-green: #326458;
 @lighter-teal: #d0eef2;
@@ -45,6 +44,7 @@
 @teal2: #39c1d2;
 @dark-teal: #9bcad0;
 @red: #ff0000;
+@info: #245b2f;
 
 @linkhover: #1591a0;
 
@@ -209,9 +209,17 @@ fieldset {
 }
 
 /* CUSTOM STYLES */
+.disable-button {
+	opacity: 50%;
+	pointer-events: none;
+}
 
 .red {
 	color: @red!important;
+}
+
+.info {
+	color: @info!important;
 }
 
 .green {
@@ -234,7 +242,15 @@ fieldset {
 	}
 }
 
-.home {	
+.home {
+	.navbar-wrapper {
+		@media @mobile {
+			min-height: 490px;
+		}
+		@media @tablet {
+			min-height: 490px;
+		}
+	}
 	.main-menu-wrapper {
 		.box-shadow-none;
 		z-index: 102;
@@ -246,6 +262,7 @@ fieldset {
 				a {
 					color: @dark-gray;
 					font-size: 16px;
+					line-height: 30px;
 					&:hover {
 						color: @black;
 					}
@@ -826,22 +843,6 @@ fieldset {
 	.person-wrapper-content {
 		display: none;
 	}
-	.registration-details-container {
-		width: 100%;
-		margin: 1% 0;
-		padding: 2%;
-		background: light-green2;
-		
-		table, th, td {
-			border-collapse: collapse;
-			border: 0;
-		}
-		table {
-			td {
-				padding: 2%;
-			}
-		}
-	}
 	.person-wrapper {
 		float: left;
 		width: 30.93%;
@@ -1006,6 +1007,13 @@ fieldset {
 		&.coordinator {
 			
 		}		
+	}
+	.registration-details-container {
+		width: 96%;
+		margin: 4%;
+		background: @lighter-teal;
+		
+		
 	}
 	.previous-years-wrapper {
 		@media @mobile {

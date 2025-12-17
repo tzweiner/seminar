@@ -140,9 +140,9 @@ if ($paged >= 2 || $page >= 2)
 					role="navigation">
 					<div class="navbar-header clearfix">
 						<div class="by-line">
-							<span class="label">Bulgarian Folk Music &<br />Dance Seminar
+							<span class="label">Bulgarian Folk Music &amp; Dance Seminar
 							</span><br />
-							<span class="date">July 18-24, 2018</span>
+							<span class="date">Jul 31 - Aug 6, 2025</span>
 						</div>
 						<button type="button" class="navbar-toggle" data-toggle="collapse"
 							data-target=".navbar-collapse">

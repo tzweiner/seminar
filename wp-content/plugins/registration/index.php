@@ -3,13 +3,13 @@
 Plugin Name: Registration Database Update
 Description: Creates a table for seminar registration
 Version: 1
-Author: Tzvety Weiner
+Author: Tzvety Dosseva
 */
 
 if( ! class_exists('Registration_Database_Update') ) {
 
 	/**
-	 * @author Tz Weiner
+	 * @author Tz Dosseva
 	 */
 	class Registration_Database_Update {
 

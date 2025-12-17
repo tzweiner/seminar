@@ -13,8 +13,8 @@
 				'post_type' => 'hotels',
 				'post_status' => 'publish',
 				'posts_per_page' => - 1,
-				'orderby' => 'date',
-				'order' => 'DESC' 
+				'orderby' => 'menu_order',
+				'order' => 'ASC'
 		);
 		
 		$my_query = new WP_Query ( $args );

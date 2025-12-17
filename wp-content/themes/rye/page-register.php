@@ -9,7 +9,7 @@ $ok_banktransfer = $today <= $banktransfer_closed_date;
 $reg_closed_date = date ( 'Y-m-d', strtotime ( get_field ( 'seminar_end_date', 'option' ) ) - 2880 ); // 2 days before
 $ok_to_register = $today <= $reg_closed_date;
 
-//$ok_to_register = $_GET ["dev"] == 'dev';
+ $ok_to_register = $_GET ["dev"] == 'dev';
 
 if (! $ok_to_register) : // registration is closed	?>
 <?php get_header(); ?>
@@ -116,7 +116,8 @@ if (isset ( $_POST ['go_submit'] ) && $_POST ['go_submit'] != '') :
 				
 				$dvd = ($_POST ['radio-dvd'] == 'no') ? 0 : 1;
 				
-				$fleita = ($_POST ['radio-fleita'] == 'no') ? 0 : 1;
+// 				$fleita = ($_POST ['radio-fleita'] == 'no') ? 0 : 1;
+				$fleita = 0;
 				
 				$gala = ($_POST ['radio-gala'] == 'No') ? 0 : 1;
 				
@@ -129,11 +130,13 @@ if (isset ( $_POST ['go_submit'] ) && $_POST ['go_submit'] != '') :
 					// exit(var_dump($dvd_format));
 				
 				$transport = $_POST ['radio-transport'];
-				if ($transport == 'one-way') {
+				if ($transport == 'pk') {
 					$transport = 1;
-				} else if ($transport == 'round-trip') {
+				} else if ($transport == 'ks') {
 					$transport = 2;
-				} else { // No
+				} else if ($transport == 'pkks') {
+                    $transport = 3;
+                } else { // No
 					$transport = 0;
 				}
 				
@@ -170,7 +173,9 @@ if (isset ( $_POST ['go_submit'] ) && $_POST ['go_submit'] != '') :
 				foreach ( $classes_selected as $class_id ) :
 					if ($_POST ['radio-rent-bring-' . $class_id] == 'rent' && in_array ( 'rent', get_field ( 'rent_bring', $class_id ) )) {
 						$rental_fee = get_field ( 'rental_fee', $class_id );
-						$rental_total += ($rental_fee * $num_days);
+						if ($class_id != '249') {
+						    $rental_total += ($rental_fee * $num_days);
+						}
 					}
 				endforeach
 				;
@@ -208,7 +213,8 @@ if (isset ( $_POST ['go_submit'] ) && $_POST ['go_submit'] != '') :
                transport = $transport,
                dvd = $dvd,
                dvd_format = '$dvd_format',
-               flute = $fleita,
+--                flute = $fleita,
+                flute = 0,
                cancel = 0,
                balance = " . (get_balance_individual ( $num_days, $gala, $age, $eefc, $payment, $dvd, $transport ) + $rental_total);
 				
@@ -364,18 +370,26 @@ if (isset ( $_POST ['go_submit'] ) && $_POST ['go_submit'] != '') :
 					</tr>
 					<?php if (get_field ( 'show_koprivshtitsa_transportation_field' )) : ?>
 					<tr>
-						<td>Transportation To Koprivshtitsa:</td>
-						<td><?php echo ($registrant->transport == '1' ? 'Yes' : 'No'); ?></td>
+						<td>Transportation:</td>
+						<?php if ($registrant->transport == 1): ?>
+						<td>Plovdiv to Koprivshtitsa</td>
+						<?php elseif ($registrant->transport == 2): ?>
+						<td>Koprivshtitsa to Sofia</td>
+						<?php elseif ($registrant->transport == 3): ?>
+                        <td>Plovdiv to Koprivshtitsa and Koprivshtitsa to Sofia</td>
+                        <?php else: ?>
+                        <td>No</td>
+						<?php endif; ?>
 					</tr>
 					<?php endif; ?>
 					<tr>
 						<td>DVD:</td>
 						<td><?php echo ($registrant->dvd == '1' ? 'Yes' : 'No'); if(isset($registrant->dvd_format) && $registrant->dvd_format != ''): echo ': ' . strtoupper($registrant->dvd_format); endif; ?></td>
 					</tr>
-					<tr>
+					<!--<tr>
 						<td>Flute class:</td>
 						<td><?php echo ($registrant->flute == '1' ? 'Yes' : 'No'); ?></td>
-					</tr>
+					</tr>-->
 				</tbody>
 			</table>
 			
@@ -402,7 +416,11 @@ if (isset ( $_POST ['go_submit'] ) && $_POST ['go_submit'] != '') :
 								$rent = $class_row->rent == 1 ? 'would like to rent' : 'bringing my own';
 							}
 							if ($class_row->rent == 1) {
-								$classDets .= $rent . ', daily fee of ' . get_field('rental_fee', $class_id) . ' EURO applies';
+							    if ($class_id == '249') {
+							        $classDets .= $rent . ', daily fee of ' . get_field('rental_fee', $class_id) . ' EURO per day, if available - payable at first tupan class';
+							    } else {
+							        $classDets .= $rent . ', daily fee of ' . get_field('rental_fee', $class_id) . ' EURO applies';
+							    }
 					
 							}
 							else {
@@ -443,31 +461,25 @@ if (isset ( $_POST ['go_submit'] ) && $_POST ['go_submit'] != '') :
 		<input type="hidden" name="registration_id"
 			value="<?php echo $reg_id; ?>" />
 		<div class="form-buttons">
-
+            <div>Please only click one time to prevent duplicate submissions.</div>
 			<div class="frm_submit">
-
-				<p class="submit-button">
+				<p class="submit-button" id="go_confirm_button">
 					<input type="submit" value="Confirm and Complete" name="go_confirm"
 						id="go_confirm" />
 				</p>
-
 			</div>
 
 			<div class="frm_submit">
-
-				<p class="submit-button">
+				<p class="submit-button" id="go_add_button">
 					<input type="submit" value="Add Another Person" name="go_add"
 						id="go_add" />
 				</p>
-
 			</div>
 
 			<div class="frm_submit cancel">
-
-				<p class="submit-button">
+				<p class="submit-button" id="go_cancel_button">
 					<input type="submit" value="Cancel" name="go_cancel" id="go_cancel" />
 				</p>
-
 			</div>
 
 
@@ -501,7 +513,7 @@ $reg_id = $_POST ['registration_id'];
 	<p>
 		We have sent a confirmation email to you. Please refer to that email
 		for further details.<br /> 
-		<span class="red">If you do not receive the confirmation email, please check your "spam" folder.  (We know this has been an issue with Gmail.)</span>
+		<span class="red">If you do not receive the confirmation email, <b>please check your "spam" folder</b>.  (We know this has been an issue with Gmail.)</span>
 		Please <a
 			href="mailto:contact@folkseminarplovdiv.net">contact us</a> if you
 		did not receive the confirmation email.<br /> Thank you and we look
@@ -598,7 +610,7 @@ $reg_id = $_POST ['registration_id'];
 						<input name="radio-gala" value="No" type="radio"
 							<?php if (isset ($_POST['radio-gala']) && $_POST['radio-gala'] == 'No') echo ' checked="checked"'; ?> />
 						No
-						<p class="gala-vkluchena waive green">Gala dinner fee of <?php echo get_gala_dinner_fee(); ?> EURO will be waived because you are attendng for the entire duration of the seminar.</p>
+						<p class="gala-vkluchena waive green">Gala dinner fee of <?php echo get_gala_dinner_fee(); ?> EURO will be waived because you are attending for the entire duration of the seminar.</p>
 						<p class="gala-vkluchena add red">Gala dinner fee of <?php echo get_gala_dinner_fee(); ?> EURO will be added to your total.</p>
 					</div>
 				</div>
@@ -612,7 +624,7 @@ $reg_id = $_POST ['registration_id'];
 							<?php if (isset ($_POST['radio-age']) && $_POST['radio-age'] == 'adult') echo ' checked="checked"'; ?> />
 						Adult<br /> <input name="radio-age" value="student" type="radio"
 							<?php if (isset ($_POST['radio-age']) && $_POST['radio-age'] == 'adult') echo ' checked="checked"'; ?> />
-						Full-Time College Student (see <a href="/faqs">FAQs</a>)<br /> <input
+						Full-Time College Student (see <a href="/faqs" target="_blank">FAQs</a>)<br /> <input
 							name="radio-age" value="child" type="radio"
 							<?php if (isset ($_POST['radio-age']) && $_POST['radio-age'] == 'child') echo ' checked="checked"'; ?> /> Child (born in or after <?php echo get_of_age_year(); ?>)
                   </div>
@@ -620,7 +632,7 @@ $reg_id = $_POST ['registration_id'];
 
 				<div class="input-row">
 					<label for="radio-eefc">* Are you (or is your family) a member of the East European Folklife Center (EEFC) for the <?php echo get_seminar_year(); ?> calendar year? (See <a
-						href="/faqs">FAQs</a>):
+						href="/faqs" target="_blank">FAQs</a>):
 					</label>
 					<div>
 						<input name="radio-eefc" value="yes" type="radio" class="required"
@@ -651,9 +663,7 @@ $reg_id = $_POST ['registration_id'];
 					?>
                   <div class="classes-wrapper">
 						<p class="center bigger">
-							<strong>CLASSES<br /> Please make your selections and indicate
-								your level of proficiency and whether you're renting or bringing
-								an instrument, if applicable. See FAQs.
+							<strong>CLASSES<br /> Please make your selections and indicate your level of proficiency.
 							</strong>
 						</p>
                      <?php
@@ -704,8 +714,16 @@ $level = get_field ( 'class_levels' );
 							foreach ( $rent_bring as $rb_option ) :
 								if ($rb_option == 'rent') {
 									$available = get_available_count_for_rent ( $class_id, $reg_id );
-									if ($available <= 0) continue;
-									$option = 'Rent';
+									if ($available <= 0) {
+									    if ($class_id != '249') {
+									        continue;
+									    } else {
+									        $option = 'Rent (if available)';
+									    }
+									} else {
+									    $option = 'Rent (if available)';
+									}
+
 								} else $option = 'Bring instrument';
 								?>
                            <div class="radioboxes">
@@ -716,20 +734,25 @@ $level = get_field ( 'class_levels' );
 										<?php if (isset($_POST ['radio-rent-bring-' . $class_id]) && $_POST ['radio-rent-bring-' . $class_id] == $rb_option) echo " checked"; ?>
 										disabled /> <label
 										for="radio-<?php echo $rb_option; ?>-<?php echo $class_id; ?>"><?php echo $option; ?></label>
-                              <?php if ($rb_option == 'rent'): ?> 
-                              	<ul style="padding-bottom: 7px;">
-										<li><?php echo $available; ?> available</li>
-										<li class="red">Rental fee of <?php echo get_instrument_rental_fee($class_id); ?> EURO per day will apply</li>
-									</ul>
+                              <?php if ($rb_option == 'rent'): ?>
+                              	<?php if ($class_id != '249'): ?>
+                                     <ul style="padding-bottom: 7px;">
+                                         <li class="info"><?php echo $available; ?> available</li>
+                                         <li class="info">Rental fee of <?php echo get_instrument_rental_fee($class_id); ?> EURO per day applies</li>
+                                     </ul>
+                                <?php else: ?>
+                                    <ul>
+                                        <li class="info">Rental fee of <?php echo get_instrument_rental_fee($class_id); ?> EURO per day, if available - payable at first tupan class</li>
+                                    </ul>
+                                <?php endif; ?>
                               <?php endif; ?>
                            </div>
                         <?php endforeach;
-							if (in_array ( 'rent', $rent_bring ) && $available <= 0) :
-								?>
-								<div class="indent">None available for rental</div>
+							//if (in_array ( 'rent', $rent_bring ) && $available <= 0 && $class_id != '249') : ?>
+								<!-- <div class="indent info">None available for rental</div> -->
 							
 							<?php 
-							endif;
+							//endif;
 						 else:
 							?>
                         <p class="mobile-hide">N/A</p> 
@@ -748,7 +771,7 @@ $level = get_field ( 'class_levels' );
                </div>
 				<!-- END CLASSES -->
 				
-				<div class="input-row">
+<!--				<div class="input-row">
 					<label for="radio-fleita">We have just added a flute class to the program. Are you interested in taking the flute class?</label>
 					<div>
 						<input name="radio-fleita" value="yes" type="radio"
@@ -757,7 +780,7 @@ $level = get_field ( 'class_levels' );
 								<?php if (!isset ($_POST['radio-fleita']) || $_POST['radio-fleita'] == 'no') echo ' checked="checked"'; ?> />
 							No
 					</div>
-				</div>
+				</div>-->
 
                <?php if (get_field ('show_dvd_available_field')): ?>
                <div class="input-row">
@@ -792,22 +815,21 @@ $level = get_field ( 'class_levels' );
                <?php
 				
 if (get_field ( 'show_koprivshtitsa_transportation_field' )) :
-					$fee = get_field ( 'koprivshtitsa_transportation_fee' );
+					$fee = get_field ( 'transportation_fee' );
 					?>
                <div class="input-row">
-					<label for="radio-transport">* <?php the_field ('question_text_koprivshtitsa_transporation'); ?></label>
-					<div>
-						<input name="radio-transport" value="one-way" type="radio"
-							class="required"
-							<?php if (isset ($_POST['radio-transport']) && $_POST['radio-transport'] == 'yes') echo ' checked="checked"'; ?> /> One-way (Add <?php echo $fee; ?> EURO)<br />
-<!-- 						<input name="radio-transport" value="round-trip" type="radio" -->
-<!-- 							class="required" -->
-							<?php //if (isset ($_POST['radio-transport']) && $_POST['radio-transport'] == 'yes') echo ' checked="checked"'; ?><!-- Round Trip (Add --><?php //echo 2 * $fee; ?><!-- EURO)<br />-->
-						<input name="radio-transport" value="no" type="radio"
-							<?php if (isset ($_POST['radio-transport']) && $_POST['radio-transport'] == 'no') echo ' checked="checked"'; ?> />
-						No
-					</div>
-				</div>
+                    <label for="radio-transport">* <?php the_field ('transportation_question_text'); ?></label>
+                    <div>
+                        <input name="radio-transport" value="pk" type="radio" class="required"
+                            <?php if (isset ($_POST['radio-transport']) && $_POST['radio-transport'] == 'pk') echo ' checked="checked"'; ?> /> Bus from Plovdiv to Koprivshtitsa<br />
+                        <input name="radio-transport" value="ks" type="radio" class="required"
+                            <?php if (isset ($_POST['radio-transport']) && $_POST['radio-transport'] == 'ks') echo ' checked="checked"'; ?> /> Bus from Koprivshtitsa to Sofia<br />
+                           <input name="radio-transport" value="pkks" type="radio" class="required"
+                               <?php if (isset ($_POST['radio-transport']) && $_POST['radio-transport'] == 'pkks') echo ' checked="checked"'; ?> /> Bus from Plovdiv to Koprivshtitsa AND bus from Koprivshtitsa to Sofia<br />
+                        <input name="radio-transport" value="no" type="radio"
+                            <?php if (isset ($_POST['radio-transport']) && $_POST['radio-transport'] == 'no') echo ' checked="checked"'; ?> /> No, thanks
+                    </div>
+                </div>
                <?php endif; ?>
 
                <div class="feedback">Please correct errors on form.</div>
@@ -815,7 +837,7 @@ if (get_field ( 'show_koprivshtitsa_transportation_field' )) :
 				<div class="form-buttons">
 					<div class="frm_submit">
 
-						<p class="submit-button">
+						<p class="submit-button" id="go_submit_button">
 							<input type="submit" value="Continue" name="go_submit"
 								id="go_submit" />
 						</p>
@@ -824,7 +846,7 @@ if (get_field ( 'show_koprivshtitsa_transportation_field' )) :
 
 					<div class="frm_submit">
 
-						<p class="submit-button">
+						<p class="submit-button" id="go_clear_button">
 							<input type="reset" value="Clear Form" name="go_clear"
 								id="go_clear" />
 						</p>
@@ -833,7 +855,7 @@ if (get_field ( 'show_koprivshtitsa_transportation_field' )) :
 
 					<div class="frm_submit cancel">
 
-						<p class="submit-button">
+						<p class="submit-button" id="go_cancel_button">
 							<input type="submit" value="Cancel" name="go_cancel"
 								id="go_cancel" />
 						</p>
@@ -1007,7 +1029,7 @@ $pdf = get_field ( 'paper_registration_pdf', 'option' );
 						<input name="radio-gala" value="No" type="radio"
 							<?php if (isset ($_POST['radio-gala']) && $_POST['radio-gala'] == 'No') echo ' checked="checked"'; ?> />
 						No
-						<p class="gala-vkluchena waive green">Gala dinner fee of <?php echo get_gala_dinner_fee(); ?> EURO will be waived because you are attendng for the entire duration of the seminar.</p>
+						<p class="gala-vkluchena waive green">Gala dinner fee of <?php echo get_gala_dinner_fee(); ?> EURO will be waived because you are attending for the entire duration of the seminar.</p>
 						<p class="gala-vkluchena add red">Gala dinner fee of <?php echo get_gala_dinner_fee(); ?> EURO will be added to your total.</p>
 					</div>
 				</div>
@@ -1021,7 +1043,7 @@ $pdf = get_field ( 'paper_registration_pdf', 'option' );
 							<?php if (isset ($_POST['radio-age']) && $_POST['radio-age'] == 'adult') echo ' checked="checked"'; ?> />
 						Adult<br /> <input name="radio-age" value="student" type="radio"
 							<?php if (isset ($_POST['radio-age']) && $_POST['radio-age'] == 'adult') echo ' checked="checked"'; ?> />
-						Full-Time College Student (see <a href="/faqs">FAQs</a>)<br /> <input
+						Full-Time College Student (see <a href="/faqs" target="_blank">FAQs</a>)<br /> <input
 							name="radio-age" value="child" type="radio"
 							<?php if (isset ($_POST['radio-age']) && $_POST['radio-age'] == 'child') echo ' checked="checked"'; ?> /> Child (born in or after <?php echo get_of_age_year(); ?>)
                   </div>
@@ -1029,7 +1051,7 @@ $pdf = get_field ( 'paper_registration_pdf', 'option' );
 
 				<div class="input-row">
 					<label for="radio-eefc">* Are you (or is your family) a member of the East European Folklife Center (EEFC) for the <?php echo get_seminar_year(); ?> calendar year? (See <a
-						href="/faqs">FAQs</a>):
+						href="/faqs" target="_blank">FAQs</a>):
 					</label>
 					<div>
 						<input name="radio-eefc" value="yes" type="radio" class="required"
@@ -1076,9 +1098,7 @@ $pdf = get_field ( 'paper_registration_pdf', 'option' );
 					?>
                   <div class="classes-wrapper">
 						<p class="center bigger">
-							<strong>CLASSES<br /> Please make your selections and indicate
-								your level of proficiency and whether you're renting or bringing
-								an instrument, if applicable. See FAQs.
+							<strong>CLASSES<br /> Please make your selections and indicate your level of proficiency.
 							</strong>
 						</p>
                      <?php
@@ -1128,17 +1148,23 @@ endforeach
 							<div class="class-bring-rent one-third">
                         <?php
 						
-$rent_bring = get_field ( 'rent_bring' );
+                        $rent_bring = get_field ( 'rent_bring' );
 						if ($rent_bring) :
 							foreach ( $rent_bring as $rb_option ) :
-								if ($rb_option == 'rent') {
-									$available = get_available_count_for_rent ( $class_id );
-									if ($available <= 0)
-										continue;
-									$option = 'Rent';
-								} else
-									$option = 'Bring instrument';
-								?>
+                                if ($rb_option == 'rent') {
+                                    $available = get_available_count_for_rent ( $class_id, $reg_id );
+                                    if ($available <= 0) {
+                                        if ($class_id != '249') {
+                                            continue;
+                                        } else {
+                                            $option = 'Rent (if available)';
+                                        }
+                                    } else {
+                                        $option = 'Rent (if available)';
+                                    }
+
+                                } else $option = 'Bring instrument';
+                                ?>
                            <div class="radioboxes">
 									<input type="radio"
 										name="radio-rent-bring-<?php echo $class_id; ?>"
@@ -1147,24 +1173,26 @@ $rent_bring = get_field ( 'rent_bring' );
 										<?php if (isset($_POST ['radio-rent-bring-' . $class_id]) && $_POST ['radio-rent-bring-' . $class_id] == $rb_option) echo " checked"; ?>
 										disabled /> <label
 										for="radio-<?php echo $rb_option; ?>-<?php echo $class_id; ?>"><?php echo $option; ?></label>
-                              <?php if ($rb_option == 'rent'): ?> 
-                              	<ul>
-										<li><?php echo $available; ?> available</li>
-										<li class="red">Rental fee of <?php echo get_instrument_rental_fee($class_id); ?> EURO per day will apply</li>
-									</ul>
+                              <?php if ($rb_option == 'rent'): ?>
+                                <?php if ($class_id != '249'): ?>
+                                     <ul style="padding-bottom: 7px;">
+                                         <li class="info"><?php echo $available; ?> available</li>
+                                         <li class="info">Rental fee of <?php echo get_instrument_rental_fee($class_id); ?> EURO per day applies</li>
+                                     </ul>
+                                <?php else: ?>
+                                    <ul>
+                                        <li class="info">Rental fee of <?php echo get_instrument_rental_fee($class_id); ?> EURO per day, if available - payable at first tupan class</li>
+                                    </ul>
+                                <?php endif; ?>
                               <?php endif; ?>
                            </div>
-                        <?php
-							
-endforeach
-							;
-							if (in_array ( 'rent', $rent_bring ) && $available <= 0) :
-								?>
-								<div class="indent">None available for rental</div>
-							
-							<?php 
-							endif;
-						 else :
+                        <?php endforeach;
+							//if (in_array ( 'rent', $rent_bring ) && $available <= 0 && $class_id != '249') : ?>
+								<!-- <div class="indent info">None available for rental</div> -->
+
+							<?php
+							//endif;
+						 else:
 							?>
                         N/A
 								<p class="mobile-hide"></p>
@@ -1186,17 +1214,6 @@ endforeach
 				?>
                </div>
 				<!-- END CLASSES -->
-				
-				<div class="input-row">
-					<label for="radio-fleita">We have just added a flute class to the program. Are you interested in taking the flute class?</label>
-					<div>
-						<input name="radio-fleita" value="yes" type="radio"
-								<?php if (isset ($_POST['radio-fleita']) && $_POST['radio-fleita'] == 'yes') echo ' checked="checked"'; ?> />
-							Yes<br /> <input name="radio-fleita" value="no" type="radio"
-								<?php if (!isset ($_POST['radio-fleita']) || $_POST['radio-fleita'] == 'no') echo ' checked="checked"'; ?> />
-							No
-					</div>
-				</div>
 
                <?php if (get_field ('show_dvd_available_field')): ?>
                <div class="input-row">
@@ -1231,20 +1248,19 @@ endforeach
                <?php
 				
 if (get_field ( 'show_koprivshtitsa_transportation_field' )) :
-					$fee = get_field ( 'koprivshtitsa_transportation_fee' );
+					$fee = get_field ( 'transportation_fee' );
 					?>
                <div class="input-row">
-					<label for="radio-transport">* <?php the_field ('question_text_koprivshtitsa_transporation'); ?></label>
+					<label for="radio-transport">* <?php the_field ('transportation_question_text'); ?></label>
 					<div>
-						<input name="radio-transport" value="one-way" type="radio"
-							class="required"
-							<?php if (isset ($_POST['radio-transport']) && $_POST['radio-transport'] == 'yes') echo ' checked="checked"'; ?> /> One-way (Add <?php echo $fee; ?> EURO)<br />
-						<!-- <input name="radio-transport" value="round-trip" type="radio"
-							class="required" -->
-							<?php //if (isset ($_POST['radio-transport']) && $_POST['radio-transport'] == 'yes') echo ' checked="checked"'; ?><!-- /> Round Trip (Add --><?php //echo 2 * $fee; ?><!-- EURO)<br /> -->
+						<input name="radio-transport" value="pk" type="radio" class="required"
+							<?php if (isset ($_POST['radio-transport']) && $_POST['radio-transport'] == 'pk') echo ' checked="checked"'; ?> /> Bus from Plovdiv to Koprivshtitsa<br />
+						<input name="radio-transport" value="ks" type="radio" class="required"
+							<?php if (isset ($_POST['radio-transport']) && $_POST['radio-transport'] == 'ks') echo ' checked="checked"'; ?> /> Bus from Koprivshtitsa to Sofia<br />
+                        <input name="radio-transport" value="pkks" type="radio" class="required"
+                            <?php if (isset ($_POST['radio-transport']) && $_POST['radio-transport'] == 'pkks') echo ' checked="checked"'; ?> /> Bus from Plovdiv to Koprivshtitsa AND bus from Koprivshtitsa to Sofia<br />
 						<input name="radio-transport" value="no" type="radio"
-							<?php if (isset ($_POST['radio-transport']) && $_POST['radio-transport'] == 'no') echo ' checked="checked"'; ?> />
-						No
+							<?php if (isset ($_POST['radio-transport']) && $_POST['radio-transport'] == 'no') echo ' checked="checked"'; ?> /> No, thanks
 					</div>
 				</div>
                <?php endif; ?>
@@ -1258,7 +1274,7 @@ if (get_field ( 'show_koprivshtitsa_transportation_field' )) :
 				<div class="form-buttons">
 					<div class="frm_submit">
 
-						<p class="submit-button">
+						<p class="submit-button" id="go_submit_button">
 							<input type="submit" value="Continue" name="go_submit"
 								id="go_submit" />
 						</p>
@@ -1267,7 +1283,7 @@ if (get_field ( 'show_koprivshtitsa_transportation_field' )) :
 
 					<div class="frm_submit">
 
-						<p class="submit-button">
+						<p class="submit-button" id="go_clear_button">
 							<input type="reset" value="Clear Form" name="go_clear"
 								id="go_clear" />
 						</p>

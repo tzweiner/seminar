@@ -62,6 +62,7 @@ function acf_load_select_actions( $field ) {
 }
 add_filter('acf/load_field/key=field_547a4bbc6c83f', 'acf_load_select_actions');	// Action sub-field
 
+
 // Populate Classes select on Teacher meta
 function acf_load_select_actions_teachers( $field ) {
 
@@ -289,7 +290,7 @@ add_shortcode( 'prices_onsite', 'prices_onsite_func' );
 // daily schedule output
 // [daily_schedule_table]
 function daily_schedule_table_func ( $atts ){
-	$html = '<table><tbody>';
+	$html = '<table class="scheduleTable"><tbody>';
 	
 	$args = array (
 			'post_type' 	=> 'slots',
@@ -371,7 +372,7 @@ function daily_schedule_table_func ( $atts ){
 add_shortcode( 'daily_schedule_table', 'daily_schedule_table_func' );
 
 
-// soubd bites on Program page
+// sound bites on Program page
 // [sound_bites]
 function sound_bites_func ( $atts ){
 	
@@ -832,11 +833,11 @@ function get_balance_individual ($num_days, $gala, $age, $eefc, $payment, $dvd, 
 		$balance += get_field ('dvd_price', $register_page_obj->ID);
 	}
 	
-	if ($transport > 0) {
-		$balance += $transport * get_field ('koprivshtitsa_transportation_fee', $register_page_obj->ID);
-	}
+// 	if ($transport > 0) {
+// 		$balance += $transport * get_field ('transportation_fee', $register_page_obj->ID);
+// 	}
 	
-	if ($gala && $num_days < 6) {
+	if ($gala) {
 		$balance += get_gala_dinner_fee(); 
 	}
 
@@ -960,7 +961,11 @@ function sendRegisterEmail (&$registration) {
 								$rent = $class_row->rent == 1 ? 'would like to rent' : 'bringing my own';
 							}
 							if ($class_row->rent) {
-								$message .= $rent . ', daily fee of ' . get_field('rental_fee', $class_id) . ' EURO applies';
+							    if ($class_id == '249') {
+							        $message .= $rent . ', daily fee of ' . get_field('rental_fee', $class_id) . ' EURO per day, if available - payable at first tupan class';
+							    } else {
+							        $message .= $rent . ', daily fee of ' . get_field('rental_fee', $class_id) . ' EURO applies';
+							    }
 								
 							}
 						}
@@ -1002,14 +1007,17 @@ function sendRegisterEmail (&$registration) {
 		$transport = $row->transport;
 		if (get_field('show_koprivshtitsa_transportation_field') && $transport != -1) {
 			if ($transport == 0) {
-				$message .= "Transport to Koprivshtitsa: No" ."\r\n";
+				$message .= "Transportation: No" ."\r\n";
 			}
 			else if ($transport == 1) {
-				$message .= "Transport to Koprivshtitsa: One-way" ."\r\n";
+				$message .= "Transportation: Plovdiv to Koprivshtitsa" ."\r\n";
 			}
 			else if ($transport == 2) {
-				$message .= "Transport to Koprivshtitsa: Round trip" ."\r\n";
+				$message .= "Transportation: Koprivshtitsa to Sofia" ."\r\n";
 			}
+			else if ($transport == 3) {
+                $message .= "Transportation: Plovdiv to Koprivshtitsa and Koprivshtitsa to Sofia" ."\r\n";
+            }
 		}
 		
 		$message .= "Days attending: $row->num_days" ."\r\n";
@@ -1018,8 +1026,8 @@ function sendRegisterEmail (&$registration) {
 		$eefc = $row->is_eefc == 1 ? 'Yes' : 'No';
 		$message .= "EEFC member: $eefc" . "\r\n";
 		
-		$flute = $row->flute == 1 ? 'Yes' : 'No';
-		$message .= "Interested in flute class: $flute" . "\r\n";
+// 		$flute = $row->flute == 1 ? 'Yes' : 'No';
+// 		$message .= "Interested in flute class: $flute" . "\r\n";
 		
 		if ($index == 0) {
 			$message .= "Payment: $primary->payment" . "\r\n";

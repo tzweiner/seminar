@@ -1,0 +1,56 @@
+[05-Aug-2022 13:35:59 UTC] PHP Fatal error:  Call to undefined function add_action() in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php on line 60
+[05-Sep-2023 09:09:19 UTC] PHP Fatal error:  Call to undefined function add_action() in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php on line 60
+[01-Apr-2024 04:40:25 UTC] PHP Fatal error:  Call to undefined function add_action() in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php on line 60
+[10-May-2024 01:34:01 UTC] PHP Fatal error:  Call to undefined function add_action() in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php on line 60
+[30-Jun-2024 12:43:17 UTC] PHP Fatal error:  Call to undefined function add_action() in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php on line 60
+[05-Jul-2024 02:43:20 UTC] PHP Fatal error:  Call to undefined function add_action() in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php on line 60
+[04-Jan-2025 05:57:31 UTC] PHP Fatal error:  Call to undefined function add_action() in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php on line 60
+[20-Jan-2025 22:42:23 UTC] PHP Fatal error:  Call to undefined function add_action() in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php on line 60
+[12-Feb-2025 12:48:44 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function add_action() in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php:60
+Stack trace:
+#0 {main}
+  thrown in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php on line 60
+[28-Mar-2025 02:00:24 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function add_action() in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php:60
+Stack trace:
+#0 {main}
+  thrown in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php on line 60
+[28-Apr-2025 19:29:07 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function add_action() in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php:60
+Stack trace:
+#0 {main}
+  thrown in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php on line 60
+[29-Apr-2025 18:17:28 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function add_action() in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php:60
+Stack trace:
+#0 {main}
+  thrown in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php on line 60
+[05-Jun-2025 22:16:18 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function add_action() in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php:60
+Stack trace:
+#0 {main}
+  thrown in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php on line 60
+[28-Jun-2025 04:04:24 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function add_action() in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php:60
+Stack trace:
+#0 {main}
+  thrown in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php on line 60
+[30-Aug-2025 21:51:06 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function add_action() in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php:60
+Stack trace:
+#0 {main}
+  thrown in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php on line 60
+[08-Sep-2025 13:58:02 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function add_action() in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php:60
+Stack trace:
+#0 {main}
+  thrown in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php on line 60
+[22-Sep-2025 17:24:28 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function add_action() in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php:60
+Stack trace:
+#0 {main}
+  thrown in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php on line 60
+[02-Oct-2025 06:59:13 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function add_action() in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php:60
+Stack trace:
+#0 {main}
+  thrown in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php on line 60
+[02-Oct-2025 07:00:31 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function add_action() in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php:60
+Stack trace:
+#0 {main}
+  thrown in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php on line 60
+[05-Nov-2025 07:20:19 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function add_action() in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php:60
+Stack trace:
+#0 {main}
+  thrown in /home/k0y4oxdn39tm/public_html/wp-content/plugins/hello.php on line 60

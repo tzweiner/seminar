@@ -187,7 +187,7 @@ $(document).ready(function() {
 	
 	
 	$('#register-form').on ('submit', function (e) {
-		
+
 		var $form = $(this);
 		var errors = validateForm('register-form');
 		
@@ -231,6 +231,8 @@ $(document).ready(function() {
 			}
 			
 			$('.feedback').fadeIn(200);
+		} else {
+			$('#go_submit_button').addClass('disable-button');
 		}
 	});
 	
@@ -283,9 +285,17 @@ $(document).ready(function() {
 					$('.error-password-mismatch').show();
 				}
 				$('.feedback').fadeIn(200);
+			} else {
+				$('#go_clear_button').addClass('disable-button');
 			}
 		}
 		
+	});
+
+	$('#continue-form').on('submit', function (e) {
+		$('#go_add_button').addClass('disable-button');
+		$('#go_confirm_button').addClass('disable-button');
+		$('#go_cancel_button').addClass('disable-button');
 	});
 	
 	// click on Expand All
@@ -378,10 +388,11 @@ $(document).ready(function() {
 		if ($('input[name="radio-gala"]:checked').val() == 'Yes') {
 			$('input[name="radio-gala-option"]:first-child').addClass('required');
 			$('.gala-option').addClass ('show-me');
-			if (days == 6) {
-				$('.gala-vkluchena.waive').addClass ('selected');
-			}
-			else if (days){
+			// if (days == 6) {
+			// 	$('.gala-vkluchena.waive').addClass ('selected');
+			// }
+			// else
+			if (days){
 				$('.gala-vkluchena.add').addClass ('selected');
 			}
 		}
@@ -402,10 +413,11 @@ $(document).ready(function() {
 			return;
 		}
 		if (gala == 'Yes') {
-			if (selection == 6) {
-				$('.gala-vkluchena.waive').addClass ('selected');
-			}
-			else if (selection) {
+			// if (selection == 6) {
+			// 	$('.gala-vkluchena.waive').addClass ('selected');
+			// }
+			// else
+			if (selection) {
 				$('.gala-vkluchena.add').addClass ('selected');
 			}
 		}
