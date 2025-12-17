@@ -230,13 +230,11 @@ function daily_schedule_table_func ( $atts ){
             // print slots times for this class in a table row
             $html .= '<tr><th class="left">' . $class_name . '</th>';
             foreach ($slots as $slot) {
-                $slot_title = $slot->post_title;
-
-                if (array_key_exists ($slot->post_title, $class_data)) {
-                    $html .= '<td>' . $class_data [$slot->post_title] . '</td>';
-                }
-                else {
-                    $html .= '<td>&nbsp;</td>';
+                if (array_key_exists($slot->post_title, $class_data)) {
+                    $html .= '<td data-label="' . esc_attr(get_clean_slot_name($slot->post_title)) . '">'
+                        . $class_data[$slot->post_title] . '</td>';
+                } else {
+                    $html .= '<td data-label="' . esc_attr(get_clean_slot_name($slot->post_title)) . '">&nbsp;</td>';
                 }
 
             }
