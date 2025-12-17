@@ -35,7 +35,12 @@ if ( ! class_exists( 'Seminar_Registration_Queries' ) ) {
          * SQL to get registration event by registration_event_id
          */
         public static function get_registration_event_sql() {
-            return "SELECT * FROM {registration_events_table} WHERE registration_event_id = %s";
+            return "SELECT r.*, e.first_name, e.last_name
+                    FROM {registration_events_table} AS r
+                    INNER JOIN {registrants_table} AS e
+                        ON r.registration_event_id = e.registration_event_id
+                    WHERE r.registration_event_id = %s;
+            ";
         }
 
         /**

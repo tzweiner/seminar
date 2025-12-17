@@ -5,8 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 <div class="wrap sr-wrap">
-    <h1>Registrants with media orders</h1>
-    <p>Query: confirmed, not cancelled, with media orders for year <?php echo esc_html( $reg_year ); ?></p>
+    <h1>Registrants with video orders</h1>
 
     <div class="sr-forms">
         <form method="post" class="sr-form" style="display:inline-block;margin-right:12px;">

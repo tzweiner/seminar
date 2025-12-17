@@ -33,6 +33,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                 <thead>
                 <tr>
                     <th>REGISTRATION NUMBER</th>
+                    <th>NAME</th>
                     <th>EMAIL</th>
                     <th>STATUS</th>
                 </tr>
@@ -42,6 +43,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                     <?php $class = ( $r->registration_status == 'cancelled' ) ? 'cancelled' : ''; ?>
                     <tr class="<?php echo esc_attr( $class ); ?>">
                         <td><?php echo esc_html( $r->registration_event_id ); ?></td>
+                        <td><?php echo esc_html( $r->first_name ) . ' ' . esc_html($r->last_name); ?></td>
                         <td><?php echo esc_html( $r->email ); ?></td>
                         <td><?php echo $r->registration_status; ?></td>
                     </tr>
