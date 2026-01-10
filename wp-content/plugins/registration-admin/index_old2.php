@@ -992,11 +992,9 @@ Koprivshtitsa to Sofia: <?php echo $results['k_to_s']; ?><br />
 				?>
 				<!-- Registrants with transportation orders -->
 	<form name="form-transport" method="post">
-
 		<input type="submit" name="get-transport"
 			value="Get Transportation orders" />
 	</form>
-				
 				<?php endif; ?>
 				
 				<!-- On-site payments -->
@@ -1108,16 +1106,6 @@ Koprivshtitsa to Sofia: <?php echo $results['k_to_s']; ?><br />
         ?>
     </div>
     <!-- END Cancel Registration by ID code -->
-
-
-	<!-- Re-send email -->
-	<!-- <form name="form-send-email" method="post">
-					<h3>Re-send registration email</h3>
-					<p class="text">Enter a registration number and click Send Email to re-send registration email.</p>
-					<label for="txt-send-email">Registration ID *</label>
-					<input type="text" name="txt-send-email" id="txt-send-email" />
-					<input type="submit" name="send-email" value="Send Email" />
-				</form> -->
 				
 				<?php endif; ?>
 				
@@ -2034,7 +2022,7 @@ Koprivshtitsa to Sofia: <?php echo $results['k_to_s']; ?><br />
 
 if( class_exists('Seminar_Registration_Admin') ) {
 
-	$seminar_registration_admin = new Seminar_Registration_Admin();
+	$seminar_registration_admin = new Seminar_Media_Orders();
 
 	register_activation_hook(__FILE__, array(&$seminar_registration_admin, 'install'));
 

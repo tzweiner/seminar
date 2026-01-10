@@ -2,6 +2,8 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+
+$show_transportation = get_field( 'registration_show_koprivshtitsa_transportation_field', 'option' );
 ?>
 <div class="wrap sr-wrap">
     <h1>All Registrations</h1>
@@ -43,8 +45,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                     <th>GALA</th>
                     <th>AGE GROUP</th>
                     <th>EEFC MEMBER</th>
-                    <th>BULGARIAN</th>
-                    <th>TRANSPORTATION</th>
+                    <?php if ( $show_transportation ) : ?><th>TRANSPORTATION</th><?php endif; ?>
                     <th>VIDEO REQUESTED</th>
                     <th>BALANCE</th>
                     <th>PAYMENT OPTION</th>
@@ -71,8 +72,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                         <td><?php echo $r->gala ? 'Yes, ' . $r->meal_option : 'No'; ?></td>
                         <td><?php echo $r->age; ?></td>
                         <td><?php echo $r->is_eefc ? 'Yes' : 'No'; ?></td>
-                        <td><?php echo $r->is_bulgarian ? 'Yes' : 'No'; ?></td>
-                        <td><?php echo $r->transport; ?></td>
+                        <?php if ( $show_transportation ) : ?><td><?php echo $r->transport; ?></td><?php endif; ?>
                         <td><?php echo $r->media ? 'Yes' : 'No'; ?></td>
                         <td><?php echo $r->balance; ?></td>
                         <td><?php echo $r->payment; ?></td>

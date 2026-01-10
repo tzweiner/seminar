@@ -459,7 +459,7 @@ function seminar_save_registration_event( WP_REST_Request $request ) {
             $meal_option = sanitize_text_field( $p['dinnerType'] ?? '' );
             $age = sanitize_text_field( $p['registrationType'] ?? '' );
             $is_eefc = !empty( $p['eefcMember'] ) ? 1 : 0;
-            $is_bulgarian = !empty( $p['isBulgarian'] ) ? 1 : 0;
+//            $is_bulgarian = !empty( $p['isBulgarian'] ) ? 1 : 0;
             $media = $p['media'] ? 1 : 0;
             $balance = floatval( $p['total'] ?? 0 );
 
@@ -484,12 +484,12 @@ function seminar_save_registration_event( WP_REST_Request $request ) {
                     'meal_option' => $meal_option,
                     'age' => $age,
                     'is_eefc' => $is_eefc,
-                    'is_bulgarian' => $is_bulgarian,
+//                    'is_bulgarian' => $is_bulgarian,
                     'transport' => $transport,
                     'media' => $media,
                     'balance' => $balance
                 ],
-                [ '%d', '%d', '%s', '%s', '%d', '%d', '%s', '%s', '%d', '%d', '%d', '%d', '%f' ]
+                [ '%d', '%d', '%s', '%s', '%d', '%d', '%s', '%s', '%d', '%d', '%d', '%f' ]
             );
             if ( $wpdb->last_error ) {
                 throw new Exception( 'Registrant insert failed: ' . $wpdb->last_error );
@@ -1014,7 +1014,7 @@ function send_registration_email( $event, $registrants ) {
         $message .= "Days attending: " . intval( $participant->num_days ?? 0 ) . "\r\n";
         $message .= "Registration type: " . ( $participant->age ?? 'N/A' ) . "\r\n";
         $message .= "EEFC member: " . ( intval( $participant->is_eefc ?? 0 ) === 1 ? 'Yes' : 'No' ) . "\r\n";
-        $message .= "Bulgarian: " . ( intval( $participant->is_bulgarian ?? 0 ) === 1 ? 'Yes' : 'No' ) . "\r\n";
+//        $message .= "Bulgarian: " . ( intval( $participant->is_bulgarian ?? 0 ) === 1 ? 'Yes' : 'No' ) . "\r\n";
 
         if ( intval( $participant->is_primary ?? 0 ) === 1 ) {
             $message .= "Payment: " . ( $event->payment ?? $participant->payment ?? 'N/A' ) . "\r\n";
