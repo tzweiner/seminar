@@ -937,7 +937,7 @@ function send_registration_email( $event, $registrants ) {
     $message .= "Thank you and see you in Plovdiv!\r\nLarry Weiner & Dilyana Kurdova\r\nInternational Program Coordinators\r\n\r\n";
 
     // Event-level contact details (primary contact)
-    $message .= "*** REGISTRATION " . $primary -> registrant_id . "***\r\n";
+    $message .= "*** REGISTRATION " . intval( $event->registration_event_id ) . "***\r\n";
     $message .= "Registration Date: " . ( $event->registration_date ?? 'N/A' ) . "\r\n";
     $addr = trim( ($event->address1 ?? '') . ( !empty($event->address2) ? ', ' . $event->address2 : '' ) );
     $message .= "Address: " . ( $addr ?: 'N/A' ) . "\r\n";
