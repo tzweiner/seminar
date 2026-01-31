@@ -215,15 +215,25 @@ function seminar_get_featured_image_url_callback( $object, $field_name, $request
  */
 function seminar_rest_api_get_acf_options(WP_REST_Request $request)
 {
-    // Safely check if ACF is available
-    $fields = function_exists('get_fields') ? get_fields('option') : [];
-
-    if (!$fields) {
-        // Return an empty object instead of null/false
-        $fields = new stdClass();
+    if (!function_exists('get_field_objects')) {
+        return new WP_REST_Response(new stdClass(), 200);
     }
 
-    return new WP_REST_Response($fields, 200);
+    $field_objects = get_field_objects('option');
+    $processed_fields = [];
+
+    if ($field_objects) {
+        foreach ($field_objects as $field_name => $field_object) {
+            $value = get_field($field_name, 'option');
+            if ($field_object['type'] === 'true_false') {
+                $processed_fields[$field_name] = (bool) $value;
+            } else {
+                $processed_fields[$field_name] = $value;
+            }
+        }
+    }
+
+    return new WP_REST_Response($processed_fields ?: new stdClass(), 200);
 }
 
 /**
