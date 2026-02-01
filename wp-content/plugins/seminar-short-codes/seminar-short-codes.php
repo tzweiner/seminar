@@ -245,6 +245,41 @@ function daily_schedule_table_func ( $atts ){
     }
     $html .= '</tbody></table>';
 
+    // Mobile responsive version
+    $html .= '<div class="scheduleTableResponsive">';
+    
+    if ($slots_main_array) {
+        foreach ($slots_main_array as $main_slot) {
+            $class_name = $main_slot['class_slot'];
+            $class_slots = $main_slot['time_slot_repeater'];
+            
+            $html .= '<div class="class-schedule">';
+            $html .= '<h3>' . esc_html($class_name) . '</h3>';
+            
+            foreach ($class_slots as $slot) {
+                $slot_title = $slot['time_slot'];
+                $mark = $slot['mark'];
+                
+                if (!empty($mark) && trim($mark) !== '&nbsp;') {
+                    $clean_slot_name = get_clean_slot_name($slot_title);
+                    $html .= '<div class="session-item">' . esc_html($clean_slot_name . ' ' . $mark) . '</div>';
+                }
+            }
+            
+            $html .= '</div>';
+        }
+    }
+    
+    // Add special slots with times
+    foreach ($slots as $slot) {
+        if ($slot->post_title === 'Daily Student Gathering' || $slot->post_title === 'Lunch Break') {
+            $slot_time = get_field('time_period', $slot->ID);
+            $html .= '<div class="special-slot">' . esc_html($slot->post_title . ': ' . $slot_time) . '</div>';
+        }
+    }
+    
+    $html .= '</div>';
+
     return $html;
 }
 add_shortcode( 'daily_schedule_table', 'daily_schedule_table_func' );
