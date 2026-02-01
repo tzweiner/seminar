@@ -40,7 +40,6 @@ class Seminar_Admin_Tools_Menu {
             [ 'slug' => 'seminar-registration-confirmed', 'label' => 'Confirmed Registrations', 'instance' => 'seminar_registration_confirmed' ],
             [ 'slug' => 'seminar-all-registrations',       'label' => 'All Registrations',       'instance' => 'seminar_all_registrations' ],
             [ 'slug' => 'seminar-registration-media-orders',           'label' => 'Video Orders',           'instance' => 'seminar_registration_media_orders' ],
-            [ 'slug' => 'seminar-transportation-counts',  'label' => 'Transportation Counts',  'instance' => 'seminar_transportation_counts' ],
             [ 'slug' => 'seminar-onsite-payment',         'label' => 'Onsite Payments',        'instance' => 'seminar_onsite_payment' ],
             [ 'slug' => 'seminar-counts-per-class',       'label' => 'Counts Per Class',       'instance' => 'seminar_counts_per_class' ],
             [ 'slug' => 'seminar-rented',                 'label' => 'Rented Instruments',     'instance' => 'seminar_rented' ],
@@ -53,6 +52,11 @@ class Seminar_Admin_Tools_Menu {
 //            ],
             [ 'slug' => 'seminar-cancel-registration-by-id',     'label' => 'Cancel Registration by ID',    'instance' => 'seminar_cancel_registration_by_id' ],
         ];
+
+        // Add transportation counts only if option is enabled
+        if ( get_field( 'registration_show_koprivshtitsa_transportation_field', 'option' ) ) {
+            $tools[] = [ 'slug' => 'seminar-transportation-counts',  'label' => 'Transportation Counts',  'instance' => 'seminar_transportation_counts' ];
+        }
 
         // 4️⃣ Add each tool as a submenu that calls the actual sub-plugin page
         foreach ( $tools as $tool ) {
@@ -102,7 +106,6 @@ class Seminar_Admin_Tools_Menu {
             [ 'slug' => 'seminar-registration-confirmed', 'label' => 'Confirmed Registrations', 'desc' => 'View and export confirmed registrants.' ],
             [ 'slug' => 'seminar-all-registrations',       'label' => 'All Registrations',       'desc' => 'View all registrations, including cancelled.' ],
             [ 'slug' => 'seminar-registration-media-orders',           'label' => 'Media Orders',           'desc' => 'Review and export media orders.' ],
-            [ 'slug' => 'seminar-transportation-counts',  'label' => 'Transportation Counts',  'desc' => 'Bus and transportation summaries.' ],
             [ 'slug' => 'seminar-onsite-payment',         'label' => 'Onsite Payments',        'desc' => 'Track payments collected onsite.' ],
             [ 'slug' => 'seminar-counts-per-class',       'label' => 'Counts Per Class',       'desc' => 'Registration totals per class.' ],
             [ 'slug' => 'seminar-rented',                 'label' => 'Rented Items',           'desc' => 'View rented equipment and materials.' ],
@@ -111,6 +114,11 @@ class Seminar_Admin_Tools_Menu {
 //            [ 'slug' => 'seminar-bulgarian-registrants',      'label' => 'Bulgarian Registrants',       'desc' => 'List of Bulgarian registrants.' ],
             [ 'slug' => 'seminar-cancel-registration-by-id',     'label' => 'Cancel Registration',    'desc' => 'Cancel a registration by ID.' ],
         ];
+
+        // Add transportation counts only if option is enabled
+        if ( get_field( 'registration_show_koprivshtitsa_transportation_field', 'option' ) ) {
+            $tools[] = [ 'slug' => 'seminar-transportation-counts',  'label' => 'Transportation Counts',  'desc' => 'Bus and transportation summaries.' ];
+        }
 
         echo '<div class="sr-admin-grid">';
         foreach ( $tools as $tool ) {

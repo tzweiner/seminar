@@ -230,13 +230,12 @@ function daily_schedule_table_func ( $atts ){
             // print slots times for this class in a table row
             $html .= '<tr><th class="left">' . $class_name . '</th>';
             foreach ($slots as $slot) {
-                $slot_title = $slot->post_title;
-
-                if (array_key_exists ($slot->post_title, $class_data)) {
-                    $html .= '<td>' . $class_data [$slot->post_title] . '</td>';
-                }
-                else {
-                    $html .= '<td>&nbsp;</td>';
+                $slot_name = esc_attr(get_clean_slot_name($slot->post_title));
+                if (array_key_exists($slot->post_title, $class_data)) {
+                    $html .= '<td data-label="' . $slot_name . '">'
+                        . $class_data[$slot->post_title] . '</td>';
+                } else {
+                    $html .= '<td data-label="' . $slot_name . '">&nbsp;</td>';
                 }
 
             }
@@ -356,14 +355,19 @@ function get_gala_dinner_fee () {
     return get_field ('gala_price', 'option');
 }
 
+// this is legacy from when the slot names were looking like this switch
 function get_clean_slot_name ($name) {
     switch ($name) {
         case 'Session 1 (am)':
-        case 'Session 1 (pm)':
             return 'Session 1';
         case 'Session 2 (am)':
-        case 'Session 2 (pm)':
             return 'Session 2';
+        case 'Session 1 (pm)':
+            return 'Session 3';
+        case 'Session 2 (pm)':
+            return 'Session 4';
+        case 'Bulgarian Language':
+            return 'Session 5';
         default:
             return $name;
     }

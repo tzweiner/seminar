@@ -127,7 +127,7 @@ if ( ! class_exists( 'Seminar_All_Registrations' ) ) {
             $meal_option  = isset( $registrant->meal_option ) ? trim( (string) $registrant->meal_option ) : '';
             $age  = isset( $registrant->age ) ? trim( (string) $registrant->age ) : '';
             $is_eefc  = isset( $registrant->is_eefc ) ? trim( (string) $registrant->is_eefc ) : '';
-            $is_bulgarian  = isset( $registrant->is_bulgarian ) ? trim( (string) $registrant->is_bulgarian ) : '';
+//            $is_bulgarian  = isset( $registrant->is_bulgarian ) ? trim( (string) $registrant->is_bulgarian ) : '';
             $transport  = isset( $registrant->transport ) ? $this->transport_label(trim( (string) $registrant->transport )) : '';
             $media  = isset( $registrant->media ) ? trim( (string) $registrant->media ) : '';
             $balance  = isset( $registrant->balance ) ? trim( (string) $registrant->balance ) : '';
@@ -154,7 +154,7 @@ if ( ! class_exists( 'Seminar_All_Registrations' ) ) {
                 'meal_option' => esc_html( $meal_option ),
                 'age' => esc_html( $age ),
                 'is_eefc' => esc_html( $is_eefc ),
-                'is_bulgarian' => esc_html( $is_bulgarian ),
+//                'is_bulgarian' => esc_html( $is_bulgarian ),
                 'transport' => esc_html( $transport ),
                 'media' => esc_html( $media ),
                 'balance' => esc_html( $balance ),
@@ -171,6 +171,7 @@ if ( ! class_exists( 'Seminar_All_Registrations' ) ) {
                 wp_die( 'No data to export.' );
             }
 
+            $show_transportation = get_field( 'registration_show_koprivshtitsa_transportation_field', 'option' );
             $filename = 'all-registrations-' . $this->reg_year . '.csv';
 
             while ( ob_get_level() ) {
@@ -193,9 +194,12 @@ if ( ! class_exists( 'Seminar_All_Registrations' ) ) {
             }
 
             $headers = array( 'Registration Number', 'Name', 'Address1', 'Address2', 'City', 'State', 'ZIP', 'Country', 'Phone',
-                'Email', 'Emergency', 'Number of Days', 'Gala', 'Age Group', 'EEFC Member', 'Bulgarian',
-                'Transportation', 'Video Requested', 'Balance', 'Payment Option', 'Registration Date',
-                'Registration Confirmation Email', 'Registration Status' );
+                'Email', 'Emergency', 'Number of Days', 'Gala', 'Age Group', 'EEFC Member' );
+            if ( $show_transportation ) {
+                $headers[] = 'Transportation';
+            }
+            $headers = array_merge( $headers, array( 'Video Requested', 'Balance', 'Payment Option', 'Registration Date',
+                'Registration Confirmation Email', 'Registration Status' ) );
             fputcsv( $out, $headers );
 
             foreach ( $rows as $r ) {
@@ -214,7 +218,7 @@ if ( ! class_exists( 'Seminar_All_Registrations' ) ) {
                 $gala = wp_strip_all_tags( $r->gala ? 'Yes, ' > $r->meal_option : 'No' );
                 $age = wp_strip_all_tags( $r->age ?? '' );
                 $is_eefc = wp_strip_all_tags( $r->is_eefc ? 'Yes' : 'No' );
-                $is_bulgarian = wp_strip_all_tags( $r->is_bulgarian ? 'Yes' : 'No' );
+//                $is_bulgarian = wp_strip_all_tags( $r->is_bulgarian ? 'Yes' : 'No' );
                 $transport = $this->transport_label(wp_strip_all_tags( $r->transport ?? '' ));
                 $media = wp_strip_all_tags( $r->media ? 'Yes' : 'No' );
                 $balance = wp_strip_all_tags( $r->balance ?? '' );
@@ -238,16 +242,20 @@ if ( ! class_exists( 'Seminar_All_Registrations' ) ) {
                     $num_days,
                     $gala,
                     $age,
-                    $is_eefc,
-                    $is_bulgarian,
-                    $transport,
+                    $is_eefc
+//                    $is_bulgarian
+                );
+                if ( $show_transportation ) {
+                    $line[] = $transport;
+                }
+                $line = array_merge( $line, array(
                     $media,
                     $balance,
                     $payment,
                     $registration_date,
                     $registration_email_sent,
                     $registration_status
-                );
+                ) );
 
                 fputcsv( $out, $line );
             }

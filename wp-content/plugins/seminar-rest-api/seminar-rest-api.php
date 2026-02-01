@@ -215,15 +215,25 @@ function seminar_get_featured_image_url_callback( $object, $field_name, $request
  */
 function seminar_rest_api_get_acf_options(WP_REST_Request $request)
 {
-    // Safely check if ACF is available
-    $fields = function_exists('get_fields') ? get_fields('option') : [];
-
-    if (!$fields) {
-        // Return an empty object instead of null/false
-        $fields = new stdClass();
+    if (!function_exists('get_field_objects')) {
+        return new WP_REST_Response(new stdClass(), 200);
     }
 
-    return new WP_REST_Response($fields, 200);
+    $field_objects = get_field_objects('option');
+    $processed_fields = [];
+
+    if ($field_objects) {
+        foreach ($field_objects as $field_name => $field_object) {
+            $value = get_field($field_name, 'option');
+            if ($field_object['type'] === 'true_false') {
+                $processed_fields[$field_name] = (bool) $value;
+            } else {
+                $processed_fields[$field_name] = $value;
+            }
+        }
+    }
+
+    return new WP_REST_Response($processed_fields ?: new stdClass(), 200);
 }
 
 /**
@@ -459,7 +469,7 @@ function seminar_save_registration_event( WP_REST_Request $request ) {
             $meal_option = sanitize_text_field( $p['dinnerType'] ?? '' );
             $age = sanitize_text_field( $p['registrationType'] ?? '' );
             $is_eefc = !empty( $p['eefcMember'] ) ? 1 : 0;
-            $is_bulgarian = !empty( $p['isBulgarian'] ) ? 1 : 0;
+//            $is_bulgarian = !empty( $p['isBulgarian'] ) ? 1 : 0;
             $media = $p['media'] ? 1 : 0;
             $balance = floatval( $p['total'] ?? 0 );
 
@@ -484,12 +494,12 @@ function seminar_save_registration_event( WP_REST_Request $request ) {
                     'meal_option' => $meal_option,
                     'age' => $age,
                     'is_eefc' => $is_eefc,
-                    'is_bulgarian' => $is_bulgarian,
+//                    'is_bulgarian' => $is_bulgarian,
                     'transport' => $transport,
                     'media' => $media,
                     'balance' => $balance
                 ],
-                [ '%d', '%d', '%s', '%s', '%d', '%d', '%s', '%s', '%d', '%d', '%d', '%d', '%f' ]
+                [ '%d', '%d', '%s', '%s', '%d', '%d', '%s', '%s', '%d', '%d', '%d', '%f' ]
             );
             if ( $wpdb->last_error ) {
                 throw new Exception( 'Registrant insert failed: ' . $wpdb->last_error );
@@ -937,7 +947,7 @@ function send_registration_email( $event, $registrants ) {
     $message .= "Thank you and see you in Plovdiv!\r\nLarry Weiner & Dilyana Kurdova\r\nInternational Program Coordinators\r\n\r\n";
 
     // Event-level contact details (primary contact)
-    $message .= "*** REGISTRATION " . $primary -> registrant_id . "***\r\n";
+    $message .= "*** REGISTRATION " . intval( $event->registration_event_id ) . "***\r\n";
     $message .= "Registration Date: " . ( $event->registration_date ?? 'N/A' ) . "\r\n";
     $addr = trim( ($event->address1 ?? '') . ( !empty($event->address2) ? ', ' . $event->address2 : '' ) );
     $message .= "Address: " . ( $addr ?: 'N/A' ) . "\r\n";
@@ -1014,7 +1024,7 @@ function send_registration_email( $event, $registrants ) {
         $message .= "Days attending: " . intval( $participant->num_days ?? 0 ) . "\r\n";
         $message .= "Registration type: " . ( $participant->age ?? 'N/A' ) . "\r\n";
         $message .= "EEFC member: " . ( intval( $participant->is_eefc ?? 0 ) === 1 ? 'Yes' : 'No' ) . "\r\n";
-        $message .= "Bulgarian: " . ( intval( $participant->is_bulgarian ?? 0 ) === 1 ? 'Yes' : 'No' ) . "\r\n";
+//        $message .= "Bulgarian: " . ( intval( $participant->is_bulgarian ?? 0 ) === 1 ? 'Yes' : 'No' ) . "\r\n";
 
         if ( intval( $participant->is_primary ?? 0 ) === 1 ) {
             $message .= "Payment: " . ( $event->payment ?? $participant->payment ?? 'N/A' ) . "\r\n";
@@ -1082,7 +1092,7 @@ function seminar_get_classes_and_teachers( WP_REST_Request $request ) {
             'meta_query' => array (
                 array (
                     'key' => 'specialty',
-                    'value' => $className,
+                    'value' => $className == 'Bulgarian Singing' ? 'Singing' : $className,
                     'compare' => '='
                 )
             )
@@ -1302,7 +1312,7 @@ function register_custom_post_types()
     ]);
 }
 add_action('init', 'register_custom_post_types', 0);
-add_theme_support('post-thumbnails', array('post', 'page', 'team'));
+add_theme_support('post-thumbnails', array('post', 'page', 'team', 'classes', 'teachers', 'dance_teachers'));
 
 // Flush rewrite rules on plugin activation
 register_activation_hook(__FILE__, 'seminar_flush_rewrite_rules');

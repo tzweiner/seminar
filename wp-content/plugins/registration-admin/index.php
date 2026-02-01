@@ -44,7 +44,7 @@ if ( file_exists( SR_INCLUDES_DIR . '/class-seminar-media-orders.php' ) ) {
     require_once SR_INCLUDES_DIR . '/class-seminar-media-orders.php';
 }
 
-if ( file_exists( SR_INCLUDES_DIR . '/class-seminar-transportation-counts.php' ) ) {
+if ( file_exists( SR_INCLUDES_DIR . '/class-seminar-transportation-counts.php' ) && get_field( 'registration_show_koprivshtitsa_transportation_field', 'option' ) ) {
     require_once SR_INCLUDES_DIR . '/class-seminar-transportation-counts.php';
 }
 
