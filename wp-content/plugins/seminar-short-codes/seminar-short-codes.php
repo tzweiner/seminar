@@ -245,6 +245,74 @@ function daily_schedule_table_func ( $atts ){
     }
     $html .= '</tbody></table>';
 
+    // Mobile responsive version
+    $html .= '<div class="scheduleTableResponsive">';
+    
+    // Add session times reference at the top
+    $html .= '<div class="informational-container">';
+    $html .= '<h3 class="session-times-heading">Session Times</h3>';
+    foreach ($slots as $slot) {
+        $clean_slot_name = get_clean_slot_name($slot->post_title);
+        // Only show actual class sessions (1-5), not special activities
+        if (strpos($clean_slot_name, 'Session') === 0) {
+            $slot_time = get_field('time_period', $slot->ID);
+            $html .= '<div class="session-time-item">' . esc_html($clean_slot_name . ': ' . $slot_time) . '</div>';
+        }
+    }
+    $html .= '</div>';
+    
+    if ($slots_main_array) {
+        $html .= '<div class="class-schedule-container">';
+        
+        foreach ($slots_main_array as $main_slot) {
+            $class_name = $main_slot['class_slot'];
+            $class_slots = $main_slot['time_slot_repeater'];
+            
+            // Check if class has at least one valid slot
+            $valid_sessions = array();
+            foreach ($class_slots as $slot) {
+                $slot_title = $slot['time_slot'];
+                $mark = $slot['mark'];
+                
+                // Skip invalid slots
+                if (!empty($mark) && trim($mark) !== '&nbsp;' && strpos($slot_title, '- Select Slot -') === false) {
+                    $clean_slot_name = get_clean_slot_name($slot_title);
+                    $valid_sessions[] = '<div class="session-item">' . esc_html($clean_slot_name . ' ' . $mark) . '</div>';
+                }
+            }
+            
+            // Only display class if it has valid sessions
+            if (!empty($valid_sessions)) {
+                $html .= '<div class="class-schedule">';
+                $html .= '<h3>' . esc_html($class_name) . '</h3>';
+                $html .= implode('', $valid_sessions);
+                $html .= '</div>';
+            }
+        }
+        
+        $html .= '</div>';
+    }
+    
+    // Add special slots with times
+    $special_slots_found = false;
+    $daily_activities_html = '';
+    foreach ($slots as $slot) {
+        if ($slot->post_title === 'Daily Student Gathering' || $slot->post_title === 'Lunch Break') {
+            if (!$special_slots_found) {
+                $daily_activities_html .= '<h3 class="daily-activities-heading">Daily Activities</h3>';
+                $special_slots_found = true;
+            }
+            $slot_time = get_field('time_period', $slot->ID);
+            $daily_activities_html .= '<div class="special-slot">' . esc_html($slot->post_title . ': ' . $slot_time) . '</div>';
+        }
+    }
+    
+    if ($special_slots_found) {
+        $html .= '<div class="informational-container">' . $daily_activities_html . '</div>';
+    }
+    
+    $html .= '</div>';
+
     return $html;
 }
 add_shortcode( 'daily_schedule_table', 'daily_schedule_table_func' );
