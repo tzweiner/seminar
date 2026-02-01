@@ -1092,7 +1092,7 @@ function seminar_get_classes_and_teachers( WP_REST_Request $request ) {
             'meta_query' => array (
                 array (
                     'key' => 'specialty',
-                    'value' => $className,
+                    'value' => $className == 'Bulgarian Singing' ? 'Singing' : $className,
                     'compare' => '='
                 )
             )
@@ -1312,7 +1312,7 @@ function register_custom_post_types()
     ]);
 }
 add_action('init', 'register_custom_post_types', 0);
-add_theme_support('post-thumbnails', array('post', 'page', 'team'));
+add_theme_support('post-thumbnails', array('post', 'page', 'team', 'classes', 'teachers', 'dance_teachers'));
 
 // Flush rewrite rules on plugin activation
 register_activation_hook(__FILE__, 'seminar_flush_rewrite_rules');
