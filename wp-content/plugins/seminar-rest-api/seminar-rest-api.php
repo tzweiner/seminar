@@ -461,10 +461,14 @@ function seminar_save_registration_event( WP_REST_Request $request ) {
 
         // Insert registrants and classes
         foreach ( $participants as $index => $p ) {
+            $numDays = $p['seminarDays'];
+            if ($numDays == 'all') {
+                $numDays = 6;
+            }
             $is_primary = empty( $p['isAdditional'] ) ? 1 : 0;
             $first_name = sanitize_text_field( $p['firstName'] ?? '' );
             $last_name = sanitize_text_field( $p['lastName'] ?? '' );
-            $num_days = intval( $p['seminarDays'] ?? 0 );
+            $num_days = intval( $numDays ?? 0 );
             $gala = !empty( $p['galaDinner'] ) ? 1 : 0;
             $meal_option = sanitize_text_field( $p['dinnerType'] ?? '' );
             $age = sanitize_text_field( $p['registrationType'] ?? '' );
