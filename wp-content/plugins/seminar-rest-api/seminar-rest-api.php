@@ -461,10 +461,14 @@ function seminar_save_registration_event( WP_REST_Request $request ) {
 
         // Insert registrants and classes
         foreach ( $participants as $index => $p ) {
+            $numDays = $p['seminarDays'];
+            if ($numDays == 'all') {
+                $numDays = 6;
+            }
             $is_primary = empty( $p['isAdditional'] ) ? 1 : 0;
             $first_name = sanitize_text_field( $p['firstName'] ?? '' );
             $last_name = sanitize_text_field( $p['lastName'] ?? '' );
-            $num_days = intval( $p['seminarDays'] ?? 0 );
+            $num_days = intval( $numDays ?? 0 );
             $gala = !empty( $p['galaDinner'] ) ? 1 : 0;
             $meal_option = sanitize_text_field( $p['dinnerType'] ?? '' );
             $age = sanitize_text_field( $p['registrationType'] ?? '' );
@@ -921,7 +925,11 @@ function send_registration_email( $event, $registrants ) {
     $message = "Seminar Registration #" . intval( $primary->registration_event_id ) . "\r\n";
     $message .= "Email Address: " . $email . "\r\n";
     $message .= "Total: EURO " . get_registration_balance( $registration_event_id, $registrants ) . "\r\n";
-    $message .= "Payment: " . ( $event->payment ?? $primary->payment ?? 'N/A' ) . "\r\n\r\n";
+    $paymentOpt = $event->payment ?? $primary->payment ?? 'N/A';
+    if ($paymentOpt == 'bank') {
+        $paymentOpt = 'Bank Transfer';
+    }
+    $message .= "Payment: " . $paymentOpt . "\r\n\r\n";
 
     // Payment instructions
     $payment_method = strtolower( trim( $event->payment ?? $primary->payment ?? '' ) );
@@ -948,7 +956,7 @@ function send_registration_email( $event, $registrants ) {
 
     // Event-level contact details (primary contact)
     $message .= "*** REGISTRATION " . intval( $event->registration_event_id ) . "***\r\n";
-    $message .= "Registration Date: " . ( $event->registration_date ?? 'N/A' ) . "\r\n";
+    $message .= "Registration Date: " . ( $event->registration_date ? get_date_from_gmt( $event->registration_date, 'M j, Y g:i A' ) : 'N/A' ) . "\r\n";
     $addr = trim( ($event->address1 ?? '') . ( !empty($event->address2) ? ', ' . $event->address2 : '' ) );
     $message .= "Address: " . ( $addr ?: 'N/A' ) . "\r\n";
     $message .= "City: " . ( $event->city ?? 'N/A' ) . ", " . ( $event->state ?? '' ) . ", " . ( $event->zip ?? '' ) . "\r\n";
@@ -1007,7 +1015,7 @@ function send_registration_email( $event, $registrants ) {
         $message .= "Video ordered: " . ( intval( $participant->media ?? -1 ) === 1 ? 'Yes' : 'No' ) . "\r\n";
 
         // Gala dinner
-        $message .= "Gala dinner: " . ( ! empty( $participant->gala ) ? 'Yes, ' . ( $participant->meal_option ?? '' ) : 'No' ) . "\r\n";
+        // $message .= "Gala dinner: " . ( ! empty( $participant->gala ) ? 'Yes, ' . ( $participant->meal_option ?? '' ) : 'No' ) . "\r\n";
 
         // Transportation, conditional
         $show_transport = function_exists('get_field') ? get_field( 'show_koprivshtitsa_transportation_field', 'option' ) : null;

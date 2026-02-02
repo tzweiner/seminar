@@ -42,7 +42,7 @@ $show_transportation = get_field( 'registration_show_koprivshtitsa_transportatio
                     <th>EMAIL</th>
                     <th>EMERGENCY</th>
                     <th>NUMBER OF DAYS</th>
-                    <th>GALA</th>
+<!--                    <th>GALA</th>-->
                     <th>AGE GROUP</th>
                     <th>EEFC MEMBER</th>
                     <?php if ( $show_transportation ) : ?><th>TRANSPORTATION</th><?php endif; ?>
@@ -69,7 +69,7 @@ $show_transportation = get_field( 'registration_show_koprivshtitsa_transportatio
                         <td><?php echo $r->email; ?></td>
                         <td><?php echo $r->emergency; ?></td>
                         <td><?php echo $r->num_days; ?></td>
-                        <td><?php echo $r->gala ? 'Yes, ' . $r->meal_option : 'No'; ?></td>
+<!--                        <td>--><?php //echo $r->gala ? 'Yes, ' . $r->meal_option : 'No'; ?><!--</td>-->
                         <td><?php echo $r->age; ?></td>
                         <td><?php echo $r->is_eefc ? 'Yes' : 'No'; ?></td>
                         <?php if ( $show_transportation ) : ?><td><?php echo $r->transport; ?></td><?php endif; ?>
