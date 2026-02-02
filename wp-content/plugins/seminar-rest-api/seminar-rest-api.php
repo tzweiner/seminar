@@ -1015,7 +1015,7 @@ function send_registration_email( $event, $registrants ) {
         $message .= "Video ordered: " . ( intval( $participant->media ?? -1 ) === 1 ? 'Yes' : 'No' ) . "\r\n";
 
         // Gala dinner
-        $message .= "Gala dinner: " . ( ! empty( $participant->gala ) ? 'Yes, ' . ( $participant->meal_option ?? '' ) : 'No' ) . "\r\n";
+        // $message .= "Gala dinner: " . ( ! empty( $participant->gala ) ? 'Yes, ' . ( $participant->meal_option ?? '' ) : 'No' ) . "\r\n";
 
         // Transportation, conditional
         $show_transport = function_exists('get_field') ? get_field( 'show_koprivshtitsa_transportation_field', 'option' ) : null;
