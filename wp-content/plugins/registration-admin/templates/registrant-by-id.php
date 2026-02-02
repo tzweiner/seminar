@@ -48,7 +48,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <!--                    <th>GALA</th>-->
                     <th>AGE GROUP</th>
                     <th>EEFC MEMBER</th>
-                    <th>BULGARIAN</th>
+<!--                    <th>BULGARIAN</th>-->
                     <th>TRANSPORTATION</th>
                     <th>VIDEO REQUESTED</th>
                     <th>BALANCE</th>
@@ -76,7 +76,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <!--                        <td>--><?php //echo $r->gala ? 'Yes, ' . $r->meal_option : 'No'; ?><!--</td>-->
                         <td><?php echo $r->age; ?></td>
                         <td><?php echo $r->is_eefc ? 'Yes' : 'No'; ?></td>
-                        <td><?php echo $r->is_bulgarian ? 'Yes' : 'No'; ?></td>
+<!--                        <td>--><?php //echo $r->is_bulgarian ? 'Yes' : 'No'; ?><!--</td>-->
                         <td><?php echo $r->transport; ?></td>
                         <td><?php echo $r->media ? 'Yes' : 'No'; ?></td>
                         <td><?php echo $r->balance; ?></td>
