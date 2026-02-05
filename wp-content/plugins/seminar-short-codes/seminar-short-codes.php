@@ -74,7 +74,7 @@ function prices_regular_func ( $atts ){
     $price = intval (get_regular_price ());
 
     $html ='
-	<table class="scheduleTable">
+	<table class="pricesTable">
 		<tbody>			
 			<tr>
 				<td>&nbsp;</td>
@@ -109,7 +109,7 @@ function prices_late_func ( $atts ){
     $price = get_regular_price();
 
     $html = '
-	<table class="scheduleTable">
+	<table class="pricesTable">
 		<tbody>			
 			<tr>
 				<td>&nbsp;</td>
@@ -144,7 +144,7 @@ add_shortcode( 'prices_late', 'prices_late_func' );
 function prices_onsite_func ( $atts ){
     $price = get_regular_price();
     $html = '
-	<table class="scheduleTable">
+	<table class="pricesTable">
 		<tbody>			
 			<tr>
 				<td>&nbsp;</td>
