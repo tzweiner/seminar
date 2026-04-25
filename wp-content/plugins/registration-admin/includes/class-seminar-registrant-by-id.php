@@ -69,13 +69,13 @@ if ( ! class_exists( 'Seminar_Registrant_by_ID' ) ) {
 
                 $input_id = intval( $_POST['txt-registrant-by-id'] ?? 0 );
                 if ( $input_id <= 0 ) {
-                    $error_message = 'ERROR! No registrant ID entered. Please enter a numeric ID.';
+                    $error_message = 'ERROR! No registration event ID entered. Please enter a numeric ID.';
                 } else {
-                    $result = $this->getRegistrantById( $input_id );
+                    $result = $this->getRegistrantsByEventId( $input_id );
                     if ( $result['error'] ) {
                         $error_message = $result['message'];
                     } else {
-                        $registrant = $this->build_display_rows( array( $result['registrant'] ) );
+                        $registrant = $this->build_display_rows( $result['registrants'] );
                         $classes = $result['classes'];
                     }
                 }
@@ -165,41 +165,41 @@ if ( ! class_exists( 'Seminar_Registrant_by_ID' ) ) {
             );
         }
 
-        private function getRegistrantById( $registrant_id ) {
+        private function getRegistrantsByEventId( $registration_event_id ) {
             global $wpdb;
             
             if ( ! class_exists( 'Seminar_Registration_Queries' ) ) {
                 return array( 'error' => true, 'message' => 'Queries class not found' );
             }
 
-            if ( ! method_exists( 'Seminar_Registration_Queries', 'get_registrant_sql' ) ) {
-                return array( 'error' => true, 'message' => 'get_registrant_sql method not found' );
+            if ( ! method_exists( 'Seminar_Registration_Queries', 'get_registrants_by_event_id_sql' ) ) {
+                return array( 'error' => true, 'message' => 'get_registrants_by_event_id_sql method not found' );
             }
 
-            $sql_template = Seminar_Registration_Queries::get_registrant_sql();
+            $sql_template = Seminar_Registration_Queries::get_registrants_by_event_id_sql();
             $sql = str_replace( '{registrant_table}', esc_sql( $this->registrant_table ), $sql_template );
-            $prepared = $wpdb->prepare( $sql, $registrant_id );
+            $prepared = $wpdb->prepare( $sql, $registration_event_id );
             
             if ( $prepared === false ) {
                 return array( 'error' => true, 'message' => 'Failed to prepare SQL' );
             }
 
-            $registrant = $wpdb->get_row( $prepared );
+            $registrants = $wpdb->get_results( $prepared );
 
-            if ( $registrant === null ) {
-                return array( 'error' => true, 'message' => 'No registrant found for ID: ' . $registrant_id );
+            if ( empty( $registrants ) ) {
+                return array( 'error' => true, 'message' => 'No registrants found for registration event ID: ' . $registration_event_id );
             }
 
-            $sql_template_classes = Seminar_Registration_Queries::get_registrant_classes_sql();
-            $sql = str_replace( '{classes_table}', esc_sql( $this->classes_table ), $sql_template_classes );
-            $prepared_classes = $wpdb->prepare( $sql, $registrant_id );
+            $sql_template_classes = Seminar_Registration_Queries::get_classes_by_event_id_sql();
+            $sql = str_replace( array( '{classes_table}', '{registrant_table}' ), array( esc_sql( $this->classes_table ), esc_sql( $this->registrant_table ) ), $sql_template_classes );
+            $prepared_classes = $wpdb->prepare( $sql, $registration_event_id );
 
-            $registrant_classes = $wpdb->get_results( $prepared_classes );
+            $classes = $wpdb->get_results( $prepared_classes );
 
             return array(
                 'error' => false,
-                'registrant' => $registrant,
-                'classes' => $registrant_classes ?? array()
+                'registrants' => $registrants,
+                'classes' => $classes ?? array()
             );
         }
 
