@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 <div class="wrap sr-wrap">
-    <h1>Registrant By ID</h1>
+    <h1>Registration by ID</h1>
 
     <?php if ( ! empty( $error_message ) ) : ?>
         <div class="notice notice-error"><p><?php echo esc_html( $error_message ); ?></p></div>
@@ -18,9 +18,9 @@ if ( ! defined( 'ABSPATH' ) ) {
     <div class="sr-forms">
         <form name="form-registrant-by-id" method="post" class="sr-form">
             <?php wp_nonce_field( 'sr_registrant_by_id', 'sr_registrant_by_id_nonce' ); ?>
-            <label for="txt-registrant-by-id">Registrant ID *</label>
+            <label for="txt-registrant-by-id">Registration ID *</label>
             <input type="text" name="txt-registrant-by-id" id="txt-registrant-by-id" />
-            <input type="submit" name="view-registrant-by-id" value="Get Registration and Classes" class="button button-primary sr-button" />
+            <input type="submit" name="view-registrant-by-id" value="Get Registrants and Classes" class="button button-primary sr-button" />
         </form>
     </div>
     <?php endif; ?>
@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     <?php if ( empty( $registrant ) || empty($classes) ) : ?>
         <p>No registrants found.</p>
     <?php else : ?>
-        <h2>Registrant Information</h2>
+        <h2>Registrants Information</h2>
         <div class="sr-table-wrap">
             <table class="sr-table">
                 <thead>

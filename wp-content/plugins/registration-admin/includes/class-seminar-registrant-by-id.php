@@ -87,7 +87,7 @@ if ( ! class_exists( 'Seminar_Registrant_by_ID' ) ) {
                 $reg_year = $this->reg_year;
                 include $template;
             } else {
-                echo '<div class="wrap"><h1>Registrant By ID</h1>';
+                echo '<div class="wrap"><h1>Registration by ID</h1>';
                 echo '<p>Template file missing: ' . esc_html( $template ) . '</p></div>';
             }
         }
