@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Seminar REST Api
  * Description: Exposes Seminar-related data via a custom REST API namespace.
- * Version:     1.0.0
+ * Version:     1.0.1
  * Author:      Tzvety Dosseva
  * Text Domain: seminar-rest-api
  */
