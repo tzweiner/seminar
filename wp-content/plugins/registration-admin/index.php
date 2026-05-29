@@ -2,7 +2,7 @@
 /*
 Plugin Name: Seminar Registration Admin Tool
 Description: Admin UI for Seminar Registration. View and export registrant and classes data.
-Version: 2.2
+Version: 2.3
 Author: Tzvety Dosseva
 */
 

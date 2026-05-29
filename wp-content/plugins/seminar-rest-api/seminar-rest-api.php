@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Seminar REST Api
  * Description: Exposes Seminar-related data via a custom REST API namespace.
- * Version:     1.0.0
+ * Version:     1.0.1
  * Author:      Tzvety Dosseva
  * Text Domain: seminar-rest-api
  */
@@ -423,6 +423,38 @@ function seminar_save_registration_event( WP_REST_Request $request ) {
     $payment = sanitize_text_field( $primary_participant['paymentMethod'] ?? '' );
     $registration_status = 'confirmed';
 
+    // Validate all participants before starting any database operations
+    foreach ( $participants as $index => $p ) {
+        $first_name = sanitize_text_field( $p['firstName'] ?? '' );
+        $last_name = sanitize_text_field( $p['lastName'] ?? '' );
+        
+        // Validate that participant has at least one class selected
+        $selected_classes = $p['selectedClasses'] ?? [];
+        if ( !is_array( $selected_classes ) || count( $selected_classes ) === 0 ) {
+            // Log validation failure for monitoring
+            error_log( 'SEMINAR REGISTRATION VALIDATION FAILED: No classes selected. Participant: ' . $first_name . ' ' . $last_name . '. Data: ' . json_encode( $p ) );
+            
+            return new WP_REST_Response( [
+                'success' => false,
+                'error' => 'Each participant must have at least one class selected. Participant: ' . $first_name . ' ' . $last_name
+            ], 400 );
+        }
+        
+        // Validate each class has valid ID
+        foreach ( $selected_classes as $class_index => $class ) {
+            $class_id = intval( $class['id'] ?? 0 );
+            if ( $class_id <= 0 ) {
+                // Log validation failure
+                error_log( 'SEMINAR REGISTRATION VALIDATION FAILED: Invalid class ID. Participant: ' . $first_name . ' ' . $last_name . '. Class: ' . json_encode( $class ) );
+                
+                return new WP_REST_Response( [
+                    'success' => false,
+                    'error' => 'Invalid or missing class ID for participant: ' . $first_name . ' ' . $last_name . ' (class #' . ($class_index + 1) . ')'
+                ], 400 );
+            }
+        }
+    }
+
     $table_events = $wpdb->prefix . 'Seminar_registration_events';
     $table_registrants = $wpdb->prefix . 'Seminar_registrants';
     $table_classes = $wpdb->prefix . 'Seminar_classes';
@@ -514,27 +546,25 @@ function seminar_save_registration_event( WP_REST_Request $request ) {
                 $primary_registrant_id = $registrant_id;
             }
 
-            // classes per registrant (if provided)
-            if ( !empty( $p['selectedClasses'] ) && is_array( $p['selectedClasses'] ) ) {
-                foreach ( $p['selectedClasses'] as $class ) {
-                    $rent = ( isset( $class['rent_bring'] ) && $class['rent_bring'] === 'rent' ) ? 1 : 0;
-                    $level = sanitize_text_field( $class['level'] ?? '' );
-                    $class_id = intval( $class['id'] ?? 0 );
+            // Insert classes for this registrant (already validated)
+            foreach ( $p['selectedClasses'] as $class ) {
+                $class_id = intval( $class['id'] );
+                $rent = ( isset( $class['rent_bring'] ) && $class['rent_bring'] === 'rent' ) ? 1 : 0;
+                $level = sanitize_text_field( $class['level'] ?? '' );
 
-                    $wpdb->insert(
-                        $table_classes,
-                        [
-                            'class_id' => $class_id,
-                            'rent' => $rent,
-                            'level' => $level,
-                            'registrant_id' => $registrant_id
-                        ],
-                        [ '%d', '%d', '%s', '%d' ]
-                    );
+                $wpdb->insert(
+                    $table_classes,
+                    [
+                        'class_id' => $class_id,
+                        'rent' => $rent,
+                        'level' => $level,
+                        'registrant_id' => $registrant_id
+                    ],
+                    [ '%d', '%d', '%s', '%d' ]
+                );
 
-                    if ( $wpdb->last_error ) {
-                        throw new Exception( 'Class insert failed: ' . $wpdb->last_error );
-                    }
+                if ( $wpdb->last_error ) {
+                    throw new Exception( 'Class insert failed: ' . $wpdb->last_error );
                 }
             }
         }
@@ -562,6 +592,9 @@ function seminar_save_registration_event( WP_REST_Request $request ) {
     foreach ($participants as $p) {
         $total_balance += floatval($p['total'] ?? 0);
     }
+
+    // Log successful registration for monitoring
+    error_log( 'SEMINAR REGISTRATION SUCCESS: Event ID ' . $registration_event_id . ', Participants: ' . $participant_count . ', Total: EUR ' . $total_balance );
 
     return new WP_REST_Response([
         'success' => true,

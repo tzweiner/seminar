@@ -105,5 +105,19 @@ if ( ! class_exists( 'Seminar_Registration_Queries' ) ) {
         public static function get_registrant_classes_sql() {
             return "SELECT * FROM {classes_table} WHERE registrant_id = %s";
         }
+
+        /**
+         * SQL to get registrants by registration_event_id
+         */
+        public static function get_registrants_by_event_id_sql() {
+            return "SELECT * FROM {registrant_table} WHERE registration_event_id = %s";
+        }
+
+        /**
+         * SQL to get classes for all registrants in a registration event
+         */
+        public static function get_classes_by_event_id_sql() {
+            return "SELECT c.* FROM {classes_table} c INNER JOIN {registrant_table} r ON c.registrant_id = r.registrant_id WHERE r.registration_event_id = %s";
+        }
     }
 }

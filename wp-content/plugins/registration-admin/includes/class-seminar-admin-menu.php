@@ -44,7 +44,7 @@ class Seminar_Admin_Tools_Menu {
             [ 'slug' => 'seminar-counts-per-class',       'label' => 'Counts Per Class',       'instance' => 'seminar_counts_per_class' ],
             [ 'slug' => 'seminar-rented',                 'label' => 'Rented Instruments',     'instance' => 'seminar_rented' ],
             [ 'slug' => 'seminar-class-level-counts',     'label' => 'Class Level Counts',     'instance' => 'seminar_class_level_counts' ],
-            [ 'slug' => 'seminar-registrant-by-id',      'label' => 'Registrant by ID',       'instance' => 'seminar_registrant_by_id' ],
+            [ 'slug' => 'seminar-registrant-by-id',      'label' => 'Registration by ID',       'instance' => 'seminar_registrant_by_id' ],
 //            [
 //                'slug'     => 'seminar-bulgarian-registrants',
 //                'label'    => 'Bulgarian Registrants',
@@ -110,7 +110,7 @@ class Seminar_Admin_Tools_Menu {
             [ 'slug' => 'seminar-counts-per-class',       'label' => 'Counts Per Class',       'desc' => 'Registration totals per class.' ],
             [ 'slug' => 'seminar-rented',                 'label' => 'Rented Items',           'desc' => 'View rented equipment and materials.' ],
             [ 'slug' => 'seminar-class-level-counts',     'label' => 'Class Level Counts',     'desc' => 'Counts grouped by class level.' ],
-            [ 'slug' => 'seminar-registrant-by-id',      'label' => 'Registrant by ID',       'desc' => 'Lookup a registrant by ID.' ],
+            [ 'slug' => 'seminar-registrant-by-id',      'label' => 'Registration by ID',       'desc' => 'Lookup registrants by Registration ID.' ],
 //            [ 'slug' => 'seminar-bulgarian-registrants',      'label' => 'Bulgarian Registrants',       'desc' => 'List of Bulgarian registrants.' ],
             [ 'slug' => 'seminar-cancel-registration-by-id',     'label' => 'Cancel Registration',    'desc' => 'Cancel a registration by ID.' ],
         ];
