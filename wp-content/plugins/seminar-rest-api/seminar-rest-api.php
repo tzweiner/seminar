@@ -1645,3 +1645,30 @@ if (function_exists('add_action')) {
 /**
  * END CACHING
  */
+
+/**
+ * Exclude "not offered" classes from the REST API.
+ * Applies to the default WP REST endpoint: /wp-json/wp/v2/classes
+ */
+add_action('pre_get_posts', function (WP_Query $query) {
+    if (!defined('REST_REQUEST') || !REST_REQUEST) {
+        return;
+    }
+
+    if ($query->get('post_type') !== 'classes') {
+        return;
+    }
+
+    $query->set('meta_query', [
+        'relation' => 'OR',
+        [
+            'key'     => 'not_offered',
+            'value'   => '1',
+            'compare' => '!=',
+        ],
+        [
+            'key'     => 'not_offered',
+            'compare' => 'NOT EXISTS',
+        ],
+    ]);
+});
